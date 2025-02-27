@@ -1,0 +1,51 @@
+﻿@model UsePrescriptionDrugsReportQueryModel
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="col-sm-12">
+                    <form id="queryForm" asp-action="Export" class="form-horizontal">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="form-row mb-4">
+                            <div class="form-inline col-4">
+                                <label class="col-sm-5 col-form-label text-right" >開始年份</label>
+                                <div class="col-sm-7">
+                                    <input name="syear" type="number" value="@(DateTime.Now.Year-1911)" class="form-control" placeholder="民國年yyy" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-row mb-4">
+                            <div class="form-inline col-4">
+                                <label class="col-sm-5 col-form-label text-right">結束年份</label>
+                                <div class="col-sm-7">
+                                    <input name="eyear" type="number" value="@(DateTime.Now.Year-1911)" class="form-control" placeholder="民國年yyy"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-center">
+                            @*<i class="fa fa-file-excel"></i>*@
+                            <input value="匯出Excel" type="submit" asp-action="Export" asp-route-fileType="xlsx" class="btn btn-primary mr-4" />
+                            <input value="匯出ODS" type="submit" asp-action="Export" asp-route-fileType="ods" class="btn btn-primary mr-4" />
+                            
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script type="text/javascript">
+        $(function() {
+            $("#syear").datepicker({ dateFormat: 'yyy' });
+            $("#eyear").datepicker({ dateFormat: 'yyy' });
+        });
+    </script>
+}

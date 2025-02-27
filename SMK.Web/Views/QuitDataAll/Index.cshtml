@@ -1,0 +1,99 @@
+﻿@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="row">
+    <div class="col-12">
+        <div class="card rounded-lg">
+            <div class="card-header">
+                <div class="col-md-12 text-left text-secondary">
+                    戒菸率資料<br />
+                    將第三方電訪單位提供之電訪調查結果資料匯入SMK系統，請按下方說明各別上傳txt格式檔案。<br />
+                    (a)6個月電訪調查結果命名規則：[QuitDataAll_yyyymm_6m]，yyyymm為調查個案初診年月。<br />
+                    (b)1年電訪調查結果命名規則：[QuitDataAll_yyyymm_1y] ，yyyymm為調查個案初診年月。<br />
+                    另外，請確定無人使用該系統時再上傳（如午休、非大家常用時段等）。<br />
+                    <br />
+                    資料更新頻率：每月1次<br />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="col-sm-12">
+                    <label for="exampleInputFile">匯入戒菸率資料</label>
+                    <div class="input-group">
+                        <div class="custom-file">
+                            <input type="file" class="custom-file-input" id="file-uploader" data-target="file-uploader" accept="text/plain" value="0" />
+                            <label class="custom-file-label" for="file-uploader">選擇檔案，檔名需為[QuitDataAll_yyyymm_6m]或[QuitDataAll_yyyymm_1y] </label>
+                        </div>
+                        <div class="input-group-append">
+                            <button id="IniDrdtluploadFile" type="button" class="btn btn-primary">上傳</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script type="text/javascript">
+        $(".custom-file-input").on("change", function () {
+            var fileName = $(this).val().split("\\").pop();
+            $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+        });
+        $(function () {
+            $("#IniDrdtluploadFile").on("click", function () { var files = $("#file-uploader").get(0).files; uploadFile(files, 0) });
+        });
+
+        function uploadFile(files, type) {
+            var CheckDataArray = ["QuitDataAll_yyyymm_6m.txt", "QuitDataAll_yyyymm_1y.txt"];
+            var DataTitleArray = ["匯入戒菸率資料", "匯入戒菸率資料"];
+            var data = new FormData();
+            if (files.length == 0) {
+                myAlert.error("上傳失敗", "未選擇檔案", true);
+                return;
+            }
+            data.append("file", files[0]);
+            data.append("type", "11");
+            if (!checkFileName(CheckDataArray[type], files[0].name)) {
+                myAlert.error("上傳失敗", `【${DataTitleArray[type]}】檔案上傳錯誤，上傳檔案名稱為【${files[0].name}】，需為【${CheckDataArray[type]}】`, true);
+                return;
+            }
+            var ajaxRequest = $.ajax({
+                type: "POST",
+                url: "@Url.Action("UploadFile")",
+                contentType: false,
+                processData: false,
+                dataType: "json",
+                data: data
+            }).done(function (res, textStatus) {
+                if (!res.isSuccess) {
+                    myAlert.error("上傳失敗", res.errMsg, true);
+                }
+                else {
+                    myAlert.success("上傳成功", "", true);
+                }
+                $("#file-uploader").val("");
+            });
+        }
+        /**
+        * 檢查檔案名稱是否符合規則
+        * UploadFilesNameArray是做資料文字切割比對
+        */
+        const checkFileName = (CheckFileName, UploadFilesName) => {
+            var CheckFileNameArray = CheckFileName.split('_');
+            var UploadFilesNameArray = UploadFilesName.split('_');
+
+            if (CheckFileNameArray[0] != UploadFilesNameArray[0])
+                return false;
+            if (UploadFilesNameArray[2] != "6m.txt" && UploadFilesNameArray[2] != "1y.txt")
+                return false;
+            return true;
+        }
+    </script>
+}

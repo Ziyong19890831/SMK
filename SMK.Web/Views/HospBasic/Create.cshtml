@@ -1,0 +1,265 @@
+﻿@using SMK.Web.Services.Foundation;
+@using SMK.Data.Entity;
+@using SMK.Web.Heppers;
+@model HospBasicViewModel
+@inject HospBasicService hospBasicService;
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var branchList = await hospBasicService.GetSelectLists<GenBranch>(
+                                                    context => context.GenBranch,
+                                                    x => x.BranchNo,
+                                                    x => x.BranchName);
+    var smkContractsList = await hospBasicService.GetSelectLists<GenSmkcontract>(
+                                                    context => context.GenSmkcontract,
+                                                    x => x.SmkcontractType,
+                                                    x => x.SmkcontractName);
+    var endReasionsList = await hospBasicService.GetSelectLists<GenEndReason>(
+                                                    context => context.GenEndReason,
+                                                    x => x.EndReasonNo,
+                                                    x => x.EndReasonName);
+}
+
+<div class="row">
+    <div class="col-12">
+        <form asp-action="Create">
+            <div class="card">
+                <div class="card-header">機構資訊</div>
+                <div class="card-body">
+                    <div class="col-sm-12">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <label asp-for="HospId" class="control-label"></label>
+                                <button class="btn-sm btn-primary" asp-action="QueryHospId">檢視機構代碼</button>
+                                <div class="input-group">
+                                    <div class="input-group-prepend col-10">
+                                        <input type="text" class="form-control mr-2" asp-for="HospId" placeholder="">
+                                    </div>
+                                    <input type="text" class="form-control" asp-for="HospSeqNo" placeholder="">
+                                </div>
+                                <span asp-validation-for="HospId" class="text-danger"></span>
+                                <span asp-validation-for="HospSeqNo" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label asp-for="HospStatus" class="control-label"></label>
+                                <label class="form-control">@Model.HospStatusString</label>
+                            </div>
+                        </div>
+                        @*<div class="row">
+                            <div class="col-md-6 mb-2">
+                                <label asp-for="NewHospId" class="control-label"></label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend col-10">
+                                        <input type="text" class="form-control mr-2" asp-for="NewHospId" placeholder="">
+                                    </div>
+                                    <input type="text" class="form-control" asp-for="NewHospSeqNo" placeholder="">
+                                </div>
+                                <span asp-validation-for="NewHospId" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label asp-for="PrevHospId" class="control-label"></label>
+                                <label class="form-control">@Model.PrevHospId @Model.PrevHospSeqNo</label>
+                            </div>
+                        </div>*@
+                        <div class="row">
+                            <div class="col-md-12 mb-2">
+                                <label asp-for="HospName" class="control-label"></label>
+                                <label class="form-control">@Model.HospName</label>
+                                <input type="hidden" asp-for="HospName" />
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-2 form-group">
+                                <label asp-for="HospAddress" class="control-label"></label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend col-2">
+                                        <input type="text" class="form-control mr-2" asp-for="Zip" placeholder="">
+                                    </div>
+                                    <input type="text" class="form-control" asp-for="HospAddress" placeholder="">
+                                </div>
+                                <span asp-validation-for="HospAddress" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-2">
+                                <label asp-for="HospEmail" class="control-label"></label>
+                                <input type="text" class="form-control" asp-for="HospEmail" placeholder="">
+                                <span asp-validation-for="HospEmail" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <label asp-for="HospTel" class="control-label"></label>
+                                <input type="text" class="form-control" asp-for="HospTel" placeholder="">
+                                <span asp-validation-for="HospTel" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label asp-for="HospFax" class="control-label"></label>
+                                <input type="text" class="form-control" asp-for="HospFax" placeholder="">
+                                <span asp-validation-for="HospFax" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <label asp-for="HospOwnName" class="control-label"></label>
+                                <input type="text" class="form-control" asp-for="HospOwnName" placeholder="">
+                                <span asp-validation-for="HospOwnName" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label asp-for="HospOwnId" class="control-label"></label>
+                                <input type="text" class="form-control" asp-for="HospOwnId" placeholder="">
+                                <span asp-validation-for="HospOwnId" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <label asp-for="BranchNo" class="control-label"></label>
+                                @Html.MyDropDownList("BranchNo",
+                                      branchList,
+                                      (m) => m,
+                                      new { @class = "form-control col-sm-7", id = "BranchNo" }, true)
+                                <span asp-validation-for="BranchNo" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label asp-for="CreateDate" class="control-label"></label>
+                                <label class="form-control">@Model.CreateDate</label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <label asp-for="Contact1" class="control-label"></label>
+                                <input type="text" class="form-control" asp-for="Contact1" placeholder="">
+                                <span asp-validation-for="Contact1" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label asp-for="ContactEmail1" class="control-label"></label>
+                                <input type="text" class="form-control" asp-for="ContactEmail1" placeholder="">
+                                <span asp-validation-for="ContactEmail1" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <label asp-for="ContactTel1" class="control-label"></label>
+                                <input type="text" class="form-control" asp-for="ContactTel1" placeholder="">
+                                <span asp-validation-for="ContactTel1" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label asp-for="ContactFax1" class="control-label"></label>
+                                <input type="text" class="form-control" asp-for="ContactFax1" placeholder="">
+                                <span asp-validation-for="ContactFax1" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <label asp-for="Remark" class="control-label"></label>
+                                <input type="text" class="form-control" asp-for="Remark" placeholder="">
+                                <span asp-validation-for="Remark" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="form-group text-center">
+                            <input type="submit" value="新增" class="btn btn-primary" />
+                            <a asp-action="Create"  class="btn btn-primary">重填</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer"></div>
+                @if (Model.HospContracts != null)
+                {
+                    <div class="card-header">機構合約</div>
+                    <div class="card-body">
+                        <div class="col-sm-12">
+                            <table class="jqDataTable table table-striped table-bordered table-hover " role="grid">
+                                <thead>
+                                    <tr role="row">
+                                        <th class="text-nowrap">
+                                            序號
+                                        </th>
+                                        <th class="text-nowrap">合約類別</th>
+                                        <th class="text-nowrap">合約生效日期</th>
+                                        <th class="text-nowrap">合約終止日</th>
+                                        <th class="text-nowrap">原因</th>
+                                        <th class="text-nowrap">備註</th>
+                                        <th class="text-nowrap">功能</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{
+                                        int i = 1;
+                                    }
+                                    @foreach (var item in Model.HospContracts)
+                                    {
+                                        <tr>
+                                            <td class="sorting_1">@(i++)</td>
+                                            <td>
+                                                @Html.MyDropDownList("SMKContractType",
+                                                     smkContractsList,
+                                                     (m) => m,
+                                                     new { @class = "form-control col-sm-7", id = "SMKContractType" },
+                                                     true)
+                                            </td>
+                                            <td>
+                                                <input asp-for="@item.HospStartDate" class="form-control" />
+                                            </td>
+                                            <td>
+                                                <input asp-for="@item.HospEndDate" class="form-control" />
+                                            </td>
+                                            <td>
+                                                @Html.MyDropDownList("EndReasonNo",
+                                                     endReasionsList,
+                                                     (m) => m,
+                                                     new { @class = "form-control col-sm-7", id = "EndReasonNo" },
+                                                     true)
+                                            </td>
+                                            <td>
+                                                <input asp-for="@item.Remark" class="form-control" />
+                                            </td>
+                                            <td>
+                                                <a asp-action="Edit" asp-route-id="@item.HospId" class="btn btn-primary">編輯</a>
+                                                <a asp-action="Delete" asp-route-id="@item.HospId"
+                                                   data-ajax-failure="onFailed" data-ajax-success="onSuccess"
+                                                   data-ajax="true" data-ajax-method="POST"
+                                                   class="btn btn-danger fn-delete">刪除</a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                }
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script type="text/javascript">
+        $(function () {
+            $("#queryHospId").click(function () {
+                if ($("input[name='HospId']").val() == "") {
+                    myAlert.error("查詢錯誤", "醫事機構代碼未填寫", true);
+                    return;
+                }
+            });
+        });
+
+        function onSuccess(data) {
+            console.log(data);
+            if (data.isSuccess) {
+                myAlert.success("刪除成功", "刪除資料成功", true);
+                $(this).closest("tr").detach();
+            }
+            else {
+                myAlert.error("刪除錯誤", data.errMsg, true);
+            }
+        }
+
+        function onFailed(data) {
+            console.log(data);
+            myAlert.error("刪除錯誤", data.errMsg, true);
+        }
+    </script>
+}

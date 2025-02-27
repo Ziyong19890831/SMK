@@ -1,0 +1,116 @@
+﻿@using SMK.Web.Services.Foundation;
+@using SMK.Data.Entity;
+@inject PrsnBasicsService prsnBasicsService;
+@{
+    Layout = null;
+    var SmkcontractsList = await prsnBasicsService.GetSelectLists<GenSmkcontract>(context => context.GenSmkcontract,
+                                                    x => x.SmkcontractType,
+                                                    x => x.SmkcontractName);
+    var prsnEndReasonList = await prsnBasicsService.GetSelectLists<GenPrsnEndReason>(context => context.GenPrsnEndReason,
+                                                     x => x.EndReasonNo,
+                                                     x => x.EndReasonName);
+}
+
+<div class="modal" id="modal-prsnContract" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">醫事人員合約資料</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="card">
+                    <div class="card-header">醫事人員合約</div>
+                    <div class="card-body" id="hospContractModal">
+                        <div class="col-sm-12">
+                            <div class="row">
+                                <div class="col-md-6 mb-2">
+                                    <label class="control-label">醫事機構代碼</label>
+                                    <input type="hidden" id="prsnContractId" />
+                                    <div class="input-group">
+                                        <label id="lblHospId" class="form-control"></label>
+                                        <label id="lblHospSeqNo" class="form-control"></label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <label class="control-label">醫事機構名稱</label>
+                                    <div class="input-group">
+                                        <label id="lblHospName" class="form-control"></label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-2">
+                                    <label class="control-label">合約類別</label>
+                                    <select asp-items="SmkcontractsList"
+                                            class="form-control col-sm-7"
+                                            id="selsmkcontractType">
+                                        <option value="">請選擇</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <label class="control-label">合約生效日</label>
+                                    <div class="input-group">
+                                        <label id="lblPrsnStartDate" class="form-control"></label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-2">
+                                    <label class="control-label">合約終止日</label>
+                                    <input type="text" class="form-control smkdate" id="txtPrsnEndDate" placeholder="">
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <label class="control-label">終止原因</label>
+                                    <select asp-items="prsnEndReasonList"
+                                            class="form-control"
+                                            id="selEndReason">
+                                        <option value="">請選擇</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-2">
+                                    <label class="control-label">可治療</label>
+                                    <input type="checkbox" class="form-control" id="chkCouldTreat" placeholder="">
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <label class="control-label">可衛教</label>
+                                    <input type="checkbox" class="form-control" id="chkCouldInstruct" placeholder="">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12 mb-2">
+                                    <label class="control-label">備註</label>
+                                    <input type="text" class="form-control" id="txtRemark" placeholder="">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-2">
+                                    <label class="control-label">建立日期</label>
+                                    <div class="input-group">
+                                        <label id="lblCreateDate" class="form-control"></label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <label class="control-label">修改日期</label>
+                                    <div class="input-group">
+                                        <label id="lblModifyDate" class="form-control"></label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="btnPrsnContractSave">儲存</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>

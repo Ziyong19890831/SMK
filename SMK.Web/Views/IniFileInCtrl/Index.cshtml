@@ -1,0 +1,179 @@
+﻿@model IniFileInCtrlQueryModel
+@using SMK.Data.Enums
+@using SMK.Web.Services.Foundation;
+@inject HospContractService hospContractService;
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var fileInStatusList = hospContractService.GetEnumList<FileInStatus>().ToList();
+}
+<div class="row">
+    <div class="col-12">
+        <div class="card rounded-lg">
+            <div class="card-header">
+                <div class="col-md-12 text-left text-secondary">
+                    健保及VPN資料上傳結果<br />
+                    此頁具查詢健保檔及VPN資料上傳狀態之功能，另可查詢特定上傳日期、檔案名稱及狀態。<br />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="col-sm-12">
+                    <form id="queryForm" class="form-horizontal">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="form-row mb-4 justify-content-center">
+                            <div class="form-inline col-4 justify-content-center">
+                                <label asp-for="CreatedAt" class="control-label"></label>
+                                <div class="col-sm-7">
+                                    <input asp-for="CreatedAt" class="form-control smkdate" placeholder="點日曆或輸入民國年月日" />
+                                </div>
+                            </div>
+                            <div class="form-inline col-4 justify-content-center">
+                                <label asp-for="FileName" class="control-label"></label>
+                                <div class="col-sm-7">
+                                    <input asp-for="FileName" class="form-control" placeholder="可模糊查詢檔案名稱" />
+                                </div>
+                            </div>
+                            <div class="form-inline col-4 justify-content-center">
+                                <label asp-for="fileInStatus" class="col-form-label"></label>
+                                <div class="col">
+                                    <select asp-items="fileInStatusList"
+                                            asp-for="fileInStatus"
+                                            class="form-control w-100">
+                                        <option value="">請選擇</option>
+                                    </select>
+                                </div>
+                                <span asp-validation-for="fileInStatus" class="text-danger col-sm-3"></span>
+                            </div>
+                        </div>
+                    </form>
+                    <div class="d-flex justify-content-center">
+                        <button id="btnQuery" type="button" class="btn btn-primary">查詢</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="col-sm-12">
+                    <table id="hospbasicTable" class="table table-striped table-bordered table-hover " role="grid">
+                        <thead>
+                            <tr role="row">
+                                <th class="text-nowrap">檔案名稱</th>
+                                <th class="text-nowrap">開始時間</th>
+                                <th class="text-nowrap">完成時間</th>
+                                <th class="text-nowrap">狀態</th>
+                                <th class="text-nowrap">重新匯入</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        @await Html.PartialAsync("~/Views/Shared/_DataTables.cshtml")
+        ;
+    }
+    <script type="text/javascript">
+        $("#FileDate").datepicker({ dateFormat: 'yyy/mm' });
+        var $hospbasicTable;
+        $(function () {
+            $("#btnQuery").on("click", query);
+        });
+
+        function importData(values, response) {
+            $.ajax({
+                url: '@Url.Action("Import", "IniFileInCtrl")',
+                type: "post",
+                dataType: "json",
+                data: {
+                    id: values.id,
+                    createdAt: $('#CreatedAt').val(),
+                    fileDate: $('#FileDate').val(),
+                    fileName: $('#FileName').val(),
+                    draw: 1,
+                    start: 0,
+                    length: 100,
+                },
+                success: function (res) {
+                    if (!res.isSuccess) {
+                        myAlert.error("查詢錯誤", res.errMsg, true);
+                        return;
+                    }
+                    if (res.data && res.data.length == 0) {
+                        response([]);
+                        return;
+                    }
+                    var data = res.data;
+                    response(data);
+                }
+            });
+        }
+        function query() {
+            if ($hospbasicTable)
+                $hospbasicTable.destroy();
+
+            var ajax = function (data, callback, settings) {
+                var o = $("#queryForm").serializeObject();
+                o.draw = data.draw;
+                o.start = data.start;
+                o.length = data.length;
+                $.post('@Url.Action("Query", "IniFileInCtrl")', o, function (res) {
+                    if (!res.isSuccess) {
+                        myAlert.error("查詢錯誤", res.errMsg, true);
+                        return;
+                    }
+                    callback(res.data);
+                });
+            };
+            $hospbasicTable = $("#hospbasicTable").DataTable({
+                "scrollY": "600px",//可選，是否固定表格高度，不包括表頭；
+                "scrollCollapse": true,//與scrollY结合使用，是否固定高度，默認false;
+                "serverSide": true,
+                "ajax": ajax,
+                "paging": true,
+                "searching": false,
+                "ordering": false,
+                "rowCallback": function (row, data) {
+                    let importButton = $(row).find('.import');
+                    if (importButton) {
+                        importButton.on('click', () => {
+                            importData(data, (results) => {
+                            });
+                        });
+                    }
+                },
+                "columns": [
+                    { data: "filename", targets: 1 },
+                    { data: "startedAt", targets: 2 },
+                    { data: "statusUpdatedAt", targets: 3 },
+                    { data: "statusStr", targets: 4 },
+                    {
+                        targets: 5,
+                        data: null,
+                        render: function (data, type, full, meta) {
+                            return data.fileIsExisted ?
+                                '<button type="button" class="import" title="重新匯入"><i class= "fas fa-play" aria-hidden="true" ></i></button > '
+                                : '';
+                        },
+                    }
+                ]
+            });
+        }
+    </script>
+}

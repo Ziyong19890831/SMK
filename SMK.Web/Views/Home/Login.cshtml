@@ -1,0 +1,107 @@
+﻿@{
+    ViewData["Title"] = "戒菸治療管理平台";
+    Layout = "";
+    var autoLogin = null != ViewBag.AutoLogin && ViewBag.AutoLogin;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>@ViewData["Title"] | 登入</title>
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    @await Html.PartialAsync("~/Views/Shared/_AdminLTE_Styles.cshtml")
+</head>
+<body class="hold-transition login-page">
+    <div class="login-box">
+        <div class="login-logo">
+            <a asp-controller="Home" asp-action="Index">@ViewData["Title"]</a>
+        </div>
+        <div class="card">
+            <div class="card-body login-card-body">
+                <p class="login-box-msg">請使用帳號登入</p>
+                <form asp-controller="Home" asp-action="Login"
+                      asp-route-returnurl="@ViewData["ReturnUrl"]"
+                      method="post" class="login-form" onsubmit="return validate();">
+                    <div asp-validation-summary="All" class="text-danger"></div>
+
+                    <div class="input-group mb-3">
+                        @*<input asp-for="Email" type="text" placeholder="Email" class="form-control" />*@
+                        <input type="text" name="account" class="form-control" placeholder="帳號" value="@ViewBag.Account">
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-envelope"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="input-group mb-3">
+                        @*<input asp-for="Password" placeholder="Password" class="form-control" />*@
+                        <input type="password" name="pwd" class="form-control" placeholder="密碼" value="@ViewBag.Pwd" autocomplete="off">
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-lock"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text">
+                                <img src="@Url.Action("CheckCode","Home")" />
+                            </div>
+                        </div>
+                        <input type="text" name="CAPTCHA" class="form-control" placeholder="驗證碼" value="@ViewBag.CAPTCHA">
+                    </div>
+                    <div class="form-group">
+                        <button class="btn btn-primary btn-block" type="submit">登入</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    @await Html.PartialAsync("~/Views/Shared/_AdminLTE_Scripts.cshtml")
+    <script>
+        function getCookie(cname) {
+            let name = cname + "=";
+            let decodedCookie = decodeURIComponent(document.cookie);
+            let ca = decodedCookie.split(';');
+            for (let i = 0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) == ' ') {
+                    c = c.substring(1);
+                }
+                if (c.indexOf(name) == 0) {
+                    return c.substring(name.length, c.length);
+                }
+            }
+            return "";
+        }
+        function validate() {
+            let CheckCode = getCookie("CheckCode");
+            if (CheckCode != $('input[name="CAPTCHA"]').val()) {
+                alert('驗證碼錯誤');
+                return false;
+            } else {
+                return true;
+            }
+        }
+    </script>
+    @if (ViewBag.Msg != null)
+    {
+        <script>
+            alert('@Html.Raw(ViewBag.Msg.ToString())');
+        </script>
+    }
+    @section Scripts {
+        @{ await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        }
+
+        @*@if (autoLogin) {
+                @Html.Raw("$('#login-form').submit();");
+            }*@
+
+    }
+</body>
+</html>

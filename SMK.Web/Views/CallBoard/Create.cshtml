@@ -1,0 +1,114 @@
+﻿@model SMK.Data.Entity.CallBoard
+
+@{
+    ViewData["Title"] = "Create";
+    // Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<section class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="col-sm-12">
+                    <form asp-action="Create" enctype="multipart/form-data">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="form-group">
+                            <label asp-for="AnnouncementDate" class="control-label"></label>
+                            <input asp-for="AnnouncementDate" class="form-control" />
+                            <span asp-validation-for="AnnouncementDate" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <div>
+                                <label asp-for="Note" class="control-label"></label>
+                                <span>(<span id="ChangeTextArea">0</span>/500)</span>
+                            </div>
+                            <textarea asp-for="Note" class="form-control" rows="10"></textarea>
+                            <span asp-validation-for="Note" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <div>
+                                <label class="control-label">上傳檔案</label>
+                                <img src="~/image/details_open.png" alt="新增上傳檔案" title="新增上傳檔案" onclick="AddFiles()" />
+                            </div>
+                        </div>
+                        <div id="All_Files">
+                            <div id="files_1" class="input-group">
+                                <div class="custom-file">
+                                    <input type="file" class="custom-file-input" id="file-uploader_1" onchange="ChangeFilesName(this)" data-target="file-uploader" name="files" accept=".doc, .docx, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, .xls, .xlsx, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, .pdf, application/pdf" value="0" />
+                                    <label class="custom-file-label" for="file-uploader_1">選擇檔案，檔名需為Word, Excel, PDF等檔案格式</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-end mt-3">
+                            <button type="submit" class="btn btn-primary">新增</button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    @{
+        @await Html.PartialAsync("~/Views/Shared/_DataTables.cshtml")
+        ;
+    }
+    <script type="text/javascript">
+        /**
+         * 上傳檔案後，更新上檔案名稱
+         */
+        const ChangeFilesName = (inputElement) => {
+            // 取得檔案元素
+            const fileElement = inputElement.files[0];
+            // 取得檔案名稱
+            const fileName = fileElement.name;
+            // 選擇相應的 label 元素
+            const labelElement = inputElement.nextElementSibling;
+            // 將檔案名稱設定為 label 元素的文字內容
+            labelElement.innerText = fileName;
+        }
+
+        $(document).ready(function () {
+            $("#Note").keyup(function () {
+                var text = $(this).val();
+                var textLength = text.length + (text.match(/\n/g) || []).length + (text.match(/ /g) || []).length;
+                $("#ChangeTextArea").text(textLength);
+            });
+        });
+
+        /**
+         * 新增檔案上傳欄位
+         */
+        var fileNum = 1;
+        var All_FilesNum = 1;
+        const AddFiles = () => {
+            if (fileNum % 2 != 0) {
+                $(`#files_${All_FilesNum}`).append(
+                    `
+                    <div class="custom-file">
+                        <input type="file" class="custom-file-input" id="file-uploader_${fileNum + 1}" onchange="ChangeFilesName(this)" data-target="file-uploader" name="files" accept=".doc, .docx, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, .xls, .xlsx, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, .pdf, application/pdf" value="0" />
+                        <label class="custom-file-label" for="file-uploader_${fileNum + 1}">選擇檔案，檔名需為Word, Excel, PDF等檔案格式</label>
+                    </div>
+                    `
+                )
+                fileNum++;
+                All_FilesNum++;
+            } else {
+                All_FilesNum++;
+                $(`#All_Files`).append(
+                    `
+                            <div id="files_${All_FilesNum}" class="input-group">
+                        <div class="custom-file">
+                            <input type="file" class="custom-file-input" id="file-uploader_${fileNum + 1}" onchange="ChangeFilesName(this)" data-target="file-uploader" name="files" accept=".doc, .docx, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, .xls, .xlsx, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, .pdf, application/pdf" value="0" />
+                            <label class="custom-file-label" for="file-uploader_${fileNum + 1}">選擇檔案，檔名需為Word, Excel, PDF等檔案格式</label>
+                        </div>
+                    </div>
+                    `
+                )
+                fileNum++;
+            }
+        }
+    </script>
+}

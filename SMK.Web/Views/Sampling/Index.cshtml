@@ -1,0 +1,250 @@
+﻿@model SamplingViewModel
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .search-table-outter {
+        overflow-x: scroll;
+        max-height: 40rem;
+    }
+</style>
+
+<div id="app">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="col-sm-12">
+                        <form v-on:submit.stop.prevent="getSamplingItems" class="form-horizontal">
+                            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                            <div class="form-row mb-4">
+                                <div class="form-inline col-4">
+                                    <label class="col-sm-5 col-form-label text-right">費用年月</label>
+                                    <div class="col-sm-7">
+                                        <input v-model="query.FeeStart" class="form-control" placeholder="費用年月(起)" />
+                                    </div>
+                                </div>
+                                <div class="form-inline col-4">
+                                    <div class="col-sm-7">
+                                        <input v-model="query.FeeEnd" class="form-control" placeholder="費用年月(迄)" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-row mb-4">
+                                <div class="form-inline col-4">
+                                    <label class="col-sm-5 col-form-label text-right">抽樣比率%</label>
+                                    <div class="col-sm-7">
+                                        <input asp-for="Query.SamplingRatio" class="form-control" placeholder="抽樣比率" />
+                                    </div>
+                                </div>
+
+                                <div class="form-inline col-4">
+                                    <label class="col-sm-5 col-form-label text-right">機構比率%</label>
+                                    <div class="col-sm-7">
+                                        <input asp-for="Query.HospRatio" type="number" class="form-control" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-row mb-4">
+                                <div class="form-check form-inline">
+                                    <input type="checkbox" class="form-check-input" asp-for="Query.ChkCondition1" id="ChkCondition1">
+                                    <label class="form-check-label" for="ChkCondition1">依比率當月申報金額最高之醫事機構</label>
+                                </div>
+                                <div class="form-check form-inline">
+                                    <input type="checkbox" class="form-check-input" asp-for="Query.ChkCondition2" id="ChkCondition2">
+                                    <label class="form-check-label" for="ChkCondition2">依比率當月申報件數最高之醫事機構</label>
+                                </div>
+                                <div class="form-check form-inline">
+                                    <input type="checkbox" class="form-check-input" asp-for="Query.ChkCondition3" id="ChkCondition3">
+                                    <label class="form-check-label" for="ChkCondition3">依匯入的醫事機構</label>
+                                </div>
+                                <div class="form-check form-inline">
+                                    <input type="checkbox" class="form-check-input" asp-for="Query.ChkCondition4" id="ChkCondition4">
+                                    <label class="form-check-label" for="ChkCondition4">單次藥費金額大於5000，小於100</label>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-around">
+                                <a target="_blank"
+                                   rel="noopener noreferrer"
+                                   v-bind:href="`@Url.Action("ExportRew1500", "Sampling")?FeeStart=${query.FeeStart}&FeeEnd=${query.FeeEnd}&fileType=xlsx`"
+                                   id="exportRew1500"
+                                   v-bind:class="['btn', (query.FeeStart.length >= 5 && query.FeeEnd.length >= 5) ? 'btn-warning' : 'btn-secondary']">匯出戒菸費用專業審查調閱清單(Excel)</a>
+                                <button id="btnQuery" type="submit" class="btn btn-primary">查詢</button>
+                                <a target="_blank"
+                                   rel="noopener noreferrer"
+                                   v-bind:href="`@Url.Action("ExportRew1500", "Sampling")?FeeStart=${query.FeeStart}&FeeEnd=${query.FeeEnd}&fileType=ods`"
+                                   id="exportRew1500"
+                                   v-bind:class="['btn', (query.FeeStart.length >= 5 && query.FeeEnd.length >= 5) ? 'btn-warning' : 'btn-secondary']">匯出戒菸費用專業審查調閱清單(Ods)</a>
+                            </div>
+                            <div class="form-row mb-4 mt-4">
+                                <div class="form-inline  col-4">
+                                    <label class="col-sm-5 col-form-label text-right">抽樣年份</label>
+                                    <div class="col-sm-5">
+                                        <input type="text" name="year" class="form-control" />
+                                    </div>
+
+                                </div>
+                                <div class="form-inline col-4">
+                                    <label class="col-sm-5 col-form-label text-right">抽樣檔案</label>
+                                    <div class="col-sm-7">
+                                        <input type="file" @@change="uploadFile" ref="file">
+                                    </div>
+
+                                </div>
+
+                            </div>
+                            <div class="d-flex justify-content-center">
+                                <button type="button" @@click="submitFile" class="btn btn-primary mr-2">上傳抽樣檔案</button>
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="col-md-3">
+                        @*<a asp-action="Create" class="btn btn-primary"><i class="fa fa-plus"></i> 新增</a>*@
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="col-sm-12 search-table-outter">
+                        <table class="search-table table table-striped table-bordered table-hover " role="grid">
+                            <thead>
+                                <tr role="row">
+                                    <th class="text-center" style="min-width: 4rem">序號</th>
+                                    <th class="text-center" style="min-width: 6rem">電腦序號</th>
+                                    <th class="text-center" style="min-width: 6rem">機構代碼</th>
+                                    <th class="text-center" style="min-width: 6rem">身分證號</th>
+                                    <th class="text-center" style="min-width: 6rem">出生日期</th>
+                                    <th class="text-center" style="min-width: 6rem">姓名</th>
+                                    <th class="text-center" style="min-width: 6rem">療程年度</th>
+                                    <th class="text-center" style="min-width: 6rem">療程次數</th>
+                                    <th class="text-center" style="min-width: 6rem">初診日</th>
+                                    <th class="text-center" style="min-width: 6rem">週數</th>
+                                    <th class="text-center" style="min-width: 6rem">就醫日期</th>
+                                    <th class="text-center" style="min-width: 6rem">給藥日份</th>
+                                    <th class="text-center" style="min-width: 6rem">申請金額</th>
+                                    <th class="text-center" style="min-width: 6rem">抽樣編號</th>
+                                    <th class="text-center" style="min-width: 6rem">費用年月</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr v-for="(item, index) in samplingItems" v-bind:key="item.hospID + item.id + item.birthday">
+                                    <td class="text-center sorting_1">{{ index + 1 }}</td>
+                                    <td class="text-center">
+                                        {{ item.dataId }}
+                                    </td>
+                                    <td class="text-center">
+                                        {{ item.hospID }}
+                                    </td>
+                                    <td class="text-center">
+                                        {{ item.id }}
+                                    </td>
+                                    <td class="text-center">
+                                        {{ item.birthday }}
+                                    </td>
+                                    <td class="text-center">
+                                        {{ item.name }}
+                                    </td>
+                                    <td class="text-center">
+                                        {{ item.examYear }}
+                                    </td>
+                                    <td class="text-center">
+                                        {{ item.examTime }}
+                                    </td>
+                                    <td class="text-center">
+                                        {{ item.firstTreatDate }}
+                                    </td>
+                                    <td class="text-center">
+                                        {{ item.weekCount }}
+                                    </td>
+                                    <td class="text-center">
+                                        {{ item.funcDate }}
+                                    </td>
+                                    <td class="text-center">
+                                        {{ item.drugDays }}
+                                    </td>
+                                    <td class="text-center">
+                                        {{ item.applDot }}
+                                    </td>
+                                    <td class="text-center">
+                                        {{ item.samplingNo }}
+                                    </td>
+                                    <td class="text-center">
+                                        {{ item.feeYearMonth }}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    @{
+        @await Html.PartialAsync("~/Views/Shared/_DataTables.cshtml")
+        ;
+    }
+    <script type="text/javascript">
+
+        const vm = new Vue({
+            el: "#app",
+            data() {
+                return {
+                    query: {
+                        FeeStart: '',
+                        FeeEnd: ''
+                    },
+                    samplingItems: []
+                }
+            },
+            methods: {
+                async getSamplingItems() {
+                    const { data } = await axios.get('@Url.Action("GetSamplingItems", "Sampling")', { params: this.query });
+                    this.samplingItems = data;
+                },
+                uploadFile() {
+                    this.input = this.$refs.file.files[0];
+                },
+                submitFile() {
+                    const formData = new FormData();
+                    formData.append('file', this.input);
+                    console.log(this.input);
+                    const headers = { 'Content-Type': 'multipart/form-data' };
+                    $.ajax({
+                        url: '@Url.Action("Upload", "Sampling")',
+                        data: formData,
+                        //headers: headers,
+                        processData: false,
+                        contentType: false,
+                        method: 'post',
+                        success: function (res) {
+                            if (!res.isSuccess) {
+                                myAlert.error("匯入錯誤", res.errMsg, true);
+                                return;
+                            } else {
+                                myAlert.success("匯入成功");
+                            }
+                        }
+                    })
+
+                },
+            }
+        })
+    </script>
+}
+
+

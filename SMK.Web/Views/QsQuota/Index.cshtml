@@ -1,0 +1,185 @@
+﻿@model SMK.Web.Models.QsQuotaQueryModel
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+<div class="row">
+    <div class="col-12">
+        <div class="card rounded-lg">
+            <div class="card-header">
+                <div class="col-md-12 text-left text-secondary">
+                    VPN配額<br />
+                    此頁具上傳、查詢VPN配額之功能，另可查詢特定年度別及醫事機構做篩選。<br />
+                    將醫療院所預防保健暨戒菸服務整合系統之VPN配額資料匯入SMK系統，請點選下方選擇檔案方框並選擇欲上傳的excel格式檔案。<br />
+                    另外，請確定無人使用該系統時再上傳（如午休、非大家常用時段等）。<br />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div id="app" class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="col-sm-12">
+                    <form id="queryForm" class="form-horizontal" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="form-row mb-4 row">
+                            <div class="form-inline col-sm-6">
+                                <label asp-for="YEARS" class="col-sm-5 col-form-label"></label>
+                                <div class="col-sm-3">
+                                    <input asp-for="YEARS" class="form-control" />
+                                </div>
+                                <span asp-validation-for="YEARS" class="text-danger col-sm-3"></span>
+                            </div>
+                            <div class="form-inline col-sm-6">
+                                <label asp-for="HospID" class="col-sm-3 col-form-label"></label>
+                                <div class="col-sm-9 input-group">
+                                    <div class="input-group-prepend">
+                                        <input asp-for="HospID" class="form-control" />
+                                    </div>
+                                    <input asp-for="HOSP_SEQ_NO" class="form-control" maxlength="2" value="00" />
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="d-flex justify-content-center">
+                            <input type="file" @@change="uploadFile" ref="file">
+                            <button type="button" @@click="submitFile" class="btn btn-primary mr-2">上傳</button>
+                            <button type="button" @@click="query" class="btn btn-primary mr-2">查詢</button>
+
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="col-sm-12">
+                    <table id="dataTable1" class="table table-bordered table-hover nowrap" role="grid">
+                        <thead>
+                            <tr role="row">
+                                <th class="text-nowrap">療程年度別</th>
+                                <th class="text-nowrap">醫事機構代碼</th>
+                                <th class="text-nowrap">分院識別號</th>
+                                <th class="text-nowrap">療程類別</th>
+                                <th class="text-nowrap">當年度用藥/衛教配額</th>
+                                <th class="text-nowrap">生效起日</th>
+                                <th class="text-nowrap">生效迄日</th>
+                                <th class="text-nowrap">異動說明</th>
+                                <th class="text-nowrap">異動人員</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    @{
+        @await Html.PartialAsync("~/Views/Shared/_DataTables.cshtml")
+        ;
+    }
+    <script type="text/javascript">
+        var $hospbasicTable;
+        const app = new Vue({
+            el: '#app',
+            data: {
+                showModal: false,
+                hospContTypeSelected: false,
+                options: [],
+                hospContTypes: [],
+                input: null
+            },
+            methods: {
+                uploadFile() {
+                    this.input = this.$refs.file.files[0];
+                },
+                submitFile() {
+                    const formData = new FormData();
+                    formData.append('file', this.input);
+                    console.log(this.input);
+                    const headers = { 'Content-Type': 'multipart/form-data' };
+                    $.ajax({
+                        url: '@Url.Action("Upload", "QsQuota")',
+                        data: formData,
+                        //headers: headers,
+                        processData: false,
+                        contentType: false,
+                        method: 'post',
+                        success: function (res) {
+                            if (!res.isSuccess) {
+                                myAlert.error("匯入錯誤", res.errMsg, true);
+                                return;
+                            } else {
+                                myAlert.success("匯入成功");
+                            }
+                        }
+                    })
+                },
+                query() {
+
+                    if ($hospbasicTable)
+                        $hospbasicTable.destroy();
+
+                    const ajax = function (data, callback, settings) {
+                        var o = $("#queryForm").serializeObject();
+                        o.draw = data.draw;
+                        o.start = data.start;
+                        o.length = data.length;
+                        $.post('@Url.Action("query", "QsQuota")', o, function (res) {
+                            if (!res.isSuccess) {
+                                myAlert.error("查詢錯誤", res.errMsg, true);
+                                return;
+                            }
+                            callback(res.data);
+                        });
+                    };
+
+                    $hospbasicTable = $("#dataTable1").DataTable({
+                        "scrollY": "600px",//可選，是否固定表格高度，不包括表頭；
+                        "scrollCollapse": true,//與scrollY结合使用，是否固定高度，默認false;
+                        "serverSide": true,
+                        "ajax": ajax,
+                        "paging": true,
+                        "searching": false,
+                        "ordering": false,
+                        "scrollX": true,
+                        "stripeClasses": [],
+                        "createdRow": function (row, data, dataIndex) {
+                            $(row).removeClass('even');
+                            $(row).removeClass('odd');
+                            if (data['dataType'] === '1') {
+                                $(row).addClass('light-cyan');
+                            } else {
+                                $(row).addClass('light-yellow');
+                            }
+                        },
+                        "columns": [
+                            { data: "years", targets: 0 },
+                            { data: "hosP_ID", targets: 1 },
+                            { data: "hosP_SEQ_NO", targets: 2 },
+                            { data: "curE_TYPE", targets: 3 },
+                            { data: "quota", targets: 4 },
+                            { data: "valiD_S_DATE", targets: 5 },
+                            { data: "valiD_E_DATE", targets: 6 },
+                            { data: "remark", targets: 7 },
+                            { data: "adjusT_USER_ID", targets: 8 },
+
+                        ]
+                    });
+                }
+            },
+        });
+
+    </script>
+}

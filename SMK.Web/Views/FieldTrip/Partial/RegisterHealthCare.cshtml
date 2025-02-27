@@ -1,0 +1,625 @@
+﻿@using SMK.Data.Entity
+@using SMK.Web.Heppers
+@using SMK.Web.Services.Foundation
+@using static SMK.Data.Enums.SmokingServicesType
+@model FieldTripQueryViewModel
+@inject HospContractService hospContractService;
+
+@{
+    Layout = "~/Views/Shared/_PartialLayout.cshtml";
+    var smokingServicesTypeEnums = hospContractService.GetEnumList<SmokingServicesTypeEnums>();
+}
+
+<div class="row mb-4">
+    <div id="appHealthTreatOne" class="col-12">
+        <div class="card mt-2">
+            <div class="card-body">
+                <div class="col-sm-12">
+                    <form id="queryFormHealthTreatOne" class="form-horizontal" asp-controller="FieldTripRegisterHealth" asp-action="Export" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="form-row mb-4 row">
+                            <div class="form-inline col-6">
+                                <label asp-for="HospID" class="col-sm-5 col-form-label text-right"></label>
+                                <div class="col-sm-7 input-group">
+                                    <div class="input-group-prepend">
+                                        <input name="HospID" id="HospIDRegisterHealth" class="form-control" placeholder="機構代碼" />
+                                    </div>
+                                    <input name="HospSeqNo" id="HospSeqNoRegisterHealth" class="form-control" maxlength="2" placeholder="院區別" value="00" />
+                                </div>
+                            </div>
+                            <div class="form-inline col-6">
+                                <label asp-for="HospName" class="col-sm-4 col-form-label text-right"></label>
+                                <div class="col-sm-7">
+                                    <input name="HospName" id="HospNameRegisterHealth" class="form-control w-100" readonly />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row mb-4 row">
+                            <div class="form-inline col-sm-6">
+                                <label asp-for="FuncStartDate" class="col-sm-5 col-form-label"></label>
+                                <div class="col-sm-7 input-group">
+                                    <input name="FuncStartDate" id="FuncStartDateRegisterHealth" type="text" class="form-control" placeholder="yyy/MM/dd(起)" />
+                                    <input name="FuncEndDate" id="FuncEndDateRegisterHealth" type="text" class="form-control" placeholder="yyy/MM/dd(迄)" />
+                                </div>
+                            </div>
+                            <div class="form-inline col-6">
+                                <label asp-for="smokingServicesTypeEnums" class="col-sm-4 col-form-label text-right"></label>
+                                <div class="col-sm-7">
+                                    @Html.MyDropDownList("smokingServicesTypeEnums",
+                                             smokingServicesTypeEnums,
+                                             (m) => m,
+                                             new { @class = "form-control w-100", id = "smokingServicesTypeEnumsRegisterHealth" }, true)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row mb-4 align-items-center" id="newCheckboxContainerHealthTreatOne" style="display:none">
+                            <div class="col-2 text-right mr-5">
+                                <label class="col-form-label mr-3">自訂下載欄位</label>
+                            </div>
+                            <div class="accordion pt-3 mr-3" id="accordionHealthTreatOne">
+                                <div class="card shadow  border border-2 rounded">
+                                    <div class="card-header" id="headingOneHealthTreatOne">
+                                        <h2 class="mb-0">
+                                            <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapseHealthTreatOne" aria-expanded="true" aria-controls="collapseOneHealthTreatOne">
+                                                治療
+                                            </button>
+                                        </h2>
+                                    </div>
+                                    <div id="collapseHealthTreatOne" class="collapse" aria-labelledby="headingOneHealthTreatOne" data-parent="#collapseHealthTreatOne">
+                                        <div class="card-body d-flex align-items-center flex-wrap" id="CardHealthTreatOne">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accordion pt-3 mr-3" id="accordionHealthEducationOne">
+                                <div class="card shadow  border border-2 rounded">
+                                    <div class="card-header" id="headingOneHealthEducationOne">
+                                        <h2 class="mb-0">
+                                            <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapseHealthEducationOne" aria-expanded="true" aria-controls="collapseOneHealthEducationOne">
+                                                衛教
+                                            </button>
+                                        </h2>
+                                    </div>
+                                    <div id="collapseHealthEducationOne" class="collapse" aria-labelledby="headingOneHealthEducationOne" data-parent="#collapseHealthEducationOne">
+                                        <div class="card-body d-flex align-items-center flex-wrap" id="CardHealthEducationOne">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-center">
+                            <button type="button" id="queryHealthTreatOne" class="btn btn-primary mr-2">查詢</button>
+                            <button id="CheckExcleRowHealthTreatOne" type="button" class="btn btn-primary mr-2" onclick="grabTableColumnsDataHealth()">自訂下載欄位</button>
+                            <button type="button" onclick="exportHealthTreatOne('Excel')" class="btn btn-primary mr-2">匯出Excel</button>
+                            <button type="button" onclick="exportHealthTreatOne('Ods')" class="btn btn-primary mr-2">匯出Ods</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="HealthTreatOne" class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="col-md-12 text-right">
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="col-sm-12 table-responsive">
+                    <table id="DeclareTableHealthTreatOne" class="table table-striped table-bordered table-hover" role="grid">
+                        <thead>
+                            <tr role="row" class="m-2">
+                                實地訪查-登入資料(健保)-治療
+                            </tr>
+                            <tr role="row">
+                                <th data-orderable="false" class="text-nowrap">序號</th>
+                                <th class="text-nowrap">類型</th>
+                                <th class="text-nowrap">醫事機構代碼</th>
+                                <th class="text-nowrap">院區別</th>
+                                <th class="text-nowrap">&emsp;&emsp; &emsp;醫事機構名稱&emsp;&emsp; &emsp;</th>
+                                <th class="text-nowrap">身分證號</th>
+                                <th class="text-nowrap">出生日期</th>
+                                <th class="text-nowrap">&emsp; &emsp;姓名&emsp; &emsp;</th>
+                                <th class="text-nowrap">性別</th>
+                                <th class="text-nowrap">電話(日)</th>
+                                <th class="text-nowrap">手機</th>
+                                <th class="text-nowrap">&emsp;&emsp; &emsp;縣市鄉鎮&emsp; &emsp;&emsp;</th>
+                                <th class="text-nowrap">&emsp; &emsp;&emsp; &emsp;通訊地址&emsp; &emsp;&emsp; &emsp;</th>
+                                <th class="text-nowrap">療程年度</th>
+                                <th class="text-nowrap">用藥週數</th>
+                                <th class="text-nowrap">費用年月</th>
+                                <th class="text-nowrap">就醫日期</th>
+                                <th class="text-nowrap">申報日期</th>
+                                <th class="text-nowrap">醫令代碼1</th>
+                                <th class="text-nowrap"> &emsp;&emsp; &emsp;&emsp; 代碼名稱1(處方藥名)&emsp; &emsp;&emsp; &emsp;</th>
+                                <th class="text-nowrap">量1(藥量)</th>
+                                <th class="text-nowrap">醫令代碼2</th>
+                                <th class="text-nowrap"> &emsp;&emsp; &emsp;&emsp; 代碼名稱2(處方藥名)&emsp; &emsp;&emsp; &emsp;</th>
+                                <th class="text-nowrap">量2(藥量)</th>
+                                <th class="text-nowrap">醫令代碼3</th>
+                                <th class="text-nowrap"> &emsp;&emsp; &emsp;&emsp; 代碼名稱3(處方藥名)&emsp; &emsp;&emsp; &emsp;</th>
+                                <th class="text-nowrap">量3(藥量)</th>
+                                <th class="text-nowrap">醫令代碼4</th>
+                                <th class="text-nowrap">&emsp;&emsp; &emsp;&emsp; 代碼名稱4(處方藥名)&emsp; &emsp;&emsp; &emsp;</th>
+                                <th class="text-nowrap">量4(藥量)</th>
+                                <th class="text-nowrap">電腦序號</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="HealthEducationOne" class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="col-md-12 text-right">
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="col-sm-12 table-responsive">
+                    <table id="DeclareTableHealthEducationOne" class="table table-striped table-bordered table-hover" role="grid">
+                        <thead>
+                            <tr role="row" class="m-2">
+                                實地訪查-登入資料(健保)-衛教
+                            </tr>
+                            <tr role="row">
+                                <th data-orderable="false" class="text-nowrap">序號</th>
+                                <th class="text-nowrap">類型</th>
+                                <th class="text-nowrap">醫事機構代碼</th>
+                                <th class="text-nowrap">院區別</th>
+                                <th class="text-nowrap">&emsp;&emsp; &emsp;醫事機構名稱&emsp;&emsp; &emsp;</th>
+                                <th class="text-nowrap">身分證號</th>
+                                <th class="text-nowrap">出生日期</th>
+                                <th class="text-nowrap">&emsp; &emsp;姓名&emsp; &emsp;</th>
+                                <th class="text-nowrap">性別</th>
+                                <th class="text-nowrap">電話(日)</th>
+                                <th class="text-nowrap">手機</th>
+                                <th class="text-nowrap">&emsp;&emsp; &emsp;縣市鄉鎮&emsp; &emsp;&emsp;</th>
+                                <th class="text-nowrap">&emsp; &emsp;&emsp; &emsp;通訊地址&emsp; &emsp;&emsp; &emsp;</th>
+                                <th class="text-nowrap">療程年度</th>
+                                <th class="text-nowrap">療程序號</th>
+                                <th class="text-nowrap">費用年月</th>
+                                <th class="text-nowrap">就醫日期</th>
+                                <th class="text-nowrap">申報日期</th>
+                                <th class="text-nowrap">醫令代碼1</th>
+                                <th class="text-nowrap"> &emsp;&emsp; &emsp;&emsp; 代碼名稱1(處方藥名)&emsp; &emsp;&emsp; &emsp;</th>
+                                <th class="text-nowrap">量1(藥量)</th>
+                                <th class="text-nowrap">醫令代碼2</th>
+                                <th class="text-nowrap"> &emsp;&emsp; &emsp;&emsp; 代碼名稱2(處方藥名)&emsp; &emsp;&emsp; &emsp;</th>
+                                <th class="text-nowrap">量2(藥量)</th>
+                                <th class="text-nowrap">電腦序號</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    th {
+        vertical-align: middle !important;
+    }
+
+    td {
+        vertical-align: middle !important;
+    }
+
+        td.highlight {
+            color: red;
+        }
+
+    table {
+        text-align: center;
+    }
+
+    .inputCheck {
+        border: 3px solid red;
+    }
+</style>
+
+@{
+    @await Html.PartialAsync("~/Views/Shared/_DataTables.cshtml")
+    ;
+}
+<script type="text/javascript">
+    $(document).ready(function () {
+        HideDivHealth();
+        $("#accordionHealthTreatOne").hide();
+        $("#queryHealthTreatOne").on("click", queryFormHealthTreatOne);
+        $("#smokingServicesTypeEnumsRegisterHealth").on("change", ChangeSmokingServicesTypeEnumsRegisterHealth);
+    });
+
+    const HideDivHealth = () => {
+        $("#HealthTreatOne").hide();
+        $("#HealthEducationOne").hide();
+    }
+
+    /**
+     * 檢查必填欄位
+     */
+    const CheckInputHealth = () => {
+        var HospIDRegisterHealth = CheckInputHealthAddClass("HospIDRegisterHealth");
+        var HospSeqNoRegisterHealth = CheckInputHealthAddClass("HospSeqNoRegisterHealth");
+        var FuncStartDateRegisterHealth = CheckInputHealthAddClass("FuncStartDateRegisterHealth");
+        var FuncEndDateRegisterHealth = CheckInputHealthAddClass("FuncEndDateRegisterHealth");
+        return HospIDRegisterHealth + HospSeqNoRegisterHealth + FuncStartDateRegisterHealth + FuncEndDateRegisterHealth;
+    }
+    /**
+     * 檢查必填欄位
+     */
+    const CheckInputHealthAddClass = (inputId) => {
+        var $input = $('#' + inputId);
+        if ($input.val() == "") {
+            $input.addClass("inputCheck");
+            return 1;
+        } else {
+            $input.removeClass("inputCheck");
+            return 0;
+        }
+    }
+
+    $(function () {
+        $("#FuncStartDateRegisterHealth").datepicker({
+            dateFormat: 'yyyy/mm/dd',
+            changeMonth: true,
+            changeYear: true,
+        });
+        $("#FuncEndDateRegisterHealth").datepicker({
+            dateFormat: 'yyyy/mm/dd',
+            changeMonth: true,
+            changeYear: true,
+        });
+
+        $('#HospIDRegisterHealth,#HospSeqNoRegisterHealth').on('keyup', async function () {
+            var hospID = $('#HospIDRegisterHealth').val();
+            var hospSeqNo = $('#HospSeqNoRegisterHealth').val();
+            const { data } = await axios.get('@Url.Action("GetHospName", "HospBasic")', { params: { hospID, hospSeqNo }, hideMask: true });
+            if (data !== undefined) {
+                $('#HospNameRegisterHealth').val(data);
+            }
+        });
+    })
+
+    const grabTableColumnsDataHealth = () => {
+        var o = $("#queryFormHealthTreatOne").serializeObject();
+        if (o.smokingServicesTypeEnums == "") {
+            myAlert.error("戒菸服務類型為必填欄位", "請選擇戒菸服務類型", true);
+            return;
+        }
+        grabTableColumns('DeclareTableHealthTreatOne', true, 1, 'newCheckboxContainerHealthTreatOne', "CardHealthTreatOne");
+        grabTableColumns('DeclareTableHealthEducationOne', true, 1, 'newCheckboxContainerHealthEducationOne', "CardHealthEducationOne");
+    }
+
+    /**
+     * 選擇客製化下載類型
+     */
+    const ChangeSmokingServicesTypeEnumsRegisterHealth = () => {
+        $("#accordionHealthTreatOne").hide();
+        $("#accordionHealthEducationOne").hide();
+        var o = $("#queryFormHealthTreatOne").serializeObject();
+        //console.log(o);
+        switch (o.smokingServicesTypeEnums) {
+            case "1":
+                $("#accordionHealthTreatOne").show();
+                break;
+            case "2":
+                $("#accordionHealthEducationOne").show();
+                break;
+            default:
+                $("#newCheckboxContainerHealthTreatOne").hide();
+                //myAlert.error("戒菸服務類型為必填欄位", "請選擇戒菸服務類型", true);
+                break;
+        }
+    }
+    /**
+     * 下載類型
+     */
+    const exportHealthTreatOne = (data) => {
+        var o = $("#queryFormHealthTreatOne").serializeObject();
+        //console.log(o);
+        switch (o.smokingServicesTypeEnums) {
+            case "1":
+                downloadfileHealthTreat(data);
+                break;
+            case "2":
+                downloadfileHealthHealth(data);
+                break;
+            default:
+                break;
+        }
+    }
+
+    /**
+     * 查詢
+     */
+    const queryFormHealthTreatOne = () => {
+        //北市聯醫還不能分開搜尋，需要加入[院區別]的篩選條件
+        if ($('#HospIDHealthTreat').val() == "0101090517" && ($('#HospSeqNoHealthTreat').val() == "00" || $('#HospSeqNoHealthTreat').val() == "")) {
+            myAlert.error("北市聯醫不能分開搜尋", "請輸入院區別", true);
+            $('#HospSeqNoHealthTreat').val("");
+            return;
+        }
+        if (CheckInputHealth() > 0) {
+            myAlert.error("全部為必填欄位，請全部填寫", "請輸入資料", true);
+            return;
+        }
+        HideDivHealth();
+        var o = $("#queryFormHealthTreatOne").serializeObject();
+        //console.log(o);
+        switch (o.smokingServicesTypeEnums) {
+            case "1":
+                queryHealthTreatOne();
+                $("#HealthTreatOne").show();
+                break;
+            case "2":
+                queryHealthHealthOne();
+                $("#HealthEducationOne").show();
+                break;
+            default:
+                myAlert.error("戒菸服務類型為必填欄位", "請選擇戒菸服務類型", true);
+                break;
+        }
+    }
+
+    var $declareTableHealthTreatOne;
+    /**
+     * 查詢治療
+     */
+    function queryHealthTreatOne() {
+        if ($declareTableHealthTreatOne)
+            $declareTableHealthTreatOne.destroy();
+
+        var ajax = function (data, callback, settings) {
+            debugger;
+            var o = $("#queryFormHealthTreatOne").serializeObject();
+            o.draw = data.draw;
+            o.start = data.start;
+            o.length = data.length;
+            $.post('@Url.Action("QueryFieldTripRegisterHealth", "FieldTripRegisterHealth")', o, function (res) {
+                if (!res.isSuccess) {
+                    myAlert.error("查詢錯誤", res.errMsg, true);
+                    return;
+                }
+                //debugger;
+                //console.log(res.data)
+                callback(res.data);
+            });
+        };
+
+        $declareTableHealthTreatOne = $("#DeclareTableHealthTreatOne").DataTable({
+            "scrollY": "600px",
+            "scrollCollapse": true,
+            "serverSide": true,
+            "scrollX": true,
+            "ajax": ajax,
+            "paging": true,
+            "searching": false,
+            "ordering": false,
+            "columns": [
+                {
+                    className: "sorting_1",
+                    data: null,
+                    width: "5%",
+                    targets: 0,
+                    render: function (data, type, full, meta) {
+                        var settings = meta.settings;
+                        var serial = meta.row + 1 + settings._iDisplayLength * settings._iDisplayStart / settings._iDisplayLength;
+                        return serial;
+                    }
+                },
+                { data: "dataType" },
+                { data: "hospId" },
+                { data: "hospSeqNo" },
+                { data: "hospName" },
+                { data: "id" },
+                { data: "birthday" },
+                { data: "name" },
+                { data: "sex" },
+                { data: "telD" },
+                { data: "telM" },
+                { data: "townName" },
+                { data: "informADDR" },
+                { data: "examYearTW" },
+                { data: "weekCount" },
+                { data: "feeYm" },
+                { data: "funcDate" },
+                { data: "applDate" },
+                { data: "order_code1" },
+                { data: "orderChiName1" },
+                { data: "order_qty1" },
+                { data: "order_code2" },
+                { data: "orderChiName2" },
+                { data: "order_qty2" },
+                { data: "order_code3" },
+                { data: "orderChiName3" },
+                { data: "order_qty3" },
+                { data: "order_code4" },
+                { data: "orderChiName4" },
+                { data: "order_qty4" },
+                { data: "dataId" },
+            ]
+        });
+    }
+
+    var $declareTableHealthEducationOne;
+    /**
+    * 查詢衛教
+    */
+    function queryHealthHealthOne() {
+        if ($declareTableHealthEducationOne)
+            $declareTableHealthEducationOne.destroy();
+
+        var ajax = function (data, callback, settings) {
+            debugger;
+            var o = $("#queryFormHealthTreatOne").serializeObject();
+            o.draw = data.draw;
+            o.start = data.start;
+            o.length = data.length;
+            $.post('@Url.Action("QueryFieldTripRegisterHealth", "FieldTripRegisterHealth")', o, function (res) {
+                if (!res.isSuccess) {
+                    myAlert.error("查詢錯誤", res.errMsg, true);
+                    return;
+                }
+                //debugger;
+                console.log(res.data)
+                callback(res.data);
+            });
+        };
+
+        $declareTableHealthEducationOne = $("#DeclareTableHealthEducationOne").DataTable({
+            "scrollY": "600px",
+            "scrollCollapse": true,
+            "serverSide": true,
+            "scrollX": true,
+            "ajax": ajax,
+            "paging": true,
+            "searching": false,
+            "ordering": false,
+            "columns": [
+                {
+                    className: "sorting_1",
+                    data: null,
+                    width: "5%",
+                    targets: 0,
+                    render: function (data, type, full, meta) {
+                        var settings = meta.settings;
+                        var serial = meta.row + 1 + settings._iDisplayLength * settings._iDisplayStart / settings._iDisplayLength;
+                        return serial;
+                    }
+                },
+                { data: "dataType" },
+                { data: "hospId" },
+                { data: "hospSeqNo" },
+                { data: "hospName" },
+                { data: "id" },
+                { data: "birthday" },
+                { data: "name" },
+                { data: "sex" },
+                { data: "telD" },
+                { data: "telM" },
+                { data: "townName" },
+                { data: "informADDR" },
+                { data: "examYearTW" },
+                { data: "inctructSerial" },
+                { data: "feeYm" },
+                { data: "funcDate" },
+                { data: "applDate" },
+                { data: "order_code1" },
+                { data: "orderChiName1" },
+                { data: "order_qty1" },
+                { data: "order_code2" },
+                { data: "orderChiName2" },
+                { data: "order_qty2" },
+                { data: "dataId" },
+            ]
+        });
+    }
+
+
+    function downloadfileHealthTreat(fileType) {
+        var o = $("#queryFormHealthTreatOne").serializeObject()
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("ExportHealthTreat", "FieldTripRegisterHealth")?fileType=' + fileType,
+            data: o,
+            xhrFields: {
+                responseType: 'blob' // to avoid binary data being mangled on charset conversion
+            },
+            success: function (blob, status, xhr) {
+                // check for a filename
+                var filename = "Health治療";
+                var disposition = xhr.getResponseHeader('Content-Disposition');
+                if (disposition && disposition.indexOf('attachment') !== -1) {
+                    var filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+                    var matches = filenameRegex.exec(disposition);
+                    if (matches != null && matches[1]) filename = matches[1].replace(/['"]/g, '');
+                }
+
+                if (typeof window.navigator.msSaveBlob !== 'undefined') {
+                    // IE workaround for "HTML7007: One or more blob URLs were revoked by closing the blob for which they were created. These URLs will no longer resolve as the data backing the URL has been freed."
+                    window.navigator.msSaveBlob(blob, filename);
+                } else {
+                    var URL = window.URL || window.webkitURL;
+                    var downloadUrl = URL.createObjectURL(blob);
+
+                    if (filename) {
+                        // use HTML5 a[download] attribute to specify filename
+                        var a = document.createElement("a");
+                        // safari doesn't support this yet
+                        if (typeof a.download === 'undefined') {
+                            window.location.href = downloadUrl;
+                        } else {
+                            a.href = downloadUrl;
+                            a.download = filename;
+                            document.body.appendChild(a);
+                            a.click();
+                        }
+                    } else {
+                        window.location.href = downloadUrl;
+                    }
+
+                    setTimeout(function () { URL.revokeObjectURL(downloadUrl); }, 100); // cleanup
+                }
+            }
+        });
+    }
+
+    function downloadfileHealthHealth(fileType) {
+        var o = $("#queryFormHealthTreatOne").serializeObject()
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("ExportHealthHealth", "FieldTripRegisterHealth")?fileType=' + fileType,
+            data: o,
+            xhrFields: {
+                responseType: 'blob' // to avoid binary data being mangled on charset conversion
+            },
+            success: function (blob, status, xhr) {
+                // check for a filename
+                var filename = "Health衛教";
+                var disposition = xhr.getResponseHeader('Content-Disposition');
+                if (disposition && disposition.indexOf('attachment') !== -1) {
+                    var filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+                    var matches = filenameRegex.exec(disposition);
+                    if (matches != null && matches[1]) filename = matches[1].replace(/['"]/g, '');
+                }
+
+                if (typeof window.navigator.msSaveBlob !== 'undefined') {
+                    // IE workaround for "HTML7007: One or more blob URLs were revoked by closing the blob for which they were created. These URLs will no longer resolve as the data backing the URL has been freed."
+                    window.navigator.msSaveBlob(blob, filename);
+                } else {
+                    var URL = window.URL || window.webkitURL;
+                    var downloadUrl = URL.createObjectURL(blob);
+
+                    if (filename) {
+                        // use HTML5 a[download] attribute to specify filename
+                        var a = document.createElement("a");
+                        // safari doesn't support this yet
+                        if (typeof a.download === 'undefined') {
+                            window.location.href = downloadUrl;
+                        } else {
+                            a.href = downloadUrl;
+                            a.download = filename;
+                            document.body.appendChild(a);
+                            a.click();
+                        }
+                    } else {
+                        window.location.href = downloadUrl;
+                    }
+
+                    setTimeout(function () { URL.revokeObjectURL(downloadUrl); }, 100); // cleanup
+                }
+            }
+        });
+    }
+
+
+</script>

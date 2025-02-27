@@ -1,0 +1,141 @@
+﻿@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+}
+<div class="row">
+    <div class="col-12">
+        <div class="card rounded-lg">
+            <div class="card-header">
+                <div class="col-md-12 text-left text-secondary">
+                    健保檔<br />
+                    將健保署提供之戒菸服務申報資料匯入SMK系統，請按下面方框規則各別上傳txt格式檔案。<br />
+                    另外，請確定無人使用該系統時再上傳（如午休、非大家常用時段等）。<br /><br />
+                    資料更新頻率：每月1次<br />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="col-sm-12">
+                    <label for="exampleInputFile">藥局治療明細</label>
+                    <div class="input-group">
+                        <div class="custom-file">
+                            <input type="file" class="custom-file-input" id="file-uploader" data-target="file-uploader" accept="text/plain" value="0" />
+                            <label class="custom-file-label" for="file-uploader">選擇檔案，檔名需為B7_yyyymm_DRDTL</label>
+                        </div>
+                        <div class="input-group-append">
+                            <button id="IniDrdtluploadFile" type="button" class="btn btn-primary">上傳</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12">
+                    <label for="exampleInputFile">藥局醫令明細資料</label>
+                    <div class="input-group">
+                        <div class="custom-file">
+                            <input type="file" class="custom-file-input" id="file-uploader1" data-target="file-uploader1" accept="text/plain" value="1" />
+                            <label class="custom-file-label" for="file-uploader1">選擇檔案，檔名需為B7_yyyymm_DRORD</label>
+                        </div>
+                        <div class="input-group-append">
+                            <button id="IniDrOrduploadFile" type="button" class="btn btn-primary">上傳</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12">
+                    <label for="exampleInputFile">門診治療明細</label>
+                    <div class="input-group">
+                        <div class="custom-file">
+                            <input type="file" class="custom-file-input" id="file-uploader2" data-target="file-uploader2" accept="text/plain" value="2" />
+                            <label class="custom-file-label" for="file-uploader2">選擇檔案，檔名需為B7_yyyymm_OPDTL</label>
+                        </div>
+                        <div class="input-group-append">
+                            <button id="IniOpdtluploadFile" type="button" class="btn btn-primary">上傳</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12">
+                    <label for="exampleInputFile">門診醫令明細資料</label>
+                    <div class="input-group">
+                        <div class="custom-file">
+                            <input type="file" class="custom-file-input" id="file-uploader3" data-target="file-uploader3" accept="text/plain" value="3" />
+                            <label class="custom-file-label" for="file-uploader3">選擇檔案，檔名需為B7_yyyymm_OPORD</label>
+                        </div>
+                        <div class="input-group-append">
+                            <button id="IniOpOrduploadFile" type="button" class="btn btn-primary">上傳</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script type="text/javascript">
+        $(".custom-file-input").on("change", function () {
+            var fileName = $(this).val().split("\\").pop();
+            $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+        });
+        $(function () {
+
+            $("#IniDrdtluploadFile").on("click", function () { var files = $("#file-uploader").get(0).files; uploadFile(files, 0) });
+            $("#IniDrOrduploadFile").on("click", function () { var files = $("#file-uploader1").get(0).files; uploadFile(files, 1) });
+            $("#IniOpdtluploadFile").on("click", function () { var files = $("#file-uploader2").get(0).files; uploadFile(files, 2) });
+            $("#IniOpOrduploadFile").on("click", function () { var files = $("#file-uploader3").get(0).files; uploadFile(files, 3) });
+        });
+
+        function uploadFile(files, type) {
+            var CheckDataArray = ["B7_yyyymm_DRDTL.txt", "B7_yyyymm_DRORD.txt", "B7_yyyymm_OPDTL.txt", "B7_yyyymm_OPORD.txt"];
+            var DataTitleArray = ["藥局治療明細", "藥局醫令明細資料", "門診治療明細", "門診醫令明細資料"];
+            var data = new FormData();
+            if (files.length == 0) {
+                myAlert.error("上傳失敗", "未選擇檔案", true);
+                return;
+            }
+            data.append("file", files[0]);
+            data.append("types", type);
+            if (!checkFileName(CheckDataArray[type], files[0].name)) {
+                myAlert.error("上傳失敗", `【${DataTitleArray[type]}】檔案上傳錯誤，上傳檔案名稱為【${files[0].name}】，需為【${CheckDataArray[type]}】`, true);
+                return;
+            }
+            var ajaxRequest = $.ajax({
+                type: "POST",
+                url: "@Url.Action("UploadFile")",
+                contentType: false,
+                processData: false,
+                dataType: "json",
+                data: data
+            }).done(function (res, textStatus) {
+                if (!res.isSuccess) {
+
+                    myAlert.error("上傳失敗", res.errMsg, true);
+                }
+                else {
+                    myAlert.success("上傳成功", "", true);
+                }
+                $("#file-uploader").val("");
+            });
+        }
+        /**
+        * 檢查檔案名稱是否符合規則
+        * UploadFilesNameArray是做資料文字切割比對
+        */
+        const checkFileName = (CheckFileName, UploadFilesName) => {
+            var CheckFileNameArray = CheckFileName.split('_');
+            var UploadFilesNameArray = UploadFilesName.split('_');
+
+            if (CheckFileNameArray[0] != UploadFilesNameArray[0])
+                return false;
+            if (CheckFileNameArray[2] != UploadFilesNameArray[2])
+                return false;
+            return true;
+        }
+    </script>
+}
+
+

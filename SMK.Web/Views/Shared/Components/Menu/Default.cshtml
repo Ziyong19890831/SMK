@@ -1,0 +1,28 @@
+﻿@using SMK.Web.Services
+@inject AuthService authService
+@{
+    var menu = authService.GetMyMenu();
+}
+<ul class="navbar-nav">
+    <li class="nav-item">
+        <a asp-action="Index" asp-controller="Home" class="nav-link">首頁</a>
+    </li>
+
+    @foreach (var node in menu.Nodes)
+    {
+
+        <li class="nav-item dropdown">
+            <a id="dropdownSystem" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+               class="nav-link dropdown-toggle">@node.Name</a>
+            <ul aria-labelledby="dropdownSystem" class="dropdown-menu border-0 shadow">
+                @foreach (var child in node.Nodes)
+                {
+                    <li>
+                        <a class="dropdown-item" asp-controller="@child.ControllerName" asp-action="@child.ActionName">@child.Name</a>
+                    </li>
+                }
+            </ul>
+        </li>
+
+    }
+</ul>

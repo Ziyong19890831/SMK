@@ -1,0 +1,151 @@
+﻿@model IEnumerable<CallBoardViewModel>
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<style>
+    .section-wrapper {
+        position: relative;
+    }
+
+    .display-4 {
+        position: relative;
+        display: inline-block;
+        margin-left: 15px;
+    }
+
+    .number-div {
+        position: absolute;
+        left: calc(100% - 100% + 100px);
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+        .number-div img {
+            height: 2.2em;
+        }
+
+    .number-img {
+        position: absolute;
+        top: 95%;
+        transform: translateY(-30%);
+        transform: translateX(-70%);
+    }
+
+    table th {
+        text-align: center;
+    }
+
+    table td {
+        vertical-align: middle;
+        text-align: center;
+    }
+
+    .left {
+        text-align: left;
+    }
+
+    .fade-img {
+        opacity: 0.05;
+        transition: opacity 1s ease;
+    }
+
+    #OpenCallBoard img {
+        transition: transform 0.3s ease;
+    }
+
+        #OpenCallBoard img:hover {
+            transform: scale(1.2); /* 1.5 倍大小 */
+        }
+</style>
+
+<div class="text-center">
+    <section>
+        <div class="section-wrapper">
+            <div class="number-div d-none d-md-flex">
+                <img src="~/image/megaphone.png" />
+                <h2 class="ml-2 mr-2">系統公告</h2>
+                <a href="#" id="OpenCallBoard">
+                    <img src="~/image/image-gallery.png" alt="Gallery" />
+                </a>
+            </div>
+            <h1 class="display-4">Welcome</h1>
+            <img class="back-ground number-img" src="~/image/logo.png" id="logeImg" />
+        </div>
+        <div class="mt-4" id="CallBoard" style="background-color:white">
+            <div class="card-body">
+                <div class="col-sm-12">
+                    <div class="col-sm-12 table-responsive">
+                        <table class="jqDataTable table table-striped table-bordered table-hover " role="grid">
+                            <thead>
+                                <tr role="row">
+                                    <th class="text-nowrap">
+                                        @Html.DisplayNameFor(model => model.AnnouncementDate)
+                                    </th>
+                                    <th class="text-nowrap">
+                                        @Html.DisplayNameFor(model => model.Note)
+                                    </th>
+                                    <th class="text-nowrap">
+                                        附件下載
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td style=" vertical-align: middle;">
+                                            @Html.DisplayFor(modelItem => item.StartDate)
+                                        </td>
+                                        <td class="left">
+                                            @Html.Raw(item.Note)
+                                        </td>
+                                        <td style=" vertical-align: middle;">
+                                            @if (item.Files != null && item.Files.Count > 0)
+                                            {
+                                                int i = 1;
+                                                @foreach (var Files in item.Files)
+                                                {
+                                                    <div class="">
+                                                        <a class="ml-3 mr-1" href="~/CallBoard/CallBoardGetFiles?filePath=@item.SysNo/@Files.Item2" target="_blank" title="@Files.Item2">附件_@i</a>
+                                                    </div>
+                                                    i++;
+                                                }
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>    
+    </section>
+</div>
+
+@section Scripts {
+    @{
+        @await Html.PartialAsync("~/Views/Shared/_DataTables.cshtml")
+        ;
+    }
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $(`#CallBoard`).hide();
+            var OpenCallBoard = false;
+        });
+
+        $(`#OpenCallBoard`).click(function () {
+            if (OpenCallBoard){
+                $(`#CallBoard`).show();
+                $(`#logeImg`).addClass('fade-img');
+                OpenCallBoard = false;
+            }else{
+                $(`#CallBoard`).hide();
+                $(`#logeImg`).removeClass('fade-img');
+                OpenCallBoard = true;
+            }
+        });
+
+    </script>
+}

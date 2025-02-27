@@ -1,0 +1,769 @@
+﻿@model DataQueryQueryModel
+@using SMK.Web.Services.Foundation;
+@inject HospContractService hospContractService;
+@inject GenHospContService genHospContService;
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_LayoutContainerFluid.cshtml";
+}
+
+<style>
+    .enlarged-checkbox {
+        width: 40px;
+        height: 40px;
+        transform:  scale(2.5);
+        -webkit-transform:  scale(2.5);
+        -moz-transform:  scale(2.5);
+        -ms-transform:  scale(2.5);
+        -o-transform:  scale(2.5);
+    }
+</style>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card rounded-lg">
+            <div class="card-header">
+                <div class="col-md-12 text-left text-secondary">
+                    個案管理<br />
+                    可以查詢機構向健保申報戒菸服務相關資料之功能；<br />
+                    可根據查詢結果內容自訂下載欄位後匯出清單；<br />
+                    另可以下載該次申報內容之醫令清單。
+                    <br />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="row mb-4">
+    <div id="app" class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="col-sm-12">
+                    <form id="queryForm" class="form-horizontal" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="form-row mb-4 row">
+                            <div class="form-inline col-6">
+                                <label asp-for="HospID" class="col-sm-5 col-form-label text-right"></label>
+                                <div class="col-sm-7 input-group">
+                                    <div class="input-group-prepend">
+                                        <input asp-for="HospID" class="form-control" placeholder="機構代碼" />
+                                    </div>
+                                    <input asp-for="HospSeqNo" class="form-control" maxlength="2" id="HospSeqNo" placeholder="院區別" value="00" />
+                                </div>
+                            </div>
+                            <div class="form-inline col-6">
+                                <label asp-for="HospName" class="col-sm-5 col-form-label text-right"></label>
+                                <div class="col-sm-7">
+                                    <input asp-for="HospName" class="form-control" readonly />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row mb-4 row">
+                            <div class="form-inline col-sm-6">
+                                <label asp-for="FuncStartDate" class="col-sm-5 col-form-label"></label>
+                                <div class="col-sm-7 input-group">
+                                    <input asp-for="FuncStartDate" type="text" class="form-control" placeholder="yyy/MM/dd(起)"/>
+                                    <input asp-for="FuncEndDate" type="text" class="form-control" placeholder="yyy/MM/dd(訖)"/>
+                                </div>
+                            </div>
+                            <div class="form-inline col-sm-6">
+                                <label asp-for="Birthday" class="col-sm-5 col-form-label"></label>
+                                <div class="col-sm-7">
+                                    <input asp-for="Birthday" type="text" class="form-control smkdate" placeholder="yyy/MM/dd"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row mb-4 row">
+                            <div class="form-inline col-6">
+                                <label asp-for="PrsnID" class="col-sm-5 col-form-label text-right"></label>
+                                <div class="col-sm-7">
+                                    <input asp-for="PrsnID" class="form-control" placeholder="身份證字號" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row mb-4">
+                            <div class="form-inline col-6">
+                                <label asp-for="Type1" class="col-sm-5 col-form-label text-right"></label>
+                                <div class="col-sm-7">
+                                    <input type="checkbox" asp-for="Type1" class="form-control enlarged-checkbox" id="Type1" placeholder="">
+                                </div>
+                            </div>
+                            <div class="form-inline col-6">
+                                <label asp-for="Type2" class="col-sm-5 col-form-label text-right"></label>
+                                <div class="col-sm-7">
+                                    <input type="checkbox" asp-for="Type2" class="form-control enlarged-checkbox" id="Type2" placeholder="">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row mb-4">
+                            <div class="form-inline col-6">
+                                <label asp-for="Type3" class="col-sm-5 col-form-label text-right"></label>
+                                <div class="col-sm-7">
+                                    <input type="checkbox" asp-for="Type3" class="form-control enlarged-checkbox" id="Type3" placeholder="">
+                                </div>
+                            </div>
+                            <div class="form-inline col-6">
+                                <label asp-for="Type4" class="col-sm-5 col-form-label text-right"></label>
+                                <div class="col-sm-7">
+                                    <input type="checkbox" asp-for="Type4" class="form-control enlarged-checkbox" id="Type4" placeholder="">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row mb-4 align-items-center" id="newCheckboxContainer" style="display:none">
+                            <div class="col-2 text-right mr-5">
+                                <label class="col-form-label">自訂下載欄位</label>
+                            </div>
+                            <div class="accordion pt-3 mr-3" title="打開後，只會下載明細檔">
+                                <div class="card shadow  border border-2 rounded">
+                                    <div class="card-header" id="headingOne">
+                                        <h2 class="mb-0" style="padding:0.4rem;">
+                                            <div class="custom-control custom-switch d-flex">
+                                                <input type="checkbox" class="custom-control-input" id="customSwitch" name="customSwitch" value="false" onclick="Switchcustom()">
+                                                <label class="custom-control-label" for="customSwitch" style="font-size:14pt;">下載明細檔</label>
+                                            </div>
+                                        </h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion pt-3 mr-3" id="accordionDTL">
+                                <div class="card shadow  border border-2 rounded">
+                                    <div class="card-header" id="headingOne">
+                                        <h2 class="mb-0">
+                                            <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapseDTL" aria-expanded="true" aria-controls="collapseOne">
+                                                明細檔
+                                            </button>
+                                        </h2>
+                                    </div>
+
+                                    <div id="collapseDTL" class="collapse" aria-labelledby="headingOne" data-parent="#collapseORD">
+                                        <div class="card-body d-flex align-items-center flex-wrap" id="dtl">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion pt-3" id="accordionORD">
+                                <div class="card shadow  border border-2 rounded">
+                                    <div class="card-header" id="headingOne">
+                                        <h2 class="mb-0">
+                                            <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapseORD" aria-expanded="true" aria-controls="collapseOne" id="BtnaccordionORD">
+                                                醫令檔
+                                            </button>
+                                        </h2>
+                                    </div>
+
+                                    <div id="collapseORD" class="collapse" aria-labelledby="headingOne" data-parent="#accordionORD">
+                                        <div class="card-body d-flex align-items-center flex-wrap" id="ord">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-center">
+                            <button type="button" @@click="query()" class="btn btn-primary mr-2">查詢</button>
+                            <button id="CheckExcleRow" type="button" class="btn btn-primary mr-2" onclick="grabTableColumnsData()">自訂下載欄位</button>
+                            <button type="button" @@click="exportExcel()" class="btn btn-primary mr-2">匯出Excel</button>
+                            <button type="button" @@click="exportOds()" class="btn btn-primary mr-2">匯出Ods</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body" id="card_Button_into">
+                <div id="Button_for_excel"></div>
+                <div class="col-sm-12 table-responsive">
+                    <table id="dataTable1" class="table table-striped table-bordered table-hover " role="grid">
+                        <thead>
+                            <tr role="row" class="m-2">
+                            </tr>
+                            <tr role="row">
+                                <th class="text-nowrap"></th>
+                                <th class="text-nowrap">選取</th>
+                                <th class="text-nowrap">費用年月</th>
+                                <th class="text-nowrap">療程年度</th>
+                                <th class="text-nowrap">療程次數</th>
+                                <th class="text-nowrap">週數</th>
+                                <th class="text-nowrap">初診日</th>
+                                <th class="text-nowrap">療程年度(衛)</th>
+                                <th class="text-nowrap">療程次數(衛)</th>
+                                <th class="text-nowrap">初診日(衛)</th>
+                                <th class="text-nowrap">衛教序次</th>
+                                <th class="text-nowrap">藥物申報</th>
+                                <th class="text-nowrap">衛教申報</th>
+                                <th class="text-nowrap">追蹤申報</th>
+                                <th class="text-nowrap">釋出申報</th>
+                                <th class="text-nowrap">申報類別</th>
+                                <th class="text-nowrap">機構代碼</th>
+                                <th class="text-nowrap">申報日期</th>
+                                <th class="text-nowrap">案件類別</th>
+                                <th class="text-nowrap">流水號</th>
+                                <th class="text-nowrap">就醫科別</th>
+                                <th class="text-nowrap">就醫日期</th>
+                                <th class="text-nowrap">調劑日期</th>
+                                <th class="text-nowrap">出生日期</th>
+                                <th class="text-nowrap">身分證號</th>
+                                <th class="text-nowrap">就醫序號</th>
+                                <th class="text-nowrap">給付類別</th>
+                                <th class="text-nowrap">部分負擔代號</th>
+                                <th class="text-nowrap">主診斷代碼</th>
+                                <th class="text-nowrap">次診斷代碼(一)</th>
+                                <th class="text-nowrap">次診斷代碼(二)</th>
+                                <th class="text-nowrap">給藥日份</th>
+                                <th class="text-nowrap">調劑方式</th>
+                                <th class="text-nowrap">醫事人員身分證號</th>
+                                <th class="text-nowrap">藥師身分證號</th>
+                                <th class="text-nowrap">藥費點數</th>
+                                <th class="text-nowrap">診療費點數</th>
+                                <th class="text-nowrap">診察費代碼</th>
+                                <th class="text-nowrap">診察費點數</th>
+                                <th class="text-nowrap">藥事服務費代碼</th>
+                                <th class="text-nowrap">藥事服務費點數</th>
+                                <th class="text-nowrap">醫療費用點數</th>
+                                <th class="text-nowrap">部份負擔金額</th>
+                                <th class="text-nowrap">申請金額</th>
+                                <th class="text-nowrap">性別</th>
+                                <th class="text-nowrap">修改備註</th>
+                                <th class="text-nowrap">特定治療項目(一)</th>
+                                <th class="text-nowrap">特定治療項目(二)</th>
+                                <th class="text-nowrap">特定治療項目(三)</th>
+                                <th class="text-nowrap">特定治療項目(四)</th>
+                                <th class="text-nowrap">釋出院所</th>
+                                <th class="text-nowrap">特定地區醫療服務</th>
+                                <th class="text-nowrap">支援區域</th>
+                                <th class="text-nowrap">實際提供醫療服務之醫事服務機構</th>
+                                <th class="text-nowrap">醫事類別</th>
+                                <th class="text-nowrap">原案件分類</th>
+                                <th class="text-nowrap">代辦部分負擔金額</th>
+                                <th class="text-nowrap">行政協助項目部分負擔點數</th>
+                                <th class="text-nowrap">姓名</th>
+                                <th class="text-nowrap">補報原因註記</th>
+                                <th class="text-nowrap">國際疾病分類碼(三)</th>
+                                <th class="text-nowrap">國際疾病分類碼(四)</th>
+                                <th class="text-nowrap">國際疾病分類碼(五)</th>
+                                <th class="text-nowrap">特殊材料明細點數小計</th>
+                                <th class="text-nowrap">矯正機關代號</th>
+                                <th class="text-nowrap">電腦序號</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+    @await Html.PartialAsync("~/Views/Shared/_DataTables.cshtml")
+        ;
+    }
+    <script type="text/javascript">
+        var $hospbasicTable;
+        const hospNameCache = {};
+        $(function () {
+            $("#FuncStartDate").datepicker({
+                dateFormat: 'yyyy/mm/dd',
+                changeMonth: true,
+                changeYear: true,
+            });
+            $("#FuncEndDate").datepicker({
+                dateFormat: 'yyyy/mm/dd',
+                changeMonth: true,
+                changeYear: true,
+            });
+
+            $('#HospID,#HospSeqNo').on('keyup', async function () {
+                var hospID = $('#HospID').val();
+                var hospSeqNo = $('#HospSeqNo').val();
+                const { data } = await axios.get('@Url.Action("GetHospName", "HospBasic")', { params: { hospID, hospSeqNo }, hideMask: true });
+                if (data !== undefined) {
+                    $('#HospName').val(data);
+                }
+            });
+            $("#HospName").autocomplete({
+                minLength: 1,
+                source: function (request, response) {
+                    var term = request.term;
+                    if (term in hospNameCache) {
+                        response(hospNameCache[term]);
+                        return;
+                    }
+
+                    $.ajax({
+                        url: '@Url.Action("QueryHospName", "HospBasic")',
+                        type: "Get",
+                        dataType: "json",
+                        data: { keyword: request.term },
+                        success: function (res) {
+                            if (!res.isSuccess) {
+                                myAlert.error("查詢錯誤", res.errMsg, true);
+                                return;
+                            }
+                            if (res.data && res.data.length == 0) {
+                                response([]);
+                                return;
+                            }
+                            var data = res.data
+                            hospNameCache[term] = data;
+                            response(data);
+                        }
+                    });
+                },
+                select: function (event, ui) {
+                    $("#HospID").val(ui.item.id);
+                }
+            });
+        });
+
+        const app = new Vue({
+            el: '#app',
+            data: {
+                showModal: false,
+                hospContTypeSelected: false,
+                options: [],
+                hospContTypes: [],
+            },
+            methods: {
+                query: function () {
+                    //北市聯醫還不能分開搜尋，需要加入[院區別]的篩選條件
+                    if ($('#HospID').val() == "0101090517" && $('#HospSeqNo').val() == "00") {
+                        myAlert.error("北市聯醫不能分開搜尋", "請輸入院區別", true);
+                        $('#HospSeqNo').val("");
+                        return;
+                    }
+
+                    if ($hospbasicTable)
+                        $hospbasicTable.destroy();
+
+                    const ajax = function (data, callback, settings) {
+                        var o = $("#queryForm").serializeObject();
+                        o.draw = data.draw;
+                        o.start = data.start;
+                        o.length = data.length;
+                        $.post('@Url.Action("Query", "DataQuery")', o, function (res) {
+                            if (!res.isSuccess) {
+                                myAlert.error("查詢錯誤", res.errMsg, true);
+                                return;
+                            }
+                            callback(res.data);
+                        });
+                    };
+                    $('#Button_for_excel').empty();
+                    $('#Button_for_excel').prepend(`<button class="btn btn-dark ml-5 mb-3" onclick="Run_ExportMedicineReport()">匯出醫令清單</button>`);
+                    $hospbasicTable = $("#dataTable1").DataTable({
+                        "scrollY": "600px",//可选，是否固定表格高度，不包括表头；
+                        "scrollCollapse": true,//与scrollY结合使用，是否固定高度，默认false;
+                        "serverSide": true,
+                        "ajax": ajax,
+                        "paging": true,
+                        "searching": false,
+                        "ordering": false,
+                        "scrollX": true,
+                        "stripeClasses": [],
+                        "createdRow": function (row, data, dataIndex) {
+                            $(row).removeClass('even');
+                            $(row).removeClass('odd');
+                            if (data['dataType'] === '1') {
+                                $(row).addClass('light-cyan');
+                            } else {
+                                $(row).addClass('light-yellow');
+                            }
+                        },
+                        //"dom": 'Bfrtip',
+                        //"buttons": {
+                        //    buttons: [
+                        //        {
+                        //            text: '匯出醫令清單',
+                        //            action: function (e, dt, node, config) {
+                        //                var id = $('input[type="radio"]:checked').val();
+                        //                ExportMedicineReport(id);
+                        //                //alert();
+                        //                //this.disable(); // disable button
+                        //            }
+                        //        }
+                        //    ]
+                        //},
+                        "columns": [
+                            {
+                                "className": 'details-control',
+                                "orderable": false,
+                                "data": null,
+                                "defaultContent": ''
+                            },
+                            {
+                                data: "dataId",
+                                render: function (data, type, row) {
+                                    //cosole.log(row);
+                                    return '<input type="radio" name="exportItem" class="exportItem" value="' + data + '-' + row.feeYm + '" class="editor-active">';
+                                },
+                                targets: 0
+                            },
+                            //{ data: "dataType", targets: 0, visible: false },
+                            { data: "feeYm", targets: 1 },
+                            { data: "examYear", targets: 2 },
+                            { data: "examTime", targets: 3 },
+                            { data: "weekCount", targets: 4 },
+                            { data: "firstTreatDate", targets: 4 },
+                            { data: "instructExamYear", targets: 5 },
+                            { data: "instructExamTime", targets: 6 },
+                            { data: "firstInstructDate", targets: 7 },
+                            { data: "inctructSerial", targets: 8 },
+                            { data: "medApply", targets: 9 },
+                            { data: "instructApply", targets: 10 },
+                            { data: "traceApply", targets: 11 },
+                            { data: "releaseApply", targets: 12 },
+                            { data: "applType", targets: 13 },
+                            { data: "hospId", targets: 14 },
+                            { data: "applDate", targets: 15 },
+                            { data: "caseType", targets: 16 },
+                            { data: "seqNo", targets: 17 },
+                            { data: "funcType", targets: 18 },
+                            { data: "funcDate", targets: 19 },
+                            { data: "relDate", targets: 20 },
+                            { data: "birthday", targets: 21 },
+                            { data: "id", targets: 22 },
+                            { data: "funcSeqNo", targets: 23 },
+                            { data: "payType", targets: 24 },
+                            { data: "partCode", targets: 25 },
+                            { data: "icd9cmCode", targets: 26 },
+                            { data: "icd9cmCode1", targets: 27 },
+                            { data: "icd9cmCode2", targets: 28 },
+                            { data: "drugDays", targets: 29 },
+                            { data: "relMode", targets: 30 },
+                            { data: "prsnId", targets: 31 },
+                            { data: "drugPrsnId", targets: 32 },
+                            { data: "drugDot", targets: 33 },
+                            { data: "cureDot", targets: 34 },
+                            { data: "diagCode", targets: 35 },
+                            { data: "diagDot", targets: 36 },
+                            { data: "dsvcCode", targets: 37 },
+                            { data: "dsvcDot", targets: 38 },
+                            { data: "expDot", targets: 39 },
+                            { data: "partAmt", targets: 40 },
+                            { data: "applDot", targets: 41 },
+                            { data: "idSex", targets: 42 },
+                            { data: "remark", targets: 43 },
+                            { data: "cureItem1", targets: 44 },
+                            { data: "cureItem2", targets: 45 },
+                            { data: "cureItem3", targets: 46 },
+                            { data: "cureItem4", targets: 47 },
+                            { data: "origHospId", targets: 48 },
+                            { data: "areaService", targets: 49 },
+                            { data: "suppArea", targets: 50 },
+                            { data: "realHospId", targets: 51 },
+                            { data: "hospDataType", targets: 52 },
+                            { data: "origCaseType", targets: 53 },
+                            { data: "agencyPartAmt", targets: 54 },
+                            { data: "otherPartAmt", targets: 55 },
+                            { data: "name", targets: 56 },
+                            { data: "applCauseMark", targets: 57 },
+                            { data: "icd10cmCode2", targets: 58 },
+                            { data: "icd10cmCode3", targets: 59 },
+                            { data: "icd10cmCode4", targets: 60 },
+                            { data: "metDot", targets: 61 },
+                            { data: "corrHospId", targets: 62 },
+                            { data: "data_id", targets: 63 },
+                        ]
+                    });
+
+                    function format1(values, callback) {
+                        $.ajax({
+                            url: '@Url.Action("QueryIniOpOrds", "DataQuery")',
+                            type: "Get",
+                            dataType: "json",
+                            data: {
+                                dataId: values.dataId, feeYm: values.feeYm,
+                                draw: 1,
+                                start: 0,
+                                length: 10000,
+                            },
+                            success: function (res) {
+                                if (!res.isSuccess) {
+                                    myAlert.error("查詢錯誤", res.errMsg, true);
+                                    return;
+                                }
+                                if (res.data && res.data.length === 0) {
+                                    return;
+                                }
+                                $(".hospbasicTablechild").remove();
+                                $(".hospbasicTablechildchild").remove();
+                                var data = res.data;
+                                let html = '';
+                                html += '<tr class="hospbasicTablechild" style="font-weight:bold"><td></td><td>醫令類別</td> <td>醫令代碼</td> <td>調劑方式</td> <td>連續處方註記</td> <td>藥品用量</td> <td>藥品使用頻率</td> <td>用藥途徑/作用部位</td> <td>醫令單價</td> <td>醫令數量</td> <td>醫令點數</td> <td>執行醫事人員代號</td> <td>備註</td> <td>診療部位</td> <td>給藥日份</td></tr>';
+                                for (let d of data) {
+                                    html += '<tr class="hospbasicTablechildchild">';
+                                    html += '<td></td>';
+                                    html += `<td>${d.orderType}</td>`;
+                                    html += `<td>${d.orderCode}</td>`;
+                                    html += `<td>${d.relMode}</td>`;
+                                    html += `<td>${d.chrMark}</td>`;
+                                    html += `<td>${d.drugNum}</td>`;
+                                    html += `<td>${d.drugFre}</td>`;
+                                    html += `<td>${d.drugPath}</td>`;
+                                    html += `<td>${d.orderUprice}</td>`;
+                                    html += `<td>${d.orderQty}</td>`;
+                                    html += `<td>${d.orderDot}</td>`;
+                                    html += `<td>${d.exePrsnId}</td>`;
+                                    html += `<td></td>`;
+                                    html += `<td>${d.curePath}</td>`;
+                                    html += `<td>${d.orderDrugDay || ''}</td>`;
+                                    html += '</tr>';
+                                }
+                                callback(html);
+                            }
+                        });
+                    }
+                    function format2(values, callback) {
+                        $.ajax({
+                            url: '@Url.Action("QueryIniDrOrds", "DataQuery")',
+                            type: "Get",
+                            dataType: "json",
+                            data: {
+                                dataId:
+                                    values.dataId,
+                                feeYm: values.feeYm,
+                                draw: 1,
+                                start: 0,
+                                length: 10000,
+                            },
+                            success: function (res) {
+                                if (!res.isSuccess) {
+                                    myAlert.error("查詢錯誤", res.errMsg, true);
+                                    return;
+                                }
+                                if (res.data && res.data.length === 0) {
+                                    return;
+                                }
+                                $(".hospbasicTablechild").remove();
+                                $(".hospbasicTablechildchild").remove();
+                                var data = res.data;
+                                let html = '';
+                                html += '<tr class="hospbasicTablechild"  style="font-weight:bold"><td></td><td>醫令類別</td> <td>醫令代碼</td> <td>調劑方式</td> <td>連續處方註記</td> <td>藥品用量</td> <td>藥品使用頻率</td> <td>用藥途徑/作用部位</td> <td>醫令單價</td> <td>醫令數量</td> <td>醫令點數</td> <td>執行醫事人員代號</td> <td>備註</td> <td>診療部位</td> <td>給藥日份</td></tr>';
+                                for (let d of data) {
+                                    html += '<tr class="hospbasicTablechildchild">';
+                                    html += '<td></td>';
+                                    html += `<td>${d.orderType}</td>`;
+                                    html += `<td>${d.orderCode}</td>`;
+                                    html += `<td></td>`;
+                                    html += `<td></td>`;
+                                    html += `<td>${d.drugNum}</td>`;
+                                    html += `<td>${d.drugFre}</td>`;
+                                    html += `<td>${d.drugPath}</td>`;
+                                    html += `<td>${d.orderUprice}</td>`;
+                                    html += `<td>${d.orderQty}</td>`;
+                                    html += `<td>${d.orderDot}</td>`;
+                                    html += `<td>${d.exePrsnId}</td>`;
+                                    html += `<td></td>`;
+                                    html += `<td></td>`;
+                                    html += `<td>${d.orderDrugDay || ''}</td>`;
+                                    html += '</tr>';
+                                }
+                                callback(html);
+                            }
+                        });
+                    }
+                    function format(values, callback) {
+                        if (values.dataType === '1')
+                            format1(values, callback);
+                        else
+                            format2(values, callback);
+                    }
+
+                    $('#dataTable1 tbody').on('click', 'td.details-control', function () {
+                        let tr = $(this).closest('tr');
+                        let row = $hospbasicTable.row(tr);
+                        $(tr).nextUntil('.light-yellow,.light-cyan').remove();
+
+                        if (tr.hasClass('shown')) {
+                            tr.removeClass('shown');
+                        } else {
+                            format(row.data(), (html) => {
+                                tr.after(html);
+                            });
+                            tr.addClass('shown');
+                        }
+                    });
+                },
+                exportExcel: function () {
+                    downloadfile('xlsx');
+
+                },
+                exportOds: function () {
+                    downloadfile('ods');
+                }
+
+            },
+        });
+        function ExportMedicineReport(id) {
+            const args = id.split('-');
+            const WebHospID = $("#HospID").val();
+            console.log(WebHospID)
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("ExportMedicineReport", "DataQuery")',
+                data: { feeYmS: args[1], feeYmE: args[1], data_id: args[0], wkHospID: WebHospID },
+                xhrFields: {
+                    responseType: 'blob' // to avoid binary data being mangled on charset conversion
+                },
+                success: function (blob, status, xhr) {
+                    // check for a filename
+                    var filename = "";
+                    var disposition = xhr.getResponseHeader('Content-Disposition');
+                    if (disposition && disposition.indexOf('attachment') !== -1) {
+                        var filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+                        var matches = filenameRegex.exec(disposition);
+                        if (matches != null && matches[1]) filename = matches[1].replace(/['"]/g, '');
+                    }
+
+                    if (typeof window.navigator.msSaveBlob !== 'undefined') {
+                        // IE workaround for "HTML7007: One or more blob URLs were revoked by closing the blob for which they were created. These URLs will no longer resolve as the data backing the URL has been freed."
+                        window.navigator.msSaveBlob(blob, filename);
+                    } else {
+                        var URL = window.URL || window.webkitURL;
+                        var downloadUrl = URL.createObjectURL(blob);
+
+                        if (filename) {
+                            // use HTML5 a[download] attribute to specify filename
+                            var a = document.createElement("a");
+                            // safari doesn't support this yet
+                            if (typeof a.download === 'undefined') {
+                                window.location.href = downloadUrl;
+                            } else {
+                                a.href = downloadUrl;
+                                a.download = filename;
+                                document.body.appendChild(a);
+                                a.click();
+                            }
+                        } else {
+                            window.location.href = downloadUrl;
+                        }
+
+                        setTimeout(function () { URL.revokeObjectURL(downloadUrl); }, 100); // cleanup
+                    }
+                }
+            });
+        }
+        function downloadfile(fileType) {
+            var o = $("#queryForm").serializeObject()
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("ExportDtlOrd", "DataQuery")?fileType=' + fileType,
+                data: o,
+                xhrFields: {
+                    responseType: 'blob' // to avoid binary data being mangled on charset conversion
+                },
+                success: function (blob, status, xhr) {
+                    // check for a filename
+                    var filename = "所有醫令清單";
+                    var disposition = xhr.getResponseHeader('Content-Disposition');
+                    if (disposition && disposition.indexOf('attachment') !== -1) {
+                        var filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+                        var matches = filenameRegex.exec(disposition);
+                        if (matches != null && matches[1]) filename = matches[1].replace(/['"]/g, '');
+                    }
+
+                    if (typeof window.navigator.msSaveBlob !== 'undefined') {
+                        // IE workaround for "HTML7007: One or more blob URLs were revoked by closing the blob for which they were created. These URLs will no longer resolve as the data backing the URL has been freed."
+                        window.navigator.msSaveBlob(blob, filename);
+                    } else {
+                        var URL = window.URL || window.webkitURL;
+                        var downloadUrl = URL.createObjectURL(blob);
+
+                        if (filename) {
+                            // use HTML5 a[download] attribute to specify filename
+                            var a = document.createElement("a");
+                            // safari doesn't support this yet
+                            if (typeof a.download === 'undefined') {
+                                window.location.href = downloadUrl;
+                            } else {
+                                a.href = downloadUrl;
+                                a.download = filename;
+                                document.body.appendChild(a);
+                                a.click();
+                            }
+                        } else {
+                            window.location.href = downloadUrl;
+                        }
+
+                        setTimeout(function () { URL.revokeObjectURL(downloadUrl); }, 100); // cleanup
+                    }
+                }
+            });
+        }
+        function Run_ExportMedicineReport() {
+            var id = $('input[type="radio"]:checked').val();
+            ExportMedicineReport(id);
+        }
+
+        const grabTableColumnsData = () => {
+            grabTableColumns('dataTable1', true, 1, 'newCheckboxContainer', "dtl");
+            var ordData = $("#ord");
+            ordData.empty();
+            var AllLock = `
+                    <div class = "col-12">
+                        <input type="checkbox" id = "AllOrdLock" value = "全選" onclick = "AllCheckBoxChecked('ord','AllOrdLock')"/>
+                        <label for="AllOrdLock" class="ml-1 mr-4 pt-1">全選</label>
+                    </div>
+                `;
+            ordData.append(AllLock);
+            var Data = ['醫令類別', '醫令代碼', '調劑方式', '連續處方註記', '藥品用量', '藥品使用頻率', '用藥途徑/作用部位', '醫令單價', '醫令數量', '醫令點數', '執行醫事人員代號', '備註', '診療部位', '給藥日份','電腦序號'];
+
+            for (var i = 0; i < Data.length; i++) {
+                var NewDomData = `
+                            <div class = "col-3">
+                                <input type="checkbox" id = "${Data[i]}" name = "SelectCheckBox" value = "${Data[i]}"/>
+                                <label for="${Data[i]}" class="ml-1 mr-4 pt-1">${Data[i]}</label>
+                            </div>
+                        `;
+                ordData.append(NewDomData);
+            }
+        }
+        const Switchcustom = () => {
+            var customSwitch = $("#customSwitch");
+            var accordionORD = $("#accordionORD");
+            var BtnaccordionORD = $("#BtnaccordionORD");
+            if (customSwitch.val() == "true") {
+                customSwitch.val(false);
+                BtnaccordionORD.prop("disabled", false);
+                accordionORD.show();
+                $(`#ord input:checkbox`).prop("checked", false);
+            } else {
+                customSwitch.val(true);
+                BtnaccordionORD.prop("disabled", true);
+                accordionORD.hide();
+                $(`#ord input:checkbox`).prop("checked", false);
+            }
+        }
+    </script>
+}
+
+<style>
+    div.dataTables_wrapper {
+        width: 95%;
+        margin: 0 auto;
+    }
+
+    .light-cyan {
+        background-color: #E0FFFF
+    }
+
+    .light-yellow {
+        background-color: #FFFFE0
+    }
+
+    td.details-control {
+        background: url('./image/details_open.png') no-repeat center center;
+        cursor: pointer;
+    }
+
+    tr.shown td.details-control {
+        background: url('./image/details_close.png') no-repeat center center;
+    }
+</style>

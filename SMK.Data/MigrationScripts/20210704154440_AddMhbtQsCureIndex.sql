@@ -1,0 +1,35 @@
+﻿-- noinspection SqlDialectInspectionForFile
+
+-- noinspection SqlNoDataSourceInspectionForFile
+
+BEGIN TRANSACTION;
+GO
+
+UPDATE [GenEmpData] SET [CreatedAt] = '2021-07-04T23:44:37.3821942+08:00'
+WHERE [Id] = N'00000000-0000-0000-0000-000000000000';
+SELECT @@ROWCOUNT;
+
+GO
+
+UPDATE [Role] SET [CreatedAt] = '2021-07-04T23:44:37.3857417+08:00'
+WHERE [Id] = N'00000000-0000-0000-0000-000000000000';
+SELECT @@ROWCOUNT;
+
+GO
+
+UPDATE [RoleEmpMapping] SET [CreatedAt] = '2021-07-04T23:44:37.3859426+08:00'
+WHERE [Id] = N'00000000-0000-0000-0000-000000000000';
+SELECT @@ROWCOUNT;
+
+GO
+
+CREATE INDEX [IX_MhbtQsCure_UpdatedAt] ON [MhbtQsCure] ([UpdatedAt]);
+GO
+
+INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+VALUES (N'20210704154440_AddMhbtQsCureIndex', N'5.0.7');
+GO
+
+COMMIT;
+GO
+

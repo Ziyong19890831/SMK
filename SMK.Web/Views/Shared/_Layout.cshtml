@@ -1,0 +1,40 @@
+﻿@{
+    ViewData["Title"] = "戒菸治療管理平台";
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>@ViewData["Title"]</title>
+    <!-- Tell the browser to be responsive to screen width -->
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    @await Html.PartialAsync("~/Views/Shared/_AdminLTE_Styles.cshtml")
+    @RenderSection("Styles", required: false)
+</head>
+<body class="layout-top-nav">
+    <div class="wrapper">
+        @await Html.PartialAsync("_Header.cshtml")
+        @*@await Html.PartialAsync("_MenuSidebar.cshtml")*@
+        <div class="content-wrapper">
+
+            @await Html.PartialAsync("~/Views/Shared/_ContentHeader.cshtml")
+            <section class="content container">
+                @RenderBody()
+            </section>
+        </div>
+
+
+        @await Html.PartialAsync("~/Views/Home/ChangeMyPwd.cshtml")
+        <!-- Content Wrapper. Contains page content -->
+        @await Html.PartialAsync("_Footer.cshtml")
+        @*@await Html.PartialAsync("_ControlSidebar.cshtml")*@
+
+        <!-- ./wrapper -->
+        <!-- jQuery 3 -->
+        @await Html.PartialAsync("~/Views/Shared/_AdminLTE_Scripts.cshtml")
+
+        @RenderSection("Scripts", required: false)
+    </div>
+</body>
+</html>

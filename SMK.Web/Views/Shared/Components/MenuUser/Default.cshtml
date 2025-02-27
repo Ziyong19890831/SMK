@@ -1,0 +1,27 @@
+﻿@using SMK.Web.Services
+@inject AuthService authService
+@{
+    var identity = authService.Identity;
+}
+<li class="nav-item dropdown">
+    <a id="menuUser" href="#"
+       data-toggle="dropdown" aria-haspopup="true"
+       aria-expanded="false" class="nav-link">
+        <i class="fa fa-user"></i>
+        @identity.Name
+    </a>
+    <ul aria-labelledby="menuUser" class="dropdown-menu border-0 shadow">
+        @*<li>
+            <a href="#" class="dropdown-item">個人資料設定</a>
+        </li>*@
+        <li>
+            <a href="#" class="dropdown-item" data-toggle="modal" data-target="#modal-changePwd">變更密碼</a>
+        </li>
+        <li>
+            <form asp-controller="Home" asp-action="LogOff" method="post">
+                <button class="dropdown-item">登出</button>
+            </form>
+        </li>
+        
+    </ul>
+</li>

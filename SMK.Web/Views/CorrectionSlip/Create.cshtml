@@ -1,0 +1,114 @@
+﻿@model SMK.Data.Entity.CorrectionSlip
+
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+            
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+                <div class="col-sm-12">
+                    <form asp-action="Create">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="form-group">
+                            <label asp-for="CaseNo" class="control-label"></label>
+                            <input asp-for="CaseNo" class="form-control" />
+                            <span asp-validation-for="CaseNo" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="ReceiveDate" class="control-label"></label>
+                            @Html.TextBoxFor(model => model.ReceiveDate, new
+                            {@class = "form-control",type = "date"})
+                            <span asp-validation-for="ReceiveDate" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="HospId" class="control-label"></label>
+                            <input asp-for="HospId" class="form-control" />
+                            <span asp-validation-for="HospId" class="text-danger"></span>
+                        </div>
+
+
+                        <div class="form-group">
+                            <label asp-for="HospName" class="control-label"></label>
+                            <input asp-for="HospName" class="form-control" />
+                            <span asp-validation-for="HospName" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="Name" class="control-label"></label>
+                            <input asp-for="Name" class="form-control" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="ID" class="control-label"></label>
+                            <input asp-for="ID" class="form-control" />
+                            <span asp-validation-for="ID" class="text-danger"></span>
+
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="Birthday" class="control-label"></label>
+                            @Html.TextBoxFor(model => model.Birthday, new
+                            { @class = "form-control", type = "date" })
+                            <span asp-validation-for="Birthday" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="CorrectBasic" class="control-label"></label>
+                            <input asp-for="CorrectBasic" class="form-control" />
+                            <span asp-validation-for="CorrectBasic" class="text-danger"></span>
+                        </div>
+
+
+                        <div class="form-group">
+                            <label asp-for="CorrectHosp" class="control-label"></label>
+                            <input asp-for="CorrectHosp" class="form-control" />
+                            <span asp-validation-for="CorrectHosp" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="CorrectHealth" class="control-label"></label>
+                            <input asp-for="CorrectHealth" class="form-control" />
+                            <span asp-validation-for="CorrectHealth" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="CorrectOther" class="control-label"></label>
+                            <input asp-for="CorrectOther" class="form-control" />
+                            <span asp-validation-for="CorrectOther" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="CorrectItems" class="control-label"></label>
+                            <input asp-for="CorrectItems" class="form-control" />
+                            <span asp-validation-for="CorrectItems" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="CorrectItems2" class="control-label"></label>
+                            <input asp-for="CorrectItems2" class="form-control" />
+                            <span asp-validation-for="CorrectItems2" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="source" class="control-label"></label>
+                            <input asp-for="source" class="form-control" />
+                            <span asp-validation-for="source" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="Memo" class="control-label"></label>
+                            <input asp-for="Memo" class="form-control" />
+                            <span asp-validation-for="Memo" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="CorrectionReason" class="control-label"></label>
+                            <input asp-for="CorrectionReason" class="form-control" />
+                            <span asp-validation-for="CorrectionReason" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="ReasonStatement" class="control-label"></label>
+                            <input asp-for="ReasonStatement" class="form-control" />
+                            <span asp-validation-for="ReasonStatement" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <input type="submit" value="新增" class="btn btn-primary" />
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>

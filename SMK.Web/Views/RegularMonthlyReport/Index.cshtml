@@ -1,0 +1,106 @@
+﻿@model SMK.Web.Models.RegularMonthlyReportQueryModel
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="row mb-4">
+    <div id="app" class="col-12">
+       @* <div class="card">
+            <div class="card-body">
+                <div class="col-sm-12">
+                    <form id="queryForm" class="form-horizontal" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="form-row mb-4 row">
+                            <div class="form-inline col-6">
+                                <label asp-for="ED1" class="col-sm-5 col-form-label text-right"></label>
+                                <div class="col-sm-7 input-group">
+                                    <input asp-for="ED1" class="form-control" autocomplete="off" placeholder="yyyyMMdd" />
+                                </div>
+                            </div>
+                            <div class="form-inline col-6">
+                                <label asp-for="EX" class="col-sm-5 col-form-label text-right"></label>
+                                <div class="col-sm-7">
+                                    <input asp-for="EX" class="form-control" autocomplete="off" placeholder="yyyyMMdd" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-center">
+                            <button type="submit" class="btn btn-primary mr-2" asp-action="ExportTotalTable" asp-controller="RegularMonthlyReport">總計表</button>
+
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>*@
+        <div class="card">
+            <div class="card-body">
+                <div class="col-sm-12">
+                    <form id="queryForm" class="form-horizontal" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="form-row mb-4 row">
+                            <div class="form-inline col-6">
+                                <label asp-for="YY" class="col-sm-5 col-form-label text-right"></label>
+                                <div class="col-sm-7 input-group">
+                                    <input asp-for="YY" class="form-control" maxlength="4" value="@DateTime.Now.Year" />
+                                    <span asp-validation-for="YY" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-inline col-6">
+                                <label asp-for="YYE" class="col-sm-5 col-form-label text-right"></label>
+                                <div class="col-sm-7">
+                                    <input asp-for="YYE" class="form-control" autocomplete="off" placeholder="yyyyMMdd" />
+                                    <span asp-validation-for="YYE" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row mb-4 row">
+                            <div class="form-inline col-sm-6">
+                                <label asp-for="YSTART" class="col-sm-5 col-form-label"></label>
+                                <div class="col-sm-7 input-group">
+                                    <input asp-for="YSTART" type="text" class="form-control" autocomplete="off" placeholder="yyyyMMdd" />
+                                    <span asp-validation-for="YSTART" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-inline col-sm-6">
+                                <label asp-for="YEND" class="col-sm-5 col-form-label"></label>
+                                <div class="col-sm-7">
+                                    <input asp-for="YEND" type="text" class="form-control" autocomplete="off" placeholder="yyyyMMdd" />
+                                    <span asp-validation-for="YEND" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row mb-4 row">
+                            <div class="form-inline col-6">
+                                <label asp-for="YSTART1" class="col-sm-5 col-form-label text-right"></label>
+                                <div class="col-sm-7 input-group">
+                                    <input asp-for="YSTART1" class="form-control" autocomplete="off" placeholder="yyyyMM" />
+                                    <span asp-validation-for="YSTART1" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-inline col-6">
+                                <label asp-for="YEND1" class="col-sm-5 col-form-label text-right"></label>
+                                <div class="col-sm-7">
+                                    <input asp-for="YEND1" class="form-control" autocomplete="off" placeholder="yyyyMM" />
+                                    <span asp-validation-for="YEND1" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div> 
+                        <div class="d-flex justify-content-center">
+                            <button type="submit" class="btn btn-primary mr-3" asp-action="ExportCategoryTable" asp-controller="RegularMonthlyReport" asp-route-fileType="xlsx">類別表 (EXCEL)</button>
+                            <button type="submit" class="btn btn-primary" asp-action="ExportCategoryTable" asp-controller="RegularMonthlyReport" asp-route-fileType="ods">類別表 (ODS)</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

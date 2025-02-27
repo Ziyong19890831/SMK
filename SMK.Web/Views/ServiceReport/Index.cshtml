@@ -1,0 +1,202 @@
+﻿@model ServiceReportQueryModel
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="col-sm-12">
+                    <form id="queryForm" asp-action="Export" class="form-horizontal">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="form-row mb-4">
+                            <div class="col-6 row">
+                                <label class="col-4 col-form-label text-right">醫事機構代碼</label>
+                                <div class="col-8 input-group">
+                                    <div class="input-group-prepend">
+                                        <input asp-for="HospId" class="form-control" />
+                                    </div>
+                                    <input asp-for="HospSeqNo" class="form-control" value="00" />
+                                </div>
+
+                            </div>
+                            <div class="col-6 row">
+                                <div class="col-3 text-right">
+                                    <label asp-for="HospName" class="col-form-label"></label>
+                                </div>
+                                <div class="col-8">
+                                    <input asp-for="HospName" readonly class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-row mb-4">
+                            <div class="row col-6">
+                                <label class="col-sm-4 col-form-label text-right">查詢年度</label>
+                                <div class="col-sm-8">
+                                    <input asp-for="Year" class="form-control" type="number" placeholder="費用年" value="@(DateTime.Now.Year-1911)" />
+                                </div>
+                            </div>
+                            <div class="row col-6  ml-2 pl-5">
+                                <label asp-for="Rate" class="col-form-label"></label>
+                                <div class="col-sm-9 pr-2">
+                                    <input asp-for="Rate" class="form-control" type="number" placeholder="0-100" value="" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-center">
+                            @*<i class="fa fa-file-excel"></i>*@
+                            <input value="匯出Excel" type="submit" asp-action="Export" asp-route-fileType="xlsx" class="btn btn-primary mr-2" />
+                            <input value="匯出ODS" type="submit" asp-action="Export" asp-route-fileType="ods" class="btn btn-primary mr-2" />
+                            @*<i class="fa fa-file-excel"></i>*@
+                            <button id="btnQuery" type="button" class="btn btn-primary">查詢</button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="col-sm-12 table-responsive">
+                    <table id="hospbasicTable" class="table table-striped table-bordered table-hover" role="grid">
+                        <thead align='center' valign="middle">
+                            <tr role="row">
+                                <th data-orderable="false" class="text-nowrap">序號</th>
+                                <th class="text-nowrap">醫事機構代碼</th>
+                                <th class="text-nowrap">分區別</th>
+                                <th class="text-nowrap">&emsp; &emsp; &emsp; &emsp; &emsp;醫事機構名稱 &emsp; &emsp; &emsp; &emsp; &emsp;</th>
+                                <th class="text-nowrap">機構層級</th>
+                                <th class="text-nowrap">年度</t>
+                                <th class="text-nowrap">治療人次上限</th>
+                                <th class="text-nowrap">衛教人次上限</th>
+                                <th class="text-nowrap">實際治療人次</th>
+                                <th class="text-nowrap">實際衛教人次</th>
+                                <th class="text-nowrap">治療服務達成率(%)</th>
+                                <th class="text-nowrap">衛教服務達成率(%)</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    th {
+        vertical-align: middle !important;
+    }
+
+    td {
+        vertical-align: middle !important;
+    }
+
+    table {
+        text-align: center;
+    }
+</style>
+
+@section Scripts {
+    @{
+        @await Html.PartialAsync("~/Views/Shared/_DataTables.cshtml")
+        ;
+    }
+    <script type="text/javascript">
+        var $hospbasicTable;
+        $(function () {
+            $("#btnQuery").on("click", query);
+            $('#HospId,#HospSeqNo').on('keyup', async function () {
+                var hospID = $('#HospId').val();
+                var hospSeqNo = $('#HospSeqNo').val();
+                const { data } = await axios.get('@Url.Action("GetHospName", "HospBasic")', { params: { hospID, hospSeqNo }, hideMask: true });
+                if (data !== undefined) {
+                    $('#HospName').val(data);
+                }
+            });
+        });
+
+        function query() {
+            if ($hospbasicTable)
+                $hospbasicTable.destroy();
+
+            var ajax = function (data, callback, settings) {
+                var o = $("#queryForm").serializeObject();
+                o.draw = data.draw;
+                o.start = data.start;
+                o.length = data.length;
+                $.post('@Url.Action("Query", "ServiceReport")', o, function (res) {
+                    if (!res.isSuccess) {
+                        myAlert.error("查詢錯誤", res.errMsg, true);
+                        return;
+                    }
+                    callback(res.data);
+                    //console.log(res.data)
+                });
+            };
+            var Rate_Data = $("#Rate").val();
+            $hospbasicTable = $("#hospbasicTable").DataTable({
+                "scrollY": "600px",//可选，是否固定表格高度，不包括表头；
+                "scrollCollapse": true,//与scrollY结合使用，是否固定高度，默认false;
+                "serverSide": true,
+                "scrollX": true,
+                "ajax": ajax,
+                "paging": true,
+                "searching": false,
+                "ordering": false,
+                "columns": [
+                    {
+                        className: "tdcheckbox sorting_1",
+                        data: null,
+                        width: "5%",
+                        targets: 0,
+                        render: function (data, type, full, meta) {
+                            var settings = meta.settings;
+                            var serial = meta.row + 1 + settings._iDisplayLength * settings._iDisplayStart / settings._iDisplayLength;
+                            var html = '<label class="text-center" >' + serial + '</label>';
+                            return html;
+                        }
+                    },
+                    { data: "hospID", targets: 1 },
+                    { data: "hospSeqNo", targets: 2 },
+                    { data: "hospName", targets: 3 },
+                    { data: "hospContName", targets: 4 },
+                    { data: "year", targets: 5 },
+                    { data: "topTreatCount", targets: 6 },
+                    { data: "topInstructCount", targets: 7 },
+                    { data: "treatReal", targets: 8 },
+                    { data: "instructReal", targets: 9 },
+                    {
+                        data: "treatSussueRate", targets: 10,
+                        render: function (data, type, full, meta) {
+                            if (Rate_Data < parseFloat(data) && Rate_Data != '') {
+                                return '<span style="color:red;">' + data + '</span>';
+                            } else {
+                                return data;
+                            }
+                        }
+                    },
+                    {
+                        data: "instructSussueRate", targets: 11,
+                        render: function (data, type, full, meta) {
+                            if (Rate_Data < parseFloat(data) && Rate_Data != '') {
+                                return '<span style="color:red;">' + data + '</span>';
+                            } else {
+                                return data;
+                            }
+                        }
+                    },
+                ]
+            });
+
+        }
+    </script>
+}
+
+

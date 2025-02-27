@@ -1,0 +1,242 @@
+﻿@using SMK.Data.Entity
+@using SMK.Web.Heppers
+@using SMK.Web.Services.Foundation
+@model ICcardByMonthQueryModel
+@inject ICardService iCardService;
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var GenHospContsList = await iCardService.GetSelectLists<GenHospCont>(
+                                        context => context.GenHospCont,
+                                        x => x.HospContName,
+                                        x => x.HospContName);
+}
+
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="col-sm-12">
+                    <form id="queryForm" asp-action="Export" class="form-horizontal">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="form-row mb-4">
+                            <div class="col-2 text-right">
+                                <label asp-for="HospID" class="col-form-label"></label>
+                            </div>
+                            <div class="col-4">
+                                <input asp-for="HospID" class="form-control" placeholder="機構代碼" />
+                            </div>
+                            <div class="col-2 text-right">
+                                <label class="col-form-label text-right">醫事機構名稱</label>
+                            </div>
+                            <div class="col-3">
+                                <input asp-for="HospName" class="form-control" />
+                            </div>
+                        </div>
+                        <div class="form-row mb-4">
+                            <div class="col-2 text-right">
+                                <label asp-for="YearMonthStart" class="col-form-label"></label>
+                            </div>
+                            <div class="col-5">
+                                @*<input asp-for="YearMonthStart" class="form-control" placeholder="費用年月(起) 如：108/01" />*@
+                                <select asp-for="YearMonthStart" id="YearMonthStart" class="custom-select custom-select">
+                                    <option value="">費用年月(起)</option>
+                                </select>
+                            </div>
+                            <div class="col-5">
+                                @*<input asp-for="YearMonthEnd" class="form-control" placeholder="費用年月(迄) 如：108/02" />*@
+                                <select asp-for="YearMonthEnd" id="YearMonthEnd" class="custom-select custom-select">
+                                    <option value="">費用年月(迄)</option>
+                                </select>
+                            </div>
+
+                        </div>
+                        <div class="form-row mb-4">
+                            <div class="form-inline col-5">
+                                <label class="col-sm col-form-label text-right">醫院層級</label>
+                                @Html.MyDropDownList("HospContName",
+                                         GenHospContsList,
+                                         (m) => m,
+                                         new { @class = "form-control col-sm-7", id = "HospContNameICcardByMonth" }, true)
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-center">
+                            @*<i class="fa fa-file-excel"></i>*@
+                            <input value="匯出Excel" type="submit" asp-action="ExportICcardByMonth" asp-route-fileType="xlsx" class="btn btn-primary mr-2" />
+                            <input value="匯出ODS" type="submit" asp-action="ExportICcardByMonth" asp-route-fileType="ods" class="btn btn-primary mr-2" />
+                            <input value="匯出樞紐Excel" type="submit" asp-controller="ICcardByMonth" asp-action="ExportICcardByMonthForPivot" asp-route-fileType="xlsx" class="btn btn-warning mr-2" />
+                            <input value="匯出樞紐ODS" type="submit" asp-controller="ICcardByMonth" asp-action="ExportICcardByMonthForPivot" asp-route-fileType="ods" class="btn btn-warning mr-2" />
+                            @*<i class="fa fa-file-excel"></i>*@
+                            <button id="btnQuery" type="button" class="btn btn-primary">查詢</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="col-md-12 text-right">
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="col-sm-12 table-responsive">
+                    <table id="DeclareTable" class="table table-striped table-bordered table-hover" role="grid">
+                        <thead>
+                            <tr role="row" class="m-2">
+                                健保卡過卡-醫院別刷卡次數
+                            </tr>
+                            <tr role="row">
+                                <th data-orderable="false" class="text-nowrap">序號</th>
+                                <th class="text-nowrap">醫事機構層級</th>
+                                <th class="text-nowrap">醫療院所代碼</th>
+                                <th class="text-nowrap">醫事機構名稱</th>
+                                <th class="text-nowrap">刷卡年月</th>
+                                <th class="text-nowrap">刷卡筆數</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        @await Html.PartialAsync("~/Views/Shared/_DataTables.cshtml")
+        ;
+    }
+    <script type="text/javascript">
+
+        //這邊是在產年月資料  (顯示)111年12月 (Val)11112
+        //傳入參數為
+        //first_Find_Year(字串) (最早的西元年分)
+        //first_Find_Month(字串) (最早的月份)
+        function get_YM(first_Find_Year, first_Find_Month) {
+            var end_Year = new Date().getFullYear() - 1911;
+            var first_Year = parseInt(first_Find_Year) - 1911;
+            var now_month = new Date().getMonth();
+            var first_Find_Month = first_Find_Month.length === 2 ? first_Find_Month : "0" + first_Find_Month;
+            var new_Year = [];
+            var data_YM_val = [];
+            var data_YM = [];
+            var onput_month;
+            var onput_year;
+            var year;
+            for (var i = 0; i <= (end_Year - first_Year); i++) {
+                year = (end_Year - i).toString()
+                new_Year.push(year);
+                for (var j = 12; j > 0; j--) {
+                    if (year === first_Year.toString() && onput_month === first_Find_Month.toString()) continue; //判斷初始年月
+                    if (year === end_Year.toString() && j - 1 > now_month.toString()) continue; //如果在這個月份以外的，全部都要剔除
+                    onput_month = j < 10 ? "0" + j : j.toString();
+                    onput_year = year.length === 2 ? "0" + year : year;
+                    data_YM_val.push(onput_year + onput_month);
+                    data_YM.push(onput_year + "年" + onput_month + "月");
+                }
+            }
+            //console.log(first_Year)
+            //console.log(end_Year)
+            //console.log(new_Year)
+            //console.log(data_YM_val)
+            //console.log(data_YM)
+            var output = [];
+            output.push(data_YM);//顯示的資料
+            output.push(data_YM_val);//val
+            return output;
+        }
+
+        $(function () {
+            //$("#YearMonthStart").datepicker({ dateFormat: 'yy/mm' });
+            //$("#YearMonthEnd").datepicker({ dateFormat: 'yy/mm' });
+            $('#HospID').on('keyup', async function () {
+                var hospID = $('#HospID').val();
+                var hospSeqNo = "00";
+                const { data } = await axios.get('@Url.Action("GetHospName", "HospBasic")', { params: { hospID, hospSeqNo }, hideMask: true });
+                if (data !== undefined) {
+                    $('#HospName').val(data);
+                }
+            });
+            var YM_Data = get_YM("2019", "8");
+            for (var i = 0; i < YM_Data[0].length; i++) {
+                //console.log(YM_Data[1][i])
+                $("#YearMonthStart").append(`<option value="${YM_Data[1][i]}">${YM_Data[0][i]}</option>`);
+                $("#YearMonthEnd").append(`<option value="${YM_Data[1][i]}">${YM_Data[0][i]}</option>`);
+            }
+            //console.log(YM_Data)
+        });
+        var $declareTable;
+        var $declareTable2;
+        $(function () {
+            $("#btnQuery").on("click", query);
+        });
+        function query() {
+
+            //console.log($("#YearMonthStart").val());
+            //console.log($("#YearMonthEnd").val());
+            if ($("#YearMonthEnd").val() < $("#YearMonthStart").val()) {
+                myAlert.error("查詢時間有誤", "費用年月(起)不得大於費用年月(迄)", true);
+                return;
+            }
+
+            if ($declareTable)
+                $declareTable.destroy();
+            //if ($declareTable2)
+            //    $declareTable2.destroy();
+
+            var ajax = function (data, callback, settings) {
+                debugger;
+                var o = $("#queryForm").serializeObject();
+                o.draw = data.draw;
+                o.start = data.start;
+                o.length = data.length;
+                $.post('@Url.Action("QueryICcardByMonth", "ICcardByMonth")', o, function (res) {
+                    if (!res.isSuccess) {
+                        myAlert.error("查詢錯誤", res.errMsg, true);
+                        return;
+                    }
+                    debugger;
+                    //console.table(res.data)
+                    callback(res.data);
+                });
+            };
+
+            $declareTable = $("#DeclareTable").DataTable({
+                "scrollY": "600px",//可选，是否固定表格高度，不包括表头；
+                "scrollCollapse": true,//与scrollY结合使用，是否固定高度，默认false;
+                "serverSide": true,
+                "scrollX": true,
+                "ajax": ajax,
+                "paging": true,
+                "searching": false,
+                "ordering": false,
+                "columns": [
+                    {
+                        className: "sorting_1",
+                        data: null,
+                        width: "5%",
+                        targets: 0,
+                        render: function (data, type, full, meta) {
+                            var settings = meta.settings;
+                            var serial = meta.row + 1 + settings._iDisplayLength * settings._iDisplayStart / settings._iDisplayLength;
+                            return serial;
+                        }
+                    },
+                    { data: "lastContType" },
+                    { data: "hospID" },
+                    { data: "hospName" },
+                    { data: "icCard_YM" },
+                    { data: "icCard_Times" }
+                ]
+            });
+        }
+    </script>
+}
+

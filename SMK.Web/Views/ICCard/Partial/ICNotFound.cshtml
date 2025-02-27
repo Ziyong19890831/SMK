@@ -1,0 +1,219 @@
+﻿@using SMK.Data.Entity
+@using SMK.Web.Heppers
+@using SMK.Web.Services.Foundation
+@model ICNotFoundQueryModel
+@inject ICardService iCardService;
+
+@{
+    Layout = "~/Views/Shared/_PartialLayout.cshtml";
+    var GenHospContsList = await iCardService.GetSelectLists<GenHospCont>(
+                                        context => context.GenHospCont,
+                                        x => x.HospContName,
+                                        x => x.HospContName);
+}
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card mt-3">
+            <div class="card-body">
+                <div class="col-sm-12">
+                    <form id="queryFormICNotFound" asp-controller="ICNotFound" asp-action="Export" class="form-horizontal">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="form-row mb-4">
+                            <div class="col-2 text-right">
+                                <label asp-for="HospID" class="col-form-label"></label>
+                            </div>
+                            <div class="col-3">
+                                <input name="HospID" id="HospIDICNotFound" class="form-control" placeholder="機構代碼" />
+                            </div>
+                            <div class="col-1">
+                                <input name="HospSeqNo" id="HospSeqNoICNotFound" class="form-control" placeholder="院區別" value="00" />
+                            </div>
+                            <div class="col-2 text-right">
+                                <label class="col-form-label text-right">醫事機構名稱</label>
+                            </div>
+                            <div class="col-3">
+                                <input name="HospName" id="HospNameICNotFound" class="form-control" readonly />
+                            </div>
+                        </div>
+                        <div class="form-row mb-4">
+                            <div class="col-2 text-right">
+                                <label asp-for="YearMonthStart" class="col-form-label"></label>
+                            </div>
+                            <div class="col-2">
+                                <input name="YearMonthStart" id="YearMonthStartICNotFound" class="form-control smkdate" type="text" placeholder="年月(起) 如：108/01" />
+                            </div>
+                            <div class="col-2">
+                                <input name="YearMonthEnd" id="YearMonthEndICNotFound" class="form-control smkdate" type="text" placeholder="年月(迄) 如：108/02" />
+                            </div>
+                            <div class="col-2 text-right">
+                                <label asp-for="ID" class="col-form-label"></label>
+                            </div>
+                            <div class="col-3">
+                                <input name="ID" id="IDICNotFound" class="form-control" placeholder="身分證號" />
+                            </div>
+                        </div>
+                        <div class="form-row mb-4">
+                            <div class="form-inline col-5">
+                                <label class="col-sm col-form-label text-right">醫院層級</label>
+                                @Html.MyDropDownList("HospContName",
+                                         GenHospContsList,
+                                         (m) => m,
+                                         new { @class = "form-control col-sm-7", id = "HospContNameICNotFound" }, true)
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-center">
+                            @*<i class="fa fa-file-excel"></i>*@
+                            <input value="匯出Excel" type="submit" asp-controller="ICNotFound" asp-action="ExportICNotFound" asp-route-fileType="xlsx" class="btn btn-primary mr-2" />
+                            <input value="匯出ODS" type="submit" asp-controller="ICNotFound" asp-action="ExportICNotFound" asp-route-fileType="ods" class="btn btn-primary mr-2" />
+                            @*<i class="fa fa-file-excel"></i>*@
+                            <button id="btnQueryICNotFound" type="button" class="btn btn-primary">查詢</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="col-md-12 text-right">
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="col-sm-12 table-responsive">
+                    <table id="DeclareTableICNotFound" class="table table-striped table-bordered table-hover" role="grid">
+                        <thead>
+                            <tr role="row" class="m-2">
+                                健保卡過卡-未過卡詳細資料
+                            </tr>
+                            <tr role="row">
+                                <th data-orderable="false" class="text-nowrap">序號</th>
+                                <th class="text-nowrap">健保業務組</th>
+                                <th class="text-nowrap">醫院層級  &emsp;</th>
+                                <th class="text-nowrap">醫事機構代碼</th>
+                                <th class="text-nowrap">院區別</th>
+                                <th class="text-nowrap">醫事機構名稱 &emsp; &emsp; &emsp; &emsp; &emsp; &emsp; &emsp; &emsp; &emsp;</th>
+                                <th class="text-nowrap">醫事類別2 &emsp; &emsp; &emsp; &emsp;</th>
+                                <th class="text-nowrap">身分證號</th>
+                                <th class="text-nowrap">出生日期</th>
+                                <th class="text-nowrap">就醫日期</th>
+                                <th class="text-nowrap">費用年月</th>
+                                <th class="text-nowrap">案件分類</th>
+                                <th class="text-nowrap">流水號</th>
+                                <th class="text-nowrap">實際執行醫院代碼</th>
+                                <th class="text-nowrap">治療型態</th>
+                                <th class="text-nowrap">醫令點數總和</th>
+                                <th class="text-nowrap">Note</th>
+                                <th class="text-nowrap">電腦序號</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        $("#YearMonthStartICNotFound").datepicker({
+            dateFormat: 'yyyy/mm',
+            changeMonth: true,
+            changeYear: true,
+        });
+        $("#YearMonthEndICNotFound").datepicker({
+            dateFormat: 'yyyy/mm',
+            changeMonth: true,
+            changeYear: true,
+        });
+        $('#HospIDICNotFound,#HospSeqNoICNotFound').on('keyup', async function () {
+            var hospID = $('#HospIDICNotFound').val();
+            var hospSeqNo = $('#HospSeqNoICNotFound').val() === null ? "00" : $('#HospSeqNoICNotFound').val();
+            const { data } = await axios.get('@Url.Action("GetHospName", "HospBasic")', { params: { hospID, hospSeqNo }, hideMask: true });
+            if (data !== undefined) {
+                $('#HospNameICNotFound').val(data);
+            }
+        });
+    });
+    var $declareTableICNotFound;
+
+    $(function () {
+        $("#btnQueryICNotFound").on("click", queryICNotFound);
+    });
+    function queryICNotFound() {
+        if ($declareTableICNotFound)
+            $declareTableICNotFound.destroy();
+
+        var ajax = function (data, callback, settings) {
+
+            //北市聯醫還不能分開搜尋，需要加入[院區別]的篩選條件
+            if ($('#HospIDICNotFound').val() == "0101090517" && ($('#HospSeqNoICNotFound').val() == "00" || $('#HospSeqNoICNotFound').val() == "")) {
+                myAlert.error("北市聯醫不能分開搜尋", "請輸入院區別", true);
+                $('#HospSeqNoICNotFound').val("");
+                return;
+            }
+
+            //debugger;
+            var o = $("#queryFormICNotFound").serializeObject();
+            o.draw = data.draw;
+            o.start = data.start;
+            o.length = data.length;
+            $.post('@Url.Action("QueryICNotFound", "ICNotFound")', o, function (res) {
+                if (!res.isSuccess) {
+                    myAlert.error("查詢錯誤", res.errMsg, true);
+                    return;
+                }
+                //debugger;
+                //console.table(res.data)
+                callback(res.data);
+            });
+        };
+
+        $declareTableICNotFound = $("#DeclareTableICNotFound").DataTable({
+            "scrollY": "600px",//可选，是否固定表格高度，不包括表头；
+            "scrollCollapse": true,//与scrollY结合使用，是否固定高度，默认false;
+            "serverSide": true,
+            "scrollX": true,
+            "ajax": ajax,
+            "paging": true,
+            "searching": false,
+            "ordering": false,
+            "columns": [
+                {
+                    className: "sorting_1",
+                    data: null,
+                    width: "5%",
+                    targets: 0,
+                    render: function (data, type, full, meta) {
+                        var settings = meta.settings;
+                        var serial = meta.row + 1 + settings._iDisplayLength * settings._iDisplayStart / settings._iDisplayLength;
+                        return serial;
+                    }
+                },
+                { data: "branchName" },
+                { data: "lastContType" },
+                { data: "hospID" },
+                { data: "hospSeqNo" },
+                { data: "hospName" },
+                { data: "hospDataType" },
+                { data: "id" },
+                { data: "birthday" },
+                { data: "funcDate" },
+                { data: "feeYM" },
+                { data: "caseType" },
+                { data: "seqNo" },
+                { data: "real_HospID" },
+                { data: "cureType" },
+                { data: "expDot" },
+                { data: "note" },
+                { data: "data_id" },
+            ]
+        });
+    }
+</script>
+
+

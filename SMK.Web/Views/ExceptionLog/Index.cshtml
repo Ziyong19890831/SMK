@@ -1,0 +1,183 @@
+﻿@model SMK.Web.Models.ExceptionLogQueryModel
+@using SMK.Web.Services.Foundation;
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card rounded-lg">
+            <div class="card-header">
+                <div class="col-md-12 text-left text-secondary">
+                    系統異常<br />
+                    此頁為查詢、檢視系統異動之功能。
+                    <br />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="row mb-4">
+    <div id="app" class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="col-sm-12">
+                    <form id="queryForm" class="form-horizontal" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="form-row mb-4 row">
+                            <div class="form-inline col-6">
+                                <label asp-for="StartTime" class="col-sm-5 col-form-label text-right"></label>
+                                <div class="col-sm-7">
+                                    <input asp-for="StartTime" class="form-control" />
+                                </div>
+
+                            </div>
+                            <div class="form-inline col-6">
+                                <label asp-for="StopTime" class="col-sm-5 col-form-label text-right"></label>
+                                <div class="col-sm-7">
+                                    <input asp-for="StopTime" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-center">
+                            <button type="button" @@click="query()" class="btn btn-primary mr-2">查詢</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="col-sm-12">
+                    <table id="dataTable1" class="table table-bordered table-hover nowrap" role="grid">
+                        <thead>
+                            <tr role="row">
+                                <th class="text-nowrap">Id</th>
+                                <th class="text-nowrap">SourceServer</th>
+                                <th class="text-nowrap">Category</th>
+                                <th class="text-nowrap">Message</th>
+                                <th class="text-nowrap">Source</th>
+                                <th class="text-nowrap">StackTrace</th>
+                                <th class="text-nowrap">ExtraData</th>
+                                <th class="text-nowrap">CreatedAt</th>
+                                <th class="text-nowrap">UpdatedAt</th>
+                                <th class="text-nowrap">UpdatedBy</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        @await Html.PartialAsync("~/Views/Shared/_DataTables.cshtml")
+        ;
+    }
+    <script type="text/javascript">
+        var $hospbasicTable;
+
+
+        const app = new Vue({
+            el: '#app',
+            data: {
+                showModal: false,
+                hospContTypeSelected: false,
+                options: [],
+                hospContTypes: [],
+            },
+            methods: {
+                query: function () {
+                    if ($hospbasicTable)
+                        $hospbasicTable.destroy();
+
+                    const ajax = function (data, callback, settings) {
+                        var o = $("#queryForm").serializeObject();
+                        o.draw = data.draw;
+                        o.start = data.start;
+                        o.length = data.length;
+                        $.post('@Url.Action("Query", "ExceptionLog")', o, function (res) {
+                            if (!res.isSuccess) {
+                                myAlert.error("查詢錯誤", res.errMsg, true);
+                                return;
+                            }
+                            callback(res.data);
+                        });
+                    };
+
+                    $hospbasicTable = $("#dataTable1").DataTable({
+                        "scrollY": "600px",//可選，是否固定表格高度，不包括表頭；
+                        "scrollCollapse": true,//與scrollY结合使用，是否固定高度，默認false;
+                        "serverSide": true,
+                        "ajax": ajax,
+                        "paging": true,
+                        "searching": false,
+                        "ordering": false,
+                        "scrollX": true,
+                        "stripeClasses": [],
+                        "createdRow": function (row, data, dataIndex) {
+                            $(row).removeClass('even');
+                            $(row).removeClass('odd');
+                            if (data['dataType'] === '1') {
+                                $(row).addClass('light-cyan');
+                            } else {
+                                $(row).addClass('light-yellow');
+                            }
+                        },
+                        "columns": [
+                            { data: "id", targets: 0 },
+                            { data: "sourceServer", targets: 1 },
+                            { data: "category", targets: 2 },
+                            { data: "message", targets: 3 },
+                            { data: "source", targets: 4 },
+                            { data: "stackTrace", targets: 5 },
+                            { data: "extraData", targets: 6 },
+                            { data: "createdAt", targets: 7 },
+                            { data: "updatedAt", targets: 8 },
+                            { data: "updatedBy", targets: 9 },
+                        ]
+                    });
+
+                },
+
+
+            },
+        });
+
+
+    </script>
+}
+
+<style>
+    div.dataTables_wrapper {
+        width: 95%;
+        margin: 0 auto;
+    }
+
+    .light-cyan {
+        background-color: #E0FFFF
+    }
+
+    .light-yellow {
+        background-color: #FFFFE0
+    }
+
+    td.details-control {
+        background: url('../image/details_open.png') no-repeat center center;
+        cursor: pointer;
+    }
+
+    tr.shown td.details-control {
+        background: url('../image/details_close.png') no-repeat center center;
+    }
+</style>

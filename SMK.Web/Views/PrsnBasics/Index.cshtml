@@ -1,0 +1,148 @@
+﻿@model PrsnBasicQueryModel
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card rounded-lg">
+            <div class="card-header">
+                <div class="col-md-12 text-left text-secondary">
+                    醫事人員<br />
+                    此頁為查詢、檢視醫事人員類別、主要專科、次要專科等基本資料之功能。<br />
+                    另點選下方按鈕可新增醫事人員基本資料及其他資料；<br />
+                    查詢後下方表格點選身分證號欄位(藍字)，可跳至編輯醫事人員資料畫面。<br />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="col-sm-12">
+                    <form id="queryForm" asp-action="Query" class="form-horizontal">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="form-row mb-4">
+                            <div class="form-inline col-4">
+                                <label asp-for="PrsnId" class="col-sm-5 col-form-label text-right"></label>
+                                <div class="col-sm-7">
+                                    <input asp-for="PrsnId" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="form-inline col-4">
+                                <label asp-for="PrsnName" class="col-sm-5 col-form-label text-right"></label>
+                                <div class="col-sm-7">
+                                    <input asp-for="PrsnName" class="form-control" placeholder="" />
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                    <div class="d-flex justify-content-center">
+                        <a asp-action="Create" class="btn btn-primary mr-2"><i class="fa fa-plus"></i> 新增</a>
+                        <button id="btnQuery" type="button" class="btn btn-primary">查詢</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="col-md-12 text-right">
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="col-sm-12">
+                    <table id="prsnBasicTable" class="table table-striped table-bordered table-hover " role="grid">
+                        <thead>
+                            <tr role="row">
+                                <th data-orderable="false" class="text-nowrap">序號</th>
+                                <th class="text-nowrap">身份證號</th>
+                                <th class="text-nowrap">姓名</th>
+                                <th class="text-nowrap">出生日期</th>
+                                <th class="text-nowrap">人員類別</th>
+                                <th class="text-nowrap">主要專科</th>
+                                <th class="text-nowrap">次要專科</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{ @await Html.PartialAsync("~/Views/Shared/_DataTables.cshtml"); }
+    <script type="text/javascript">
+        var $prsnBasicTable;
+        $(function () {
+            $("#btnQuery").on("click", query);
+        });
+        function query() {
+            if($prsnBasicTable)
+                $prsnBasicTable.destroy();
+
+            var ajax = function (data, callback, settings) {
+                var o = $("#queryForm").serializeObject();
+                o.draw = data.draw;
+                o.start = data.start;
+                o.length = data.length;
+                $.post('@Url.Action("Query", "PrsnBasics")', o, function (res) {
+                    if (!res.isSuccess) {
+                        myAlert.error("查詢錯誤", res.errMsg, true);
+                        return;
+                    }
+                    callback(res.data);
+                });
+            };
+            $prsnBasicTable = $("#prsnBasicTable").DataTable({
+                "serverSide": true,
+                "ajax": ajax,
+                "paging": true,
+                "searching": false,
+                "ordering": false,
+                "columns": [
+                    {
+                        className:"sorting_1",
+                        data: null,
+                        width: "5%",
+                        targets: 0,
+                        render: function (data, type, full, meta) {
+                            var settings = meta.settings;
+                            var serial = meta.row + 1 + settings._iDisplayLength * settings._iDisplayStart / settings._iDisplayLength;
+                            return serial;
+                        }
+                    },
+                    {
+                        data: "prsnId",
+                        targets: 1,
+                        render: function (data, type, full, meta) {
+                            console.log(full);
+                            return '<a href="#'+data+'" class="linkEdit">'+data+'</a>';
+                        }
+                    },
+                    { data: "prsnName", targets: 2 },
+                    { data: "prsnBirthday", targets: 3 },
+                    { data: "prsnTypeName", targets: 4 },
+                    { data: "majorSpecialistName", targets: 5 },
+                    { data: "subSpecialistName", targets: 6 }
+                ]
+            });
+            $prsnBasicTable.on('click', ".linkEdit", function () {
+                var closestRow = $(this).closest('tr');
+                var data = $prsnBasicTable.row(closestRow).data();
+                location.href = '@Url.Action("Edit","PrsnBasics")/' + data.prsnId;
+            });
+        }
+    </script>
+}
+

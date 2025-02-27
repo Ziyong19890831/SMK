@@ -1,0 +1,32 @@
+﻿@using System.IO;
+@model List<(string Title, string FileName)>
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                @foreach (var item in Model)
+                {
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <label class="control-label"> @item.Title</label>
+                            <a class="btn-sm btn-primary ml-3" href="@Url.Action("DownloadFile","ViolationHospReport",new { filename=item.FileName,fileType="xlxs"})">下載 (EXCEL)</a>
+                            <a class="btn-sm btn-primary ml-3" href="@Url.Action("DownloadFile","ViolationHospReport",new { filename=item.FileName,fileType="ods"})">下載 (ODS)</a>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script type="text/javascript">
+
+    </script>
+}
+
+

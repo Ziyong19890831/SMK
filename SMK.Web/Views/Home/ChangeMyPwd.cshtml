@@ -1,0 +1,36 @@
+﻿
+<div class="modal" id="modal-changePwd" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">變更密碼</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="myForm" method="post" class="form-horizontal" asp-action="ChangeMyPwd" asp-controller="Home">
+                    @Html.AntiForgeryToken()
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">新密碼</label>
+                        <div class="col-sm-8">
+                            <input type="password" autocomplete="new-password" class="form-control" name="pwd" id="txtPwd" pattern="^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*\W).{8,}$" title="不符合密碼規定" required/>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">新密碼確認</label>
+                        <div class="col-sm-8">
+                            <input type="password" autocomplete="new-password" class="form-control" id="txtPwdConfirm" pattern="^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*\W).{8,}$" required/>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-primary" id="btnChangePincode">確定</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>

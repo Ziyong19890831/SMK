@@ -1,0 +1,271 @@
+﻿@using SMK.Data.Entity
+@model IEnumerable<CallBoardViewModel>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";/*~/Views/Shared/_PartialLayout.cshtml*/
+}
+<style>
+    table th {
+        /* vertical-align: middle; */
+        text-align: center;
+    }
+
+    table td {
+        vertical-align: middle;
+        text-align: center;
+    }
+
+    .left {
+        text-align: left;
+    }
+</style>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card rounded-lg">
+            <div class="card-header">
+                <div class="col-md-12 text-left text-secondary">
+                    首頁公告<br />
+                    此頁具新增、編輯、刪除首頁公告之功能。<br />
+                    該項目為新增、編輯、刪除首頁的公告內容功能，另可以上傳公告內容所提之文件檔案。
+                    <br />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="col-md-3">
+                    <a asp-action="Create" class="btn btn-primary" data-toggle="modal" data-target="#CreateModal"><i class="fa fa-plus"></i> 新增</a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="col-sm-12">
+                    <div class="col-sm-12 table-responsive">
+                        <table class="jqDataTable table table-striped table-bordered table-hover " role="grid">
+                            <thead>
+                                <tr role="row">
+                                    <th class="text-nowrap">序號</th>
+                                    <th class="text-nowrap">
+                                        @Html.DisplayNameFor(model => model.AnnouncementDate)
+                                    </th>
+                                    <th class="text-nowrap">
+                                        @Html.DisplayNameFor(model => model.Note)
+                                    </th>
+                                    <th class="text-nowrap">
+                                        附件下載
+                                    </th>
+                                    <th class="text-nowrap">
+                                        @Html.DisplayNameFor(model => model.Condition)
+                                    </th>
+                                    <th class="text-nowrap">
+                                        管理
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    <tr id="AllData_@item.SysNo">
+                                        <td class="sorting_1" style=" vertical-align: middle;">@Html.DisplayFor(modelItem => item.SysNo)</td>
+                                        <td style=" vertical-align: middle;">
+                                            @Html.DisplayFor(modelItem => item.StartDate)
+                                        </td>
+                                        <td class="left">
+                                            @Html.Raw(item.Note)
+                                        </td>
+                                        <td style=" vertical-align: middle;">
+                                            @if (item.Files != null && item.Files.Count > 0)
+                                            {
+                                                int i = 1;
+                                                @foreach (var Files in item.Files)
+                                                {
+                                                    <div class="">
+                                                        <a class="ml-3 mr-1" href="~/CallBoard/CallBoardGetFiles?filePath=@item.SysNo/@Files.Item2" target="_blank" title="@Files.Item2">附件_@i</a>
+                                                    </div>
+                                                    i++;
+                                                }
+                                            }
+                                        </td>
+                                        <td style=" vertical-align: middle;">
+                                            <div id="Condition_@item.SysNo" class="custom-control custom-switch">
+                                                @if (@item.Condition == false)
+                                                {
+                                                    <input type="checkbox" class="custom-control-input" id="switch_@item.SysNo" onchange="confirmChangeIndex('@item.SysNo','@item.Condition')">
+                                                    <label class="custom-control-label" id="switchLable_@item.SysNo" for="switch_@item.SysNo">停用</label>
+                                                }
+                                                else
+                                                {
+                                                    <input type="checkbox" class="custom-control-input" id="switch_@item.SysNo" checked onchange="confirmChangeIndex('@item.SysNo','@item.Condition')">
+                                                    <label class="custom-control-label" id="switchLable_@item.SysNo" for="switch_@item.SysNo">啟用</label>
+                                                }
+                                            </div>
+                                        </td>
+                                        <td style=" vertical-align: middle;">
+                                            <a asp-action="Edit" asp-route-id="@item.SysNo" class="btn btn-primary">編輯</a>
+                                            <a class="btn btn-danger" onclick="confirmDeleteIndex(@item.SysNo)">刪除</a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="CreateModal" tabindex="-1" aria-labelledby="CreateModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="CreateModalLabel">新增首頁公告</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                @await Html.PartialAsync("Create", new CallBoard())
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">關閉</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        @await Html.PartialAsync("~/Views/Shared/_DataTables.cshtml")
+        ;
+    }
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#announcementDate').val(new Date());
+        });
+
+        function confirmDeleteIndex(Sysno) {
+            var result = confirm(`確定要刪除【編號 ${Sysno}】嗎？`);
+
+            if (result) {
+                $.ajax({
+                    url: '@Url.Action("DeleteCallBoard", "CallBoard")',
+                    type: 'POST',
+                    data: { id: Sysno },
+                    success: function (data) {
+                        // 在這裡處理返回的JSON結果
+                        console.log(data);
+                        if (data) {
+                            myAlert.success("刪除成功", `編號 ${Sysno} 已成功刪除。`, true);
+                            $(`#AllData_${Sysno}`).empty();
+                            return;
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        // 在這裡處理錯誤
+                        console.error(xhr.responseText); // 輸出到控制台以便檢查錯誤
+                    }
+                });
+            }
+        }
+
+        function confirmChangeIndex(Sysno, Condition) {
+            var ChangeCondition = "停用";
+            if (Condition == "False" || Condition == "false") {
+                ChangeCondition = "啟用";
+                Condition = true;
+            } else {
+                Condition = false;
+            }
+
+            $.ajax({
+                url: '@Url.Action("ConditionCallBoard", "CallBoard")',
+                type: 'POST',
+                data: { id: Sysno, ChangeCondition: Condition },
+                success: function (data) {
+                    // 在這裡處理返回的JSON結果
+                    if (data) {
+                        myAlert.success("修正成功", `編號 ${Sysno} 已成功${ChangeCondition}。`, true);
+                        //$(`#switchLable_${Sysno}`).text(ChangeCondition);
+                        $(`#Condition_${Sysno}`).empty();
+                        if (Condition) {
+                            $(`#Condition_${Sysno}`).append(`<input type="checkbox" class="custom-control-input" checked id = "switch_${Sysno}" onchange = "confirmChangeIndex('${Sysno}','${Condition}')" >`);
+                        } else {
+                            $(`#Condition_${Sysno}`).append(`<input type="checkbox" class="custom-control-input" id = "switch_${Sysno}" onchange = "confirmChangeIndex('${Sysno}','${Condition}')" >`);
+                        }
+                        $(`#Condition_${Sysno}`).append(`<label class="custom-control-label" id = "switchLable_${Sysno}" for= "switch_${Sysno}">${ChangeCondition}</label>`);
+                        return;
+                    }
+                },
+                error: function (xhr, status, error) {
+                    // 在這裡處理錯誤
+                    console.error(xhr.responseText); // 輸出到控制台以便檢查錯誤
+                }
+            });
+
+        }
+
+        /**
+        * 上傳檔案後，更新上檔案名稱
+        */
+        const ChangeFilesName = (inputElement) => {
+            // 取得檔案元素
+            const fileElement = inputElement.files[0];
+            // 取得檔案名稱
+            const fileName = fileElement.name;
+            // 選擇相應的 label 元素
+            const labelElement = inputElement.nextElementSibling;
+            // 將檔案名稱設定為 label 元素的文字內容
+            labelElement.innerText = fileName;
+        }
+
+        $(document).ready(function () {
+            $("#Note").keyup(function () {
+                var text = $(this).val();
+                var textLength = text.length + (text.match(/\n/g) || []).length + (text.match(/ /g) || []).length;
+                $("#ChangeTextArea").text(textLength);
+            });
+        });
+
+        /**
+         * 新增檔案上傳欄位
+         */
+        var fileNum = 1;
+        var All_FilesNum = 1;
+        const AddFiles = () => {
+            if (fileNum % 2 != 0) {
+                $(`#files_${All_FilesNum}`).append(
+                    `
+                            <div class="custom-file">
+                                <input type="file" class="custom-file-input" id="file-uploader_${fileNum + 1}" onchange="ChangeFilesName(this)" data-target="file-uploader" name="files" accept=".doc, .docx, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, .xls, .xlsx, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, .pdf, application/pdf" value="0" />
+                                <label class="custom-file-label" for="file-uploader_${fileNum + 1}">選擇檔案，檔名需為Word, Excel, PDF等檔案格式</label>
+                            </div>
+                            `
+                )
+                fileNum++;
+                All_FilesNum++;
+            } else {
+                All_FilesNum++;
+                $(`#All_Files`).append(
+                    `
+                                    <div id="files_${All_FilesNum}" class="input-group">
+                                <div class="custom-file">
+                                    <input type="file" class="custom-file-input" id="file-uploader_${fileNum + 1}" onchange="ChangeFilesName(this)" data-target="file-uploader" name="files" accept=".doc, .docx, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, .xls, .xlsx, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, .pdf, application/pdf" value="0" />
+                                    <label class="custom-file-label" for="file-uploader_${fileNum + 1}">選擇檔案，檔名需為Word, Excel, PDF等檔案格式</label>
+                                </div>
+                            </div>
+                            `
+                )
+                fileNum++;
+            }
+        }
+    </script>
+}

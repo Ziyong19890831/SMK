@@ -1,0 +1,1149 @@
+﻿@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .search-table-outter {
+        overflow-x: scroll;
+        max-height: 40rem;
+    }
+</style>
+
+<div id="app">
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="col-sm-12" style="min-height: 130px">
+
+                        <template v-if="tabSelected !== 'result'">
+                            <form v-on:submit.stop.prevent="onSearch" class="form-horizontal">
+                                <div class="form-row my-2">
+                                    <div class="row col-4">
+                                        <label class="col-5 col-form-label text-right"><span class="text-danger">*</span>費用年月</label>
+                                        <div class="col-sm-7">
+                                            <input v-model="query.FeeStart" class="form-control" placeholder="費用年月(起)" />
+                                        </div>
+                                    </div>
+                                    <div class="row col-4">
+                                        <div class="col-sm-7">
+                                            <input v-model="query.FeeEnd" class="form-control" placeholder="費用年月(迄)" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-row my-2">
+                                    <div class="row col-4">
+                                        <label class="col-5 col-form-label text-right"><span class="text-danger">*</span>醫事機構代碼</label>
+                                        <div class="col-sm-7">
+                                            <input v-model="query.HospID" class="form-control" placeholder="醫事機構代碼" />
+                                        </div>
+                                    </div>
+                                    <div class="row col-1">
+                                        <div class="col-sm-12">
+                                            <input v-model="query.HospSeqNo" class="form-control" placeholder="" />
+                                        </div>
+                                    </div>
+                                    <div class="row col-6">
+                                        <label class="col-4 col-form-label text-right">醫事機構名稱</label>
+                                        <div class="col-sm-8">
+                                            <input v-model="hospName" readonly class="form-control" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-center mt-2">
+                                    <button id="btnQuery" type="submit" class="btn btn-primary">查詢</button>
+                                </div>
+                            </form>
+                            <hr />
+
+                            <div class="d-flex justify-content-around">
+                                <form method="post" asp-controller="SamplingExamine" asp-action="ExportRew1300">
+                                    <input type="hidden" name="feeYmS" v-bind:value="this.query.FeeStart">
+                                    <input type="hidden" name="feeYmE" v-bind:value="this.query.FeeEnd">
+                                    <input type="hidden" name="wkHospID" v-bind:value="this.query.HospID">
+                                    <input type="hidden" name="fileType" value="xlsx">
+                                    <input v-for="dataId in dataIdItems" type="hidden" name="wkDataID" v-bind:value="dataId">
+
+                                    <button type="submit" v-bind:disabled="!canExportRew1300" class="btn btn-warning" v-on:click="exportRew1300($event)">匯出門診療服務點數及醫令清單(Excel)</button>
+                                </form>
+                                <span class="mx-1"></span>
+                                <form method="post" asp-controller="SamplingExamine" asp-action="ExportRew1600">
+                                    <input type="hidden" name="feeYmS" v-bind:value="this.query.FeeStart">
+                                    <input type="hidden" name="feeYmE" v-bind:value="this.query.FeeEnd">
+                                    <input type="hidden" name="wkHospID" v-bind:value="this.query.HospID">
+                                    <input type="hidden" name="fileType" value="xlsx">
+                                    <input v-for="dataId in dataIdItems" type="hidden" name="wkDataID" v-bind:value="dataId">
+
+                                    <button type="submit" v-bind:disabled="!canExportRew1600" class="btn btn-warning">匯出專業審查追扣核定總表(Excel)</button>
+                                </form>
+                                <span class="mx-1"></span>
+                                <form method="post" asp-controller="SamplingExamine" asp-action="ExportRew1800">
+                                    <input type="hidden" name="feeYmS" v-bind:value="this.query.FeeStart">
+                                    <input type="hidden" name="feeYmE" v-bind:value="this.query.FeeEnd">
+                                    <input type="hidden" name="wkHospID" v-bind:value="this.query.HospID">
+                                    <input type="hidden" name="fileType" value="xlsx">
+                                    <input v-for="dataId in dataIdItems" type="hidden" name="wkDataID" v-bind:value="dataId">
+
+                                    <button type="submit" v-bind:disabled="!canExportRew1600" class="btn btn-warning">匯出專業審查追扣補付核定總表(申復)(Excel)</button>
+                                </form>
+                            </div>
+                            <div class="d-flex justify-content-around mt-3">
+                                <form method="post" asp-controller="SamplingExamine" asp-action="ExportRew1300">
+                                    <input type="hidden" name="feeYmS" v-bind:value="this.query.FeeStart">
+                                    <input type="hidden" name="feeYmE" v-bind:value="this.query.FeeEnd">
+                                    <input type="hidden" name="wkHospID" v-bind:value="this.query.HospID">
+                                    <input type="hidden" name="fileType" value="ods">
+                                    <input v-for="dataId in dataIdItems" type="hidden" name="wkDataID" v-bind:value="dataId">
+
+                                    <button type="submit" v-bind:disabled="!canExportRew1300" class="btn btn-warning" v-on:click="exportRew1300($event)">匯出門診療服務點數及醫令清單(Ods)</button>
+                                </form>
+                                <span class="mx-1"></span>
+                                <form method="post" asp-controller="SamplingExamine" asp-action="ExportRew1600">
+                                    <input type="hidden" name="feeYmS" v-bind:value="this.query.FeeStart">
+                                    <input type="hidden" name="feeYmE" v-bind:value="this.query.FeeEnd">
+                                    <input type="hidden" name="wkHospID" v-bind:value="this.query.HospID">
+                                    <input type="hidden" name="fileType" value="ods">
+                                    <input v-for="dataId in dataIdItems" type="hidden" name="wkDataID" v-bind:value="dataId">
+
+                                    <button type="submit" v-bind:disabled="!canExportRew1600" class="btn btn-warning">匯出專業審查追扣核定總表(Ods)</button>
+                                </form>
+                                <span class="mx-1"></span>
+                                <form method="post" asp-controller="SamplingExamine" asp-action="ExportRew1800">
+                                    <input type="hidden" name="feeYmS" v-bind:value="this.query.FeeStart">
+                                    <input type="hidden" name="feeYmE" v-bind:value="this.query.FeeEnd">
+                                    <input type="hidden" name="wkHospID" v-bind:value="this.query.HospID">
+                                    <input type="hidden" name="fileType" value="ods">
+                                    <input v-for="dataId in dataIdItems" type="hidden" name="wkDataID" v-bind:value="dataId">
+
+                                    <button type="submit" v-bind:disabled="!canExportRew1600" class="btn btn-warning">匯出專業審查追扣補付核定總表(申復)(Ods)</button>
+                                </form>
+                            </div>
+                        </template>
+
+                        <template v-else>
+                            <form v-on:submit.stop.prevent="searchForResult" class="form-horizontal">
+
+                                <div class="form-row my-2">
+                                    <div class="row col-4">
+                                        <label class="col-5 col-form-label text-right">
+                                            <span class="text-danger">*</span>抽樣編號
+                                        </label>
+                                        <div class="col-sm-7">
+                                            <input class="form-control" v-model.trim="samplingResultQuery.SamplingNo" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-center mt-2">
+                                    <button type="submit" class="btn btn-primary">查詢</button>
+                                </div>
+                            </form>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+
+            <div class="card">
+
+                <div class="card-body">
+
+                    <ul class="nav nav-tabs" id="myTab" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="tab-create" data-toggle="tab" href="#create" role="tab" aria-controls="create" aria-selected="true" v-on:click="setTabSelected('create')">專審抽樣建立</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="tab-result" data-toggle="tab" href="#result" role="tab" aria-controls="result" aria-selected="false" v-on:click="setTabSelected('result')">專審抽樣結果</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="tab-query" data-toggle="tab" href="#query" role="tab" aria-controls="query" aria-selected="false" v-on:click="setTabSelected('query')">專審抽樣結果查詢</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="tab-receive" data-toggle="tab" href="#receive" role="tab" aria-controls="receive" aria-selected="false" v-on:click="setTabSelected('receive')">專審/申複收件狀況</a>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content" id="myTabContent">
+
+                        <!-- 專審抽樣建立 -->
+                        <div class="tab-pane fade show active" id="create" role="tabpanel" aria-labelledby="tab-create">
+
+                            <fieldset class="border p-3">
+
+                                <div class="form-row my-2">
+                                    <div class="row col-4">
+                                        <div class="col-5 col-form-label text-right">
+                                            <input type="checkbox" id="review" v-model="samplingCreateData.isReview">
+                                            <label for="review">審查委員</label>
+                                        </div>
+                                        <div class="col-sm-7">
+                                            <input class="form-control" v-model="samplingCreateData.review" />
+                                        </div>
+                                    </div>
+
+                                    <div class="row col-4">
+                                        <label class="col-5 col-form-label text-right">審查日期</label>
+                                        <div class="col-sm-7">
+                                            <input class="form-control" v-model="samplingCreateData.reviewdate" placeholder="___/__/__" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-row my-2">
+                                    <div class="row col-4">
+                                        <div class="col-5 col-form-label text-right">
+                                            <input type="checkbox" id="appeals" v-model="samplingCreateData.isAppeals">
+                                            <label for="appeals">申複審查委員</label>
+                                        </div>
+                                        <div class="col-sm-7">
+                                            <input class="form-control" v-model="samplingCreateData.appeals" />
+                                        </div>
+                                    </div>
+
+                                    <div class="row col-4">
+                                        <label class="col-5 col-form-label text-right">申複審查日期</label>
+                                        <div class="col-sm-7">
+                                            <input class="form-control" v-model="samplingCreateData.appealsdate" placeholder="___/__/__" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-inline col-4">
+                                        <div class="col-sm-7">
+                                            <select class="form-control" style="min-width:10rem" v-model="query.AccessNo">
+                                                <option v-for="option in accessnos" v-bind:value="option.value">
+                                                    {{ option.text }}
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-center mt-2">
+                                    <input type="button" value="儲存"
+                                           class="btn btn-primary"
+                                           v-bind:disabled="!samplingCreateData.isReview && !samplingCreateData.isAppeals"
+                                           v-on:click="saveSamplingCreateData" />
+                                </div>
+                            </fieldset>
+
+                            <div class="col-sm-12 search-table-outter mt-3">
+                                <table class="search-table table table-striped table-bordered table-hover " role="grid">
+                                    <thead>
+                                        <tr role="row">
+                                            <th class="text-center" style="min-width: 3rem"></th>
+                                            <th class="text-center" style="min-width: 6rem">
+                                                <div>
+                                                    <input type="checkbox" id="samplingCreateItemsAllChecked"
+                                                           v-model="samplingCreateItemsAllChecked"
+                                                           v-on:change="samplingCreateItemsAllCheckedChange($event)">
+                                                    <label for="samplingCreateItemsAllChecked" class="my-0">全選</label>
+                                                </div>
+                                            </th>
+                                            <th class="text-center" style="min-width: 6rem">抽樣編號</th>
+                                            <th class="text-center" style="min-width: 5rem">姓名</th>
+                                            <th class="text-center" style="min-width: 6rem">身分證號</th>
+                                            <th class="text-center" style="min-width: 6rem">費用年月</th>
+                                            <th class="text-center" style="min-width: 6rem">就醫日期</th>
+                                            <th class="text-center" style="min-width: 6rem">申請金額</th>
+                                            <th class="text-center" style="min-width: 6rem">審查委員</th>
+                                            <th class="text-center" style="min-width: 6rem">審查日期</th>
+                                            <th class="text-center" style="min-width: 8rem">申覆審查委員</th>
+                                            <th class="text-center" style="min-width: 8rem">申覆審查日期</th>
+                                            <th class="text-center" style="min-width: 5rem">審查否</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        <tr v-for="(item, index) in samplingCreateItems" v-bind:key="item.fee_ym + item.data_id">
+                                            <td class="text-center sorting_1">{{ index + 1 }}</td>
+                                            <td class="text-center">
+                                                <input type="checkbox" v-model="item.isChecked">
+                                            </td>
+                                            <td class="text-center">
+                                                <a href="javascript:void(0)" v-on:click="samplingnoClick(item)">{{ item.samplingno }}</a>
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.name }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.id }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.fee_ym_taiwan }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.func_date_taiwan }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.appl_dot }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.review }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.reviewdate_taiwan }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.appeals }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.appealsdate_taiwan }}
+                                            </td>
+                                            <td class="text-center">
+                                                <input type="checkbox" v-model="item.chkflg" true-value="1" :false-value="null">
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- 專審抽樣結果 -->
+                        <div class="tab-pane fade" id="result" role="tabpanel" aria-labelledby="tab-result">
+                            <fieldset class="border p-3">
+
+                                <div class="form-row my-2">
+                                    <div class="row col-4">
+                                        <label class="col-5 col-form-label text-right">姓名</label>
+                                        <div class="col-sm-7">
+                                            <input class="form-control" v-model="samplingResultData.name" readonly />
+                                        </div>
+                                    </div>
+                                    <div class="row col-4">
+                                        <label class="col-5 col-form-label text-right">身分證號</label>
+                                        <div class="col-sm-7">
+                                            <input class="form-control" v-model="samplingResultData.id" readonly />
+                                        </div>
+                                    </div>
+                                    <div class="row col-4">
+                                        <label class="col-5 col-form-label text-right">就醫日期</label>
+                                        <div class="col-sm-7">
+                                            <input class="form-control" v-model="samplingResultData.func_date" readonly />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-row my-2">
+                                    <div class="row col-4">
+                                        <label class="col-5 col-form-label text-right">審查委員</label>
+                                        <div class="col-sm-7">
+                                            <input class="form-control" v-model="samplingResultData.review" readonly />
+                                        </div>
+                                    </div>
+                                    <div class="row col-4">
+                                        <label class="col-5 col-form-label text-right">審查日期</label>
+                                        <div class="col-sm-7">
+                                            <input class="form-control" v-model="samplingResultData.reviewdate" readonly />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-row my-2">
+                                    <div class="row col-4">
+                                        <label class="col-5 col-form-label text-right">申復審查委員</label>
+                                        <div class="col-sm-7">
+                                            <input class="form-control" v-model="samplingResultData.appeals" readonly />
+                                        </div>
+                                    </div>
+                                    <div class="row col-4">
+                                        <label class="col-5 col-form-label text-right">申復審查日期</label>
+                                        <div class="col-sm-7">
+                                            <input class="form-control" v-model="samplingResultData.appealsdate" readonly />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-row my-2">
+                                    <div class="row col-4">
+                                        <label class="col-5 col-form-label text-right">醫事機構代碼</label>
+                                        <div class="col-sm-7">
+                                            <input class="form-control" v-model="samplingResultData.hospid" readonly />
+                                        </div>
+                                    </div>
+                                    <div class="row col-1">
+                                        <div class="col-sm-7">
+                                            <input class="form-control" style="width: 3rem" v-model="samplingResultData.hospseqno" readonly />
+                                        </div>
+                                    </div>
+                                    <div class="row col-7">
+                                        <label class="col-3 col-form-label text-right">醫事機構代碼名稱</label>
+                                        <div class="col-sm-9">
+                                            <input class="form-control" v-model="samplingResultData.hospname" readonly />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-center mt-2">
+                                    <input type="button" value="儲存"
+                                           class="btn btn-primary"
+                                           v-bind:disabled="isNotCheckedSamplingResultItems"
+                                           v-on:click="saveSamplingResultData" />
+                                </div>
+                            </fieldset>
+
+                            <div class="col-sm-12 search-table-outter mt-3">
+                                <table class="search-table table table-striped table-bordered table-hover " role="grid">
+                                    <thead>
+                                        <tr role="row">
+                                            <th class="text-center" style="min-width: 3rem"></th>
+                                            <th class="text-center" style="min-width: 4rem">勾選</th>
+                                            <th class="text-center" style="min-width: 6rem">醫令序</th>
+                                            <th class="text-center" style="min-width: 6rem">醫令類別</th>
+                                            <th class="text-center" style="min-width: 8rem">藥品給藥日份</th>
+                                            <th class="text-center" style="min-width: 9rem">藥品(項目)代號</th>
+                                            <th class="text-center" style="min-width: 17rem">診療項目或藥品、材料名稱規格</th>
+                                            <th class="text-center" style="min-width: 6rem">藥品用量</th>
+                                            <th class="text-center" style="min-width: 8rem">藥品使用頻率</th>
+                                            <th class="text-center" style="min-width: 11rem">用藥途徑/作用部位</th>
+                                            <th class="text-center" style="min-width: 4rem">總量</th>
+                                            <th class="text-center" style="min-width: 4rem">單價</th>
+                                            <th class="text-center" style="min-width: 4rem">點數</th>
+                                            <th class="text-center" style="min-width: 8rem">審查欄</th>
+                                            <th class="text-center" style="min-width: 8rem">核扣金額</th>
+                                            <th class="text-center" style="min-width: 10rem">申覆審查欄</th>
+                                            <th class="text-center" style="min-width: 8rem">申覆補給金額</th>
+                                            <th class="text-center" style="min-width: 5rem">審查否</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        <tr v-for="(item, index) in samplingResultItems" v-bind:key="item.fee_ym + item.data_id + item.order_seq_no">
+                                            <td class="text-center sorting_1">{{ index + 1 }}</td>
+                                            <td class="text-center">
+                                                <input type="checkbox" v-model="item.isChecked">
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.order_seq_no }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.order_type }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.order_drug_day }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.order_code }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.orderchiname }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.drug_num }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.drug_fre }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.drug_path }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.order_qty }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.order_uprice }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.order_dot }}
+                                            </td>
+                                            <td class="text-center">
+                                                <input v-bind:class="[ item.isChecked ? 'text-primary' : '', 'form-control', 'text-center']" v-model.trim="item.reviewremark" />
+                                            </td>
+                                            <td class="text-center">
+                                                <input type="number" v-bind:class="[ item.isChecked ? 'text-primary' : '', 'form-control', 'text-center']" v-model="item.reviewamt" />
+                                            </td>
+                                            <td class="text-center">
+                                                <select v-bind:class="[ item.isChecked ? 'text-primary' : '', 'form-control', 'text-center']" style="min-width:6rem" v-model="item.appealsremark">
+                                                    <option v-for="option in appealsremarkOptions" v-bind:value="option.value">
+                                                        {{ option.text }}
+                                                    </option>
+                                                </select>
+                                            </td>
+                                            <td class="text-center">
+                                                <input type="number" v-bind:class="[ item.isChecked ? 'text-primary' : '', 'form-control', 'text-center']" v-model="item.appealsamt" />
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.chkflg }}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- 專審抽樣結果查詢 -->
+                        <div class="tab-pane fade" id="query" role="tabpanel" aria-labelledby="tab-query">
+
+                            <div class="col-sm-12 search-table-outter mt-3">
+                                <table class="search-table table table-striped table-bordered table-hover " role="grid">
+                                    <thead>
+                                        <tr role="row">
+                                            <th class="text-center" style="min-width: 3rem"></th>
+                                            <th class="text-center" style="min-width: 6rem">
+                                                <div>
+                                                    <input type="checkbox" id="samplingQueryItemsAllChecked"
+                                                           v-model="samplingQueryItemsAllChecked"
+                                                           v-on:change="samplingQueryItemsAllCheckedChange($event)">
+                                                    <label for="samplingQueryItemsAllChecked" class="my-0">全選</label>
+                                                </div>
+                                            </th>
+                                            <th class="text-center" style="min-width: 6rem">抽樣編號</th>
+                                            <th class="text-center" style="min-width: 6rem">機構代碼</th>
+                                            <th class="text-center" style="min-width: 20rem">機構名稱</th>
+                                            <th class="text-center" style="min-width: 5rem">姓名</th>
+                                            <th class="text-center" style="min-width: 6rem">身分證號</th>
+                                            <th class="text-center" style="min-width: 6rem">就醫日期</th>
+                                            <th class="text-center" style="min-width: 6rem">費用年月</th>
+                                            <th class="text-center" style="min-width: 5rem">初診日</th>
+                                            <th class="text-center" style="min-width: 5rem">流水號</th>
+                                            <th class="text-center" style="min-width: 6rem">給藥日份</th>
+                                            <th class="text-center" style="min-width: 5rem">診察費</th>
+                                            <th class="text-center" style="min-width: 7rem">藥事服務費</th>
+                                            <th class="text-center" style="min-width: 13rem">行政協助項目部分負擔</th>
+                                            <th class="text-center" style="min-width: 6rem">合計點數</th>
+                                            <th class="text-center" style="min-width: 8rem">部分負擔點數</th>
+                                            <th class="text-center" style="min-width: 13rem">申請點數(扣除部分負擔)</th>
+                                            <th class="text-center" style="min-width: 5rem">審查欄</th>
+                                            <th class="text-center" style="min-width: 6rem">核扣金額</th>
+                                            <th class="text-center" style="min-width: 6rem">審查委員</th>
+                                            <th class="text-center" style="min-width: 6rem">審查日期</th>
+                                            <th class="text-center" style="min-width: 7rem">申覆審查欄</th>
+                                            <th class="text-center" style="min-width: 8rem">申覆補付金額</th>
+                                            <th class="text-center" style="min-width: 8rem">申覆審查委員</th>
+                                            <th class="text-center" style="min-width: 8rem">申覆審查日期</th>
+                                            <th class="text-center" style="min-width: 5rem">審查否</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody v-for="(item, index) in samplingQueryItems" v-bind:key="item.fee_ym + item.data_id">
+                                        <tr>
+                                            <td class="text-center" v-on:click="expandQueryItem(item)">
+                                                <div class="d-flex align-items-center">
+
+                                                    <span class="mr-2">{{ index + 1 }}</span>
+                                                    <svg v-if="!item.isExpanded" width="0.7em" height="0.7em" viewBox="0 0 16 16" class="bi bi-plus-square" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                                        <path fill-rule="evenodd" d="M14 1H2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z" />
+                                                        <path fill-rule="evenodd" d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z" />
+                                                    </svg>
+                                                    <svg v-else width="0.7em" height="0.7em" viewBox="0 0 16 16" class="bi bi-dash-square" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                                        <path fill-rule="evenodd" d="M14 1H2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z" />
+                                                        <path fill-rule="evenodd" d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8z" />
+                                                    </svg>
+                                                </div>
+                                            </td>
+                                            <td class="text-center">
+                                                <input type="checkbox" v-model="item.isChecked">
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.samplingno }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.hospid }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.hospname }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.name }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.id }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.func_date }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.fee_ym }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.firsttreatdate }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.seq_no }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.drug_days }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.cure_dot }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.dsvc_dot }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.other_part_amt }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.appl_dot }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.part_amt }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.finish_amt }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.reviewremark }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.reviewamt }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.review }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.reviewdate }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.appealsremark }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.appealsamt }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.appeals }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.appealsdate }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.chkflg }}
+                                            </td>
+                                        </tr>
+                                        <tr v-if="item.isExpanded">
+                                            <td colspan="27">
+
+                                                <table class="search-table table table-striped table-bordered table-hover " role="grid">
+                                                    <thead>
+                                                        <tr role="row">
+                                                            <th class="text-center" style="min-width: 3rem"></th>
+                                                            <th class="text-center" style="min-width: 5rem">醫令序</th>
+                                                            <th class="text-center" style="min-width: 6rem">醫令類別</th>
+                                                            <th class="text-center" style="min-width: 8rem">藥品給藥日份</th>
+                                                            <th class="text-center" style="min-width: 9rem">藥品(項目)代號</th>
+                                                            <th class="text-center" style="min-width: 16rem">診療項目或藥品、材料名稱規格</th>
+                                                            <th class="text-center" style="min-width: 6rem">藥品用量</th>
+                                                            <th class="text-center" style="min-width: 8rem">藥品使用頻率</th>
+                                                            <th class="text-center" style="min-width: 10rem">用藥途徑/作用部位</th>
+                                                            <th class="text-center" style="min-width: 4rem">總量</th>
+                                                            <th class="text-center" style="min-width: 4rem">單價</th>
+                                                            <th class="text-center" style="min-width: 4rem">點數</th>
+                                                            <th class="text-center" style="min-width: 5rem">審查欄</th>
+                                                            <th class="text-center" style="min-width: 6rem">核扣金額</th>
+                                                            <th class="text-center" style="min-width: 6rem">審查委員</th>
+                                                            <th class="text-center" style="min-width: 6rem">審查日期</th>
+                                                            <th class="text-center" style="min-width: 7rem">申覆審查欄</th>
+                                                            <th class="text-center" style="min-width: 8rem">申覆補付金額</th>
+                                                            <th class="text-center" style="min-width: 8rem">申覆審查委員</th>
+                                                            <th class="text-center" style="min-width: 8rem">申覆審查日期</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody v-for="(detailItem, detailIndex) in item.details" v-bind:key="detailItem.order_seq_no">
+                                                        <tr>
+                                                            <td class="text-center sorting_1">{{ detailIndex + 1 }}</td>
+                                                            <td class="text-center">
+                                                                {{ detailItem.order_seq_no }}
+                                                            </td>
+                                                            <td class="text-center">
+                                                                {{ detailItem.order_type }}
+                                                            </td>
+                                                            <td class="text-center">
+                                                                {{ detailItem.order_drug_day }}
+                                                            </td>
+                                                            <td class="text-center">
+                                                                {{ detailItem.order_code }}
+                                                            </td>
+                                                            <td class="text-center">
+                                                                {{ detailItem.orderchiname }}
+                                                            </td>
+                                                            <td class="text-center">
+                                                                {{ detailItem.drug_num }}
+                                                            </td>
+                                                            <td class="text-center">
+                                                                {{ detailItem.drug_fre }}
+                                                            </td>
+                                                            <td class="text-center">
+                                                                {{ detailItem.drug_path }}
+                                                            </td>
+                                                            <td class="text-center">
+                                                                {{ detailItem.order_qty }}
+                                                            </td>
+                                                            <td class="text-center">
+                                                                {{ detailItem.order_uprice }}
+                                                            </td>
+                                                            <td class="text-center">
+                                                                {{ detailItem.order_dot }}
+                                                            </td>
+                                                            <td class="text-center">
+                                                                {{ detailItem.reviewremark }}
+                                                            </td>
+                                                            <td class="text-center">
+                                                                {{ detailItem.reviewamt }}
+                                                            </td>
+                                                            <td class="text-center">
+                                                                {{ detailItem.review }}
+                                                            </td>
+                                                            <td class="text-center">
+                                                                {{ detailItem.reviewdate }}
+                                                            </td>
+                                                            <td class="text-center">
+                                                                {{ detailItem.appealsremark }}
+                                                            </td>
+                                                            <td class="text-center">
+                                                                {{ detailItem.appealsamt }}
+                                                            </td>
+                                                            <td class="text-center">
+                                                                {{ detailItem.appeals }}
+                                                            </td>
+                                                            <td class="text-center">
+                                                                {{ detailItem.appealsdate }}
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- 專審/申複收件狀況 -->
+                        <div class="tab-pane fade" id="receive" role="tabpanel" aria-labelledby="tab-receive">
+                            <fieldset class="border p-3">
+
+                                <div class="form-row my-2">
+                                    <div class="row col-4">
+                                        <div class="col-5 col-form-label text-right">
+                                            <input type="checkbox" id="date4-1" v-model="samplingExamineReceiveRequest.isAccess">
+                                            <label for="date4-1">調閱收件日期</label>
+                                        </div>
+                                        <div class="col-sm-7">
+                                            <input class="form-control" v-model="samplingExamineReceiveRequest.accessDate" />
+                                        </div>
+                                    </div>
+
+                                    <div class="row col-4">
+                                        <label class="col-5 col-form-label text-right">審查編號</label>
+                                        <div class="col-sm-7">
+                                            <input class="form-control" v-model="samplingExamineReceiveRequest.accessNo" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-row my-2">
+                                    <div class="row col-4">
+                                        <div class="col-5 col-form-label text-right">
+                                            <input type="checkbox" id="date4-2" v-model="samplingExamineReceiveRequest.isReply">
+                                            <label for="date4-2">申復收件日期</label>
+                                        </div>
+                                        <div class="col-sm-7">
+                                            <input class="form-control" v-model="samplingExamineReceiveRequest.replyDate" placeholder="___/__/__" />
+                                        </div>
+                                    </div>
+
+                                    <div class="row col-4">
+                                        <label class="col-5 col-form-label text-right">申復編號</label>
+                                        <div class="col-sm-7">
+                                            <input class="form-control" v-model="samplingExamineReceiveRequest.replyNo" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-inline col-4">
+                                        <div class="col-sm-7">
+                                            <select class="form-control" style="min-width:10rem" v-model="receiveAccessNo">
+                                                <option v-for="option in receiveAccessNos" v-bind:value="option.value">
+                                                    {{ option.text }}
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-center mt-2">
+                                    <input type="button" value="儲存"
+                                           class="btn btn-primary"
+                                           v-on:click="saveSamplingExamineReceiveData" />
+                                </div>
+                            </fieldset>
+
+                            <div class="col-sm-12 search-table-outter mt-3">
+                                <table class="search-table table table-striped table-bordered table-hover " role="grid">
+                                    <thead>
+                                        <tr role="row">
+                                            <th class="text-center" style="min-width: 3rem"></th>
+                                            <th class="text-center" style="min-width: 6rem">
+                                                <div>
+                                                    <input type="checkbox" id="samplingReceiveItemsAllChecked"
+                                                           v-model="samplingReceiveItemsAllChecked"
+                                                           v-on:change="samplingReceiveItemsAllCheckedChange($event)">
+                                                    <label for="samplingReceiveItemsAllChecked" class="my-0">全選</label>
+                                                </div>
+                                            </th>
+                                            <th class="text-center" style="min-width: 6rem">抽樣編號</th>
+                                            <th class="text-center" style="min-width: 6rem">機構代碼</th>
+                                            <th class="text-center" style="min-width: 20rem">機構名稱</th>
+                                            <th class="text-center" style="min-width: 6rem">費用年月</th>
+                                            <th class="text-center" style="min-width: 6rem">身分證號</th>
+                                            <th class="text-center" style="min-width: 6rem">出生日期</th>
+                                            <th class="text-center" style="min-width: 5rem">姓名</th>
+                                            <th class="text-center" style="min-width: 6rem">就醫日期</th>
+                                            <th class="text-center" style="min-width: 8rem">調閱收件日期</th>
+                                            <th class="text-center" style="min-width: 6rem">審查編號</th>
+                                            <th class="text-center" style="min-width: 5rem">審查否</th>
+                                            <th class="text-center" style="min-width: 8rem">申復收件日期</th>
+                                            <th class="text-center" style="min-width: 6rem">申復編號</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        <tr v-for="(item, index) in samplingReceiveItems" v-bind:key="item.fee_ym + item.data_id">
+                                            <td class="text-center sorting_1">{{ index + 1 }}</td>
+                                            <td class="text-center">
+                                                <input type="checkbox" v-model="item.isChecked">
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.samplingno }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.hospid }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.hospname }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.fee_ym }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.id }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.birthday }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.name }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.func_date }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.accessdate }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.accessno }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.chkflg }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.replydate }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ item.replyno }}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    @{ @await Html.PartialAsync("~/Views/Shared/_DataTables.cshtml"); }
+    <script type="text/javascript">
+
+        const vm = new Vue({
+            el: "#app",
+            data() {
+                return {
+                    tabSelected: 'create',
+                    query: {
+                        FeeStart: null,
+                        FeeEnd: null,
+                        HospID: null,
+                        HospSeqNo: '00',
+                        AccessNo: null
+                    },
+                    hospName: '',
+                    samplingCreateData: {
+                        isReview: false,
+                        review: null,
+                        reviewdate: null,
+                        isAppeals: false,
+                        appeals: null,
+                        appealsdate:null
+                    },
+                    samplingCreateItemsAllChecked: false,
+                    samplingCreateItems: [],
+                    accessnos: [],
+
+                    // 專審抽樣結果
+                    samplingResultQuery: {
+                        SamplingNo: null
+                    },
+                    samplingResultData: {
+                        name: null,
+                        id: null,
+                        func_date: null,
+                        hospid: null,
+                        hospseqno: null,
+                        hospname: null,
+                        review: null,
+                        reviewdate: null,
+                        appeals: null,
+                        appealsdate: null
+                    },
+                    samplingResultItems: [],
+                    appealsremarkOptions: [
+                        { text: '', value: null },
+                        { text: '同意補付', value: '同意補付' },
+                        { text: '不予補付', value: '不予補付' }
+                    ],
+
+                    // 專審抽樣結果查詢
+                    samplingQueryItemsAllChecked: false,
+                    samplingQueryItems: [],
+
+                    // 專審/申復收件狀況資料
+                    samplingReceiveItems: [],
+                    receiveAccessNo: null,
+                    receiveAccessNos: [],
+                    samplingReceiveItemsAllChecked: false,
+                    samplingExamineReceiveRequest: {
+                        isAccess: false,
+                        isReply: false,
+                        accessNo: null,
+                        accessDate: null,
+                        replyNo: null,
+                        replyDate: null
+                    }
+
+                }
+            },
+            computed: {
+                isNotCheckedSamplingResultItems() {
+                    return !this.samplingResultItems.some(x => x.isChecked);
+                },
+                canExportRew1300() {
+                    if (this.tabSelected === 'query') {
+                        return false;
+                    }
+
+                    if (!this.hasDataIdItems) {
+                        return false;
+                    }
+
+                    return true;
+                },
+                canExportRew1600() {
+                    if (this.tabSelected === 'create') {
+                        return false;
+                    }
+
+                    if (!this.hasDataIdItems) {
+                        return false;
+                    }
+
+                    return true;
+                },
+                hasDataIdItems() {
+                    if (this.tabSelected === 'create') {
+                        return this.samplingCreateItems.some(x => x.isChecked);
+                    } else if (this.tabSelected === 'query') {
+                        return this.samplingQueryItems.some(x => x.isChecked);
+                    } else if (this.tabSelected === 'receive') {
+                        return this.samplingReceiveItems.some(x => x.isChecked);
+                    }
+
+                    return false;
+                },
+                dataIdItems() {
+                    if (this.tabSelected === 'create') {
+                        return this.samplingCreateItems.filter(x => x.isChecked).map(x => x.data_id);
+                    } else if (this.tabSelected === 'query') {
+                        return this.samplingQueryItems.filter(x => x.isChecked).map(x => x.data_id);
+                    } else if (this.tabSelected === 'receive') {
+                        return this.samplingReceiveItems.filter(x => x.isChecked).map(x => x.data_id);
+                    }
+
+                    return [];
+                }
+            },
+            methods: {
+                setTabSelected(tab) {
+                    this.tabSelected = tab;
+                },
+                exportRew1300(event) {
+                    if (!this.hospName) {
+                        event.preventDefault()
+                        myAlert.error("錯誤提示", '醫療院所不可為空白!', true);
+                        return;
+                    }
+
+                },
+                async samplingnoClick(item) {
+                    $("#tab-result").trigger("click");
+                    this.setTabSelected('result');
+                    this.samplingResultQuery.SamplingNo = item.samplingno;
+                    await this.searchForResult();
+                },
+                async onSearch() {
+
+                    switch (this.tabSelected) {
+                        case 'create':
+                            await this.searchForCreate();
+                            break;
+                        case 'query':
+                            await this.searchForQuery();
+                            break;
+                        case 'receive':
+                            await this.searchForRreceive();
+                            break;
+
+                    }
+                },
+                async searchForCreate() {
+
+                    if (!this.hospName) {
+                        myAlert.error("錯誤提示", '醫療院所不可為空白!', true);
+                        return;
+                    }
+
+                    const { data } = await axios.get('@Url.Action("GetSamplingExamineCreateDatas", "SamplingExamine")', { params: this.query });
+                    this.samplingCreateItems = data;
+
+                    if (this.samplingCreateItems.length === 0) {
+                        myAlert.info('訊息提示', '查無資料', true);
+                        return;
+                    }
+
+                    await this.setAccessnos();
+                },
+                async searchForResult() {
+                    this.samplingResultData = {};
+
+                    const { data } = await axios.post('@Url.Action("GetWithCreateSamplingResultQueryDatas", "SamplingExamine")', this.samplingResultQuery);
+                    this.samplingResultItems = data;
+
+                    if (this.samplingResultItems.length === 0) {
+                        myAlert.info('訊息提示', '查無資料', true);
+                        return;
+                    }
+
+                    this.samplingResultData = Object.assign({}, this.samplingResultItems[0]);
+
+                },
+                async searchForQuery() {
+                    const { data } = await axios.get('@Url.Action("GetSamplingExamineQueryDatas", "SamplingExamine")', { params: this.query });
+                    this.samplingQueryItems = data;
+
+                    if (this.samplingQueryItems.length === 0) {
+                        myAlert.info('訊息提示', '查無資料', true);
+                        return;
+                    }
+                },
+                async searchForRreceive() {
+                    const request =
+                    {
+                        FeeStart: this.query.FeeStart,
+                        FeeEnd: this.query.FeeEnd,
+                        HospID: this.query.HospID,
+                        AccessNo: this.receiveAccessNo,
+                    };
+
+                    const { data } = await axios.get('@Url.Action("GetSamplingExamineReceiveDatas", "SamplingExamine")', { params: request });
+                    this.samplingReceiveItems = data;
+
+                    if (this.samplingReceiveItems.length === 0) {
+                        myAlert.info('訊息提示', '查無資料', true);
+                        return;
+                    }
+
+                    await this.setReceiveAccessnos();
+                },
+                async setReceiveAccessnos() {
+                    const { FeeStart, FeeEnd } = this.query;
+                    const { data } = await axios.get('@Url.Action("GetAccessnos", "SamplingExamine")', { params: { FeeStart, FeeEnd }, hideMask: true });
+                    if (!data.some(x => x === this.receiveAccessNo)) {
+                        this.receiveAccessNo = null;
+                    }
+                    this.receiveAccessNos = [{ text: '', value: null }].concat(data.map(x => ({ text: x, value: x })));
+                },
+                async setHospName(hospID, hospSeqNo) {
+                    this.hospName = '';
+                    const { data } = await axios.get('@Url.Action("GetHospName", "HospBasic")', { params: { hospID, hospSeqNo}, hideMask: true });
+                    this.hospName = data;
+                },
+                async setAccessnos() {
+                    const { FeeStart, FeeEnd } = this.query;
+                    const { data } = await axios.get('@Url.Action("GetAccessnos", "SamplingExamine")', { params: { FeeStart, FeeEnd }, hideMask: true });
+                    if (!data.some(x => x === this.query.AccessNo)) {
+                        this.query.AccessNo = null;
+                    }
+                    this.accessnos = [{ text: '', value: null }].concat(data.map(x => ({ text: x, value: x })));
+                },
+                async saveSamplingCreateData() {
+
+                    const request = Object.assign({ items: this.samplingCreateItems }, this.samplingCreateData);
+                    await axios.post('@Url.Action("SaveSamplingCreateData", "SamplingExamine")', request);
+
+                    await this.searchForCreate();
+                    myAlert.success('確認訊息', '資料已儲存完成', true);
+                },
+                async saveSamplingResultData() {
+                    const request = Object.assign({ items: this.samplingResultItems }, this.samplingResultData);
+                    await axios.post('@Url.Action("SaveSamplingResultData", "SamplingExamine")', request);
+
+                    myAlert.success('確認訊息', '資料已儲存完成', true);
+                },
+                samplingCreateItemsAllCheckedChange() {
+                    this.samplingCreateItems.forEach(x => x.isChecked = this.samplingCreateItemsAllChecked);
+                },
+                async expandQueryItem(item) {
+                    item.isExpanded = !item.isExpanded;
+
+                    if (!item.details) {
+                        const { fee_ym, data_id } = item;
+                        const { data } = await axios.get('@Url.Action("GetSamplingExamineQueryDetailDatas", "SamplingExamine")', { params: { fee_ym, data_id } });
+                        item.details = data;
+                    }
+                },
+                samplingQueryItemsAllCheckedChange() {
+                    this.samplingQueryItems.forEach(x => x.isChecked = this.samplingQueryItemsAllChecked);
+                },
+                samplingReceiveItemsAllCheckedChange() {
+                    this.samplingReceiveItems.forEach(x => x.isChecked = this.samplingReceiveItemsAllChecked);
+                },
+                async saveSamplingExamineReceiveData() {
+                    const items = this.samplingReceiveItems.map(x => ({ isChecked: x.isChecked, fee_ym: x.fee_ym, data_id: x.data_id }));
+                    const request = Object.assign({ items }, this.samplingExamineReceiveRequest);
+                    await axios.post('@Url.Action("SaveSamplingExamineReceiveData", "SamplingExamine")', request);
+
+                    await this.searchForRreceive();
+                    myAlert.success('確認訊息', '資料已儲存完成', true);
+                }
+            },
+            watch: {
+                'query.HospID': async function (newValue) {
+                    await this.setHospName(newValue, this.query.HospSeqNo);
+                },
+                'query.HospSeqNo': async function (newValue) {
+                    await this.setHospName(this.query.HospID, newValue);
+                }
+            }
+        })
+    </script>
+}
+
+

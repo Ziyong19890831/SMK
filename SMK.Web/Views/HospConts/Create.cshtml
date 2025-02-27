@@ -1,0 +1,32 @@
+﻿@model SMK.Data.Entity.GenHospCont
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="col-sm-12">
+                    <form asp-action="Create">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="form-group">
+                            <label asp-for="HospContType" class="control-label"></label>
+                            <input asp-for="HospContType" class="form-control" />
+                            <span asp-validation-for="HospContType" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="HospContName" class="control-label"></label>
+                            <input asp-for="HospContName" class="form-control" />
+                            <span asp-validation-for="HospContName" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <input type="submit" value="新增" class="btn btn-primary" />
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

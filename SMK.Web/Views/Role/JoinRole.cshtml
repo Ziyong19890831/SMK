@@ -1,0 +1,36 @@
+﻿@using SMK.Data.Entity;
+@{
+    var role = ViewBag.Role as Role;
+    var empData = ViewBag.EmpData as GenEmpData;
+}
+
+<row class="text-left">
+    <div class="card">
+        <div class="card-header">
+            <div class="col-md-3">
+                新增角色成員
+            </div>
+        </div>
+        <div class="card-body">
+            <form id="myForm" method="post" class="form-horizontal">
+                @Html.AntiForgeryToken()
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">帳號</label>
+                    <div class="col-sm-4">
+                        @Html.TextBox("Account", empData.Account, new { @class = "form-control", id = "Account", placeholder = "Account" })
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="card-footer">
+            <button type="submit" class="btn btn-primary pull-right" form="myForm">確定</button>
+        </div>
+    </div>
+</row>
+@section Scripts{
+    <script>
+        $(document).ready(function () {
+
+        });
+    </script>
+}

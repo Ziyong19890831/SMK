@@ -1,0 +1,49 @@
+﻿@using SMK.Data.Dto;
+@using SMK.Data.Enums;
+@using SMK.Data.Entity;
+@model PrivilegeNodeModel
+
+@{
+    var isRootNode = Model.LinkType == PrivilegeNodeType.Root;
+
+    var role = ViewBag.ExtendData as Role;
+
+}
+
+
+@if (isRootNode)
+{
+    <ul id="myTreeView" data-role="treeview" data-widget="tree">
+        @foreach (var node in Model.Nodes)
+        {
+            @await Html.PartialAsync("Partail_Treeview.cshtml", node);
+        }
+    </ul>
+}
+else
+{
+    @switch (Model.LinkType)
+    {
+        case PrivilegeNodeType.Node:
+            <li class="node">@Model.Name</li>
+            break;
+
+        case PrivilegeNodeType.Link:
+        case PrivilegeNodeType.Functionality:
+            <li class="list-unstyled">
+                <label class="ckx-container">
+                    @Model.Name
+                    <input type="checkbox" class="role-edit" @Html.Raw(Model.EnableEntry ? "checked":"") data-rid="@role.Id" data-pid="@Model.PrivilegeId" />
+                    <span class="checkmark"></span>
+                </label>
+            </li>
+            break;
+
+    }
+    @foreach (var node in Model.Nodes)
+    {
+        <ul class="">
+            @await Html.PartialAsync("Partail_Treeview.cshtml", node)
+        </ul>
+    }
+}

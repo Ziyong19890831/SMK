@@ -1,0 +1,26 @@
+﻿label.form-control {
+    background-color: cornsilk;
+}
+td.tdcheckbox {
+    padding: 0px;
+}
+td > label {
+    display: block;
+    padding: 10px;
+}
+
+.star::after {
+    content:'※';
+    color:red;
+}
+
+.back-ground {
+    opacity: 0.5;
+    background-image: url("https://quitsmoking.hpa.gov.tw/images/logo.png");
+}
+
+iframe {
+    height:calc(100vh - 250px);
+}
+
+[v-cloak] { display: none; }

@@ -1,0 +1,146 @@
+﻿@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">自訂參數</div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-2">
+                        <label class="control-label" for="chk1">參數1（審查1：非合約機構）</label>
+                        <input type="checkbox" class="delay " id="chk1" placeholder="">
+                        <a onclick="return false;" style="display:none;" id="link1" href="~/MedicalOrderData/自選參數/審查1.xlsx"></a>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <label class="control-label" for="chk2">參數2（審查2：非合約醫事人員）</label>
+                        <input type="checkbox" class="delay " id="chk2" placeholder="">
+                        <a onclick="return false;" style="display:none;" id="link2" href="~/MedicalOrderData/自選參數/審查2.xlsx"></a>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-2">
+                        <label class="control-label" for="chk4">參數4（審查4：主次診斷不符）</label>
+                        <input type="checkbox" class="delay " id="chk4" placeholder="">
+                        <a onclick="return false;" style="display:none;" id="link4" href="~/MedicalOrderData/自選參數/審查4.xlsx"></a>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <label class="control-label" for="chk5">參數5（審查5：VPN未登錄）</label>
+                        <input type="checkbox" class="delay " id="chk5" placeholder="">
+                        <a onclick="return false;" style="display:none;" id="link5" href="~/MedicalOrderData/自選參數/審查5.xlsx"></a>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-2">
+                        <label class="control-label" for="chk6">參數6（審查6：申報藥服費代碼與給藥天數不符）</label>
+                        <input type="checkbox" class="delay " id="chk6" placeholder="">
+                        <a onclick="return false;" style="display:none;" id="link6" href="~/MedicalOrderData/自選參數/審查6.xlsx"></a>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <label class="control-label" for="chk7">參數7（審查7：部分負擔金額不符）</label>
+                        <input type="checkbox" class="delay " id="chk7" placeholder="">
+                        <a onclick="return false;" style="display:none;" id="link7" href="~/MedicalOrderData/自選參數/審查7.xlsx"></a>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-2">
+                        <label class="control-label" for="chk8">參數8（審查8：非戒菸用藥）</label>
+                        <input type="checkbox" class="delay " id="chk8" placeholder="">
+                        <a onclick="return false;" style="display:none;" id="link8" href="~/MedicalOrderData/自選參數/審查8.xlsx"></a>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <label class="control-label" for="chk9">參數9（審查9：非戒菸補助醫令類別）</label>
+                        <input type="checkbox" class="delay " id="chk9" placeholder="">
+                        <a onclick="return false;" style="display:none;" id="link9" href="~/MedicalOrderData/自選參數/審查9.xlsx"></a>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-2">
+                        <label class="control-label" for="chk11">參數11（審查11：申報費用異常）</label>
+                        <input type="checkbox" class="delay " id="chk11" placeholder="">
+                        <a onclick="return false;" style="display:none;" id="link11" href="~/MedicalOrderData/自選參數/審查11.xlsx"></a>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <label class="control-label" for="chk12">參數12（審查12：重複申報）</label>
+                        <input type="checkbox" class="delay " id="chk12" placeholder="">
+                        <a onclick="return false;" style="display:none;" id="link12" href="~/MedicalOrderData/自選參數/審查12.xlsx"></a>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-2">
+                        <label class="control-label" for="chk13">參數13（審查13：給藥天數不符VPN週數）</label>
+                        <input type="checkbox" class="delay " id="chk13" placeholder="">
+                        <a onclick="return false;" style="display:none;"  id="link13" href="~/MedicalOrderData/自選參數/審查13.xlsx"></a>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <label class="control-label">醫令規則下載</label>
+                        <a class="btn btn-primary" download="107年REA審查邏輯.doc" href="~/MedicalOrderData/自選參數/107年REA審查邏輯.doc">下載</a>
+                    </div>
+                </div>
+                <a onclick="return false; " style="display:none;" class="btn-sm btn-primary all" href="~/MedicalOrderData/第一次-防菸核扣_REA_6項_detail_v2.xlsx"></a>
+                <a onclick="return false;" style="display:none;" class="btn-sm btn-primary all" href="~/MedicalOrderData/第二次-SMK_REA_審查2_5_6_11_13_v5.xlsx"></a>
+            </div>
+            <div class="card-footer">
+                <button id="btnDownload" class="btn btn-primary">下載</button>
+                
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script type="text/javascript">
+        var timeout = 1000 * 60 * 3;
+
+
+        var PromiseQueue = function () {
+            var promise = $.Deferred().resolve();
+            return {
+                push: function (fn) {
+                    promise = promise.then(fn, fn);
+                    return this;
+                }
+            };
+        };
+
+        var wait = function (link) {
+            return function () {
+                showMask();
+                var def = $.Deferred();
+                setTimeout(function () {
+                    location.href = link;
+                    def.resolve();
+                    hideMask();
+                }, timeout);
+                return def.promise();
+            };
+        };
+
+        $(function () {
+            $("#btnDownload").click(function () {
+                var prom = new PromiseQueue();
+                var list = $('.delay:checked');
+                if (list.length == $('.delay').length) {
+                    list = $('.all');
+                    list.each(function (index) {
+                        var that = $(this);
+                        prom.push(wait(that.attr("href")));
+                    });
+                }
+                else {
+                    list.each(function (index) {
+                        var that = $(this);
+                        var link = that.attr('id').replace("chk", "link");
+                        prom.push(wait($("#" + link).attr("href")));
+                    });
+                }
+                $.when(prom).always(function () {
+                    hideMask();
+                });
+            });
+        });
+    </script>
+}
+
+

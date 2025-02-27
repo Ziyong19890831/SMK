@@ -1,0 +1,465 @@
+﻿@model DeclareReportQueryModel
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="col-sm-12">
+                    <form id="queryForm" asp-action="Export" class="form-horizontal">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="form-row mb-4">
+                            <div class="col-2 text-right">
+                                <label asp-for="HospID" class="col-form-label"></label>
+                            </div>
+                            <div class="col-4">
+                                <input asp-for="HospID" class="form-control" placeholder="機構代碼" />
+                            </div>
+                            <div class="col-1">
+                                <input asp-for="HospSeqNo" class="form-control" placeholder="院區別" />
+                            </div>
+                            <div class="col-2 text-right">
+                                <label class="col-form-label text-right">醫事機構名稱</label>
+                            </div>
+                            <div class="col-3">
+                                <input asp-for="HospName" class="form-control" readonly />
+                            </div>
+                        </div>
+                        <div class="form-row mb-4">
+                            <div class="col-2 text-right">
+                                <label asp-for="YearMonthStart" class="col-form-label"></label>
+                            </div>
+                            <div class="col-5">
+                                <input asp-for="YearMonthStart" class="form-control" placeholder="費用年月(起) 如：108/01" />
+                            </div>
+                            <div class="col-5">
+                                <input asp-for="YearMonthEnd" class="form-control" placeholder="費用年月(迄) 如：108/02" />
+                            </div>
+
+                        </div>
+                        <div class="d-flex justify-content-center">
+                            @*<i class="fa fa-file-excel"></i>*@
+                            <input value="院所匯出Excel" type="submit" asp-action="ExportIniOpDtl" asp-route-fileType="xlsx" class="btn btn-primary mr-2" />
+                            <input value="院所匯出ODS" type="submit" asp-action="ExportIniOpDtl" asp-route-fileType="ods" class="btn btn-primary mr-2" />
+                            <input value="藥局匯出Excel" type="submit" asp-action="ExportIniDrDtl" asp-route-fileType="xlsx" class="btn btn-primary mr-2" />
+                            <input value="藥局匯出ODS" type="submit" asp-action="ExportIniDrDtl" asp-route-fileType="ods" class="btn btn-primary mr-2" />
+                            @*<i class="fa fa-file-excel"></i>*@
+                            <button id="btnQuery" type="button" class="btn btn-primary">查詢</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="col-md-12 text-right">
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="col-sm-12 table-responsive">
+                    <table id="DeclareTable" class="table table-striped table-bordered table-hover" role="grid">
+                        <thead>
+                            <tr role="row">
+                                申報資料
+                            </tr>
+                            <tr role="row">
+                                <th data-orderable="false" class="text-nowrap">序號</th>
+                                <th class="text-nowrap">電腦序號</th>
+                                <th class="text-nowrap">費用年月</th>
+                                <th class="text-nowrap">療程年度</th>
+                                <th class="text-nowrap">療程次數</th>
+                                <th class="text-nowrap">初診日</th>
+                                <th class="text-nowrap">週數</th>
+                                <th class="text-nowrap">衛教療程年度</th>
+                                <th class="text-nowrap">衛教療程次數</th>
+                                <th class="text-nowrap">衛教初診日</th>
+                                <th class="text-nowrap">衛教序次</th>
+                                <th class="text-nowrap">藥物申報</th>
+                                <th class="text-nowrap">衛教申報</th>
+                                <th class="text-nowrap">追蹤申報</th>
+                                <th class="text-nowrap">釋出申報</th>
+                                <th class="text-nowrap">申報類別</th>
+                                <th class="text-nowrap">機構代碼</th>
+                                <th class="text-nowrap">申報日期</th>
+                                <th class="text-nowrap">案件類別</th>
+                                <th class="text-nowrap">流水號</th>
+                                <th class="text-nowrap">就醫科別</th>
+                                <th class="text-nowrap">就醫日期</th>
+                                <th class="text-nowrap">治療結束日期</th>
+                                <th class="text-nowrap">出生日期</th>
+                                <th class="text-nowrap">身分證號</th>
+                                <th class="text-nowrap">就醫序號</th>
+                                <th class="text-nowrap">給付類別</th>
+                                <th class="text-nowrap">部分負擔代號</th>
+                                <th class="text-nowrap">主診斷代碼</th>
+                                <th class="text-nowrap">次診斷代碼(一)</th>
+                                <th class="text-nowrap">次診斷代碼(二)</th>
+                                <th class="text-nowrap">給藥日份</th>
+                                <th class="text-nowrap">處方調劑方式</th>
+                                <th class="text-nowrap">醫事人員身分證號</th>
+                                <th class="text-nowrap">藥師身分證號</th>
+                                <th class="text-nowrap">藥費點數</th>
+                                <th class="text-nowrap">診療費點數</th>
+                                <th class="text-nowrap">診察費代碼</th>
+                                <th class="text-nowrap">診察費點數</th>
+                                <th class="text-nowrap">藥事服務費代碼</th>
+                                <th class="text-nowrap">藥事服務費點數</th>
+                                <th class="text-nowrap">醫療費用點數</th>
+                                <th class="text-nowrap">部份負擔金額</th>
+                                <th class="text-nowrap">申請金額</th>
+                                <th class="text-nowrap">性別</th>
+                                <th class="text-nowrap">特定治療項目(一)</th>
+                                <th class="text-nowrap">特定治療項目(二)</th>
+                                <th class="text-nowrap">特定治療項目(三)</th>
+                                <th class="text-nowrap">特定治療項目(四)</th>
+                                <th class="text-nowrap">特定地區醫療服務</th>
+                                <th class="text-nowrap">支援區域</th>
+                                <th class="text-nowrap">實際提供醫療服務之醫事服務機構代號</th>
+                                <th class="text-nowrap">醫事類別</th>
+                                <th class="text-nowrap">代辦部分負擔金額</th>
+                                <th class="text-nowrap">姓名</th>
+                                <th class="text-nowrap">補報原因註記</th>
+                                <th class="text-nowrap">國際疾病分類碼(四)</th>
+                                <th class="text-nowrap">國際疾病分類碼(五)</th>
+                                <th class="text-nowrap">特殊材料明細點數小計</th>
+                                <th class="text-nowrap">矯正機關代號</th>
+                                <th class="text-nowrap">轉檔日期</th>
+                                <th class="text-nowrap">院區別</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@*<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="col-md-12 text-right">
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="col-sm-12 table-responsive">
+                    <table id="DeclareTable2" class="table table-striped table-bordered table-hover" role="grid">
+                        <thead>
+                            <tr role="row">
+                                申報資料
+                            </tr>
+                            <tr role="row">
+                                <th data-orderable="false" class="text-nowrap">序號</th>
+                                <th class="text-nowrap">電腦序號</th>
+                                <th class="text-nowrap">費用年月</th>
+                                <th class="text-nowrap">療程年度</th>
+                                <th class="text-nowrap">療程次數</th>
+                                <th class="text-nowrap">初診日</th>
+                                <th class="text-nowrap">週數</th>
+                                <th class="text-nowrap">衛教療程年度</th>
+                                <th class="text-nowrap">衛教療程次數</th>
+                                <th class="text-nowrap">衛教初診日</th>
+                                <th class="text-nowrap">衛教序次</th>
+                                <th class="text-nowrap">藥物申報</th>
+                                <th class="text-nowrap">衛教申報</th>
+                                <th class="text-nowrap">追蹤申報</th>
+                                <th class="text-nowrap">釋出申報</th>
+                                <th class="text-nowrap">申報類別</th>
+                                <th class="text-nowrap">機構代碼</th>
+                                <th class="text-nowrap">申報日期</th>
+                                <th class="text-nowrap">案件類別</th>
+                                <th class="text-nowrap">流水號</th>
+                                <th class="text-nowrap">就醫科別</th>
+                                <th class="text-nowrap">就醫日期</th>
+                                <th class="text-nowrap">治療結束日期</th>
+                                <th class="text-nowrap">出生日期</th>
+                                <th class="text-nowrap">身分證號</th>
+                                <th class="text-nowrap">就醫序號</th>
+                                <th class="text-nowrap">給付類別</th>
+                                <th class="text-nowrap">部分負擔代號</th>
+                                <th class="text-nowrap">主診斷代碼</th>
+                                <th class="text-nowrap">次診斷代碼(一)</th>
+                                <th class="text-nowrap">次診斷代碼(二)</th>
+                                <th class="text-nowrap">給藥日份</th>
+                                <th class="text-nowrap">處方調劑方式</th>
+                                <th class="text-nowrap">醫事人員身分證號</th>
+                                <th class="text-nowrap">藥師身分證號</th>
+                                <th class="text-nowrap">藥費點數</th>
+                                <th class="text-nowrap">診療費點數</th>
+                                <th class="text-nowrap">診察費代碼</th>
+                                <th class="text-nowrap">診察費點數</th>
+                                <th class="text-nowrap">藥事服務費代碼</th>
+                                <th class="text-nowrap">藥事服務費點數</th>
+                                <th class="text-nowrap">醫療費用點數</th>
+                                <th class="text-nowrap">部份負擔金額</th>
+                                <th class="text-nowrap">申請金額</th>
+                                <th class="text-nowrap">性別</th>
+                                <th class="text-nowrap">特定治療項目(一)</th>
+                                <th class="text-nowrap">特定治療項目(二)</th>
+                                <th class="text-nowrap">特定治療項目(三)</th>
+                                <th class="text-nowrap">特定治療項目(四)</th>
+                                <th class="text-nowrap">特定地區醫療服務</th>
+                                <th class="text-nowrap">支援區域</th>
+                                <th class="text-nowrap">實際提供醫療服務之醫事服務機構代號</th>
+                                <th class="text-nowrap">醫事類別</th>
+                                <th class="text-nowrap">代辦部分負擔金額</th>
+                                <th class="text-nowrap">姓名</th>
+                                <th class="text-nowrap">補報原因註記</th>
+                                <th class="text-nowrap">國際疾病分類碼(四)</th>
+                                <th class="text-nowrap">國際疾病分類碼(五)</th>
+                                <th class="text-nowrap">特殊材料明細點數小計</th>
+                                <th class="text-nowrap">矯正機關代號</th>
+                                <th class="text-nowrap">轉檔日期</th>
+                                <th class="text-nowrap">院區別</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>*@
+
+@section Scripts {
+    @{
+        @await Html.PartialAsync("~/Views/Shared/_DataTables.cshtml")
+        ;
+    }
+    <script type="text/javascript">
+        $(function () {
+            $("#YearMonthStart").datepicker({ dateFormat: 'yy/mm' });
+            $("#YearMonthEnd").datepicker({ dateFormat: 'yy/mm' });
+            $('#HospID,#HospSeqNo').on('keyup', async function () {
+                var hospID = $('#HospID').val();
+                var hospSeqNo = $('#HospSeqNo').val();
+                const { data } = await axios.get('@Url.Action("GetHospName", "HospBasic")', { params: { hospID, hospSeqNo }, hideMask: true });
+                if (data !== undefined) {
+                    $('#HospName').val(data);
+                }
+            });
+        });
+        var $declareTable;
+        var $declareTable2;
+        $(function () {
+            $("#btnQuery").on("click", query);
+        });
+        function query() {
+            if ($declareTable)
+                $declareTable.destroy();
+            //if ($declareTable2)
+            //    $declareTable2.destroy();
+
+            var ajax = function (data, callback, settings) {
+                debugger;
+                var o = $("#queryForm").serializeObject();
+                o.draw = data.draw;
+                o.start = data.start;
+                o.length = data.length;
+                //$.post('@Url.Action("QueryIniOpDtl", "DeclareReport")', o, function (res) {
+                $.post('@Url.Action("Query_IniOpDtl_IniDrDtl", "DeclareReport")', o, function (res) {
+                    if (!res.isSuccess) {
+                        myAlert.error("查詢錯誤", res.errMsg, true);
+                        return;
+                    }
+                    debugger;
+                    callback(res.data);
+                });
+            };
+
+            $declareTable = $("#DeclareTable").DataTable({
+                "scrollY": "600px",//可選，是否固定表格高度，不包括表頭；
+                "scrollCollapse": true,//與scrollY结合使用，是否固定高度，默認false;
+                "serverSide": true,
+                "scrollX": true,
+                "ajax": ajax,
+                "paging": true,
+                "searching": false,
+                "ordering": false,
+                "columns": [
+                    {
+                        className: "sorting_1",
+                        data: null,
+                        width: "5%",
+                        targets: 0,
+                        render: function (data, type, full, meta) {
+                            var settings = meta.settings;
+                            var serial = meta.row + 1 + settings._iDisplayLength * settings._iDisplayStart / settings._iDisplayLength;
+                            return serial;
+                        }
+                    },
+                    { data: "dataId" },
+                    { data: "feeYm" },
+                    { data: "examYear" },
+                    { data: "examTime" },
+                    { data: "firstTreatDate" },
+                    { data: "weekCount" },
+                    { data: "instructExamYear" },
+                    { data: "instructExamTime" },
+                    { data: "firstInstructDate" },
+                    { data: "inctructSerial" },
+                    { data: "medApply" },
+                    { data: "instructApply" },
+                    { data: "traceApply" },
+                    { data: "releaseApply" },
+                    { data: "applType" },
+                    { data: "hospId" },
+                    { data: "applDate" },
+                    { data: "caseType" },
+                    { data: "seqNo" },
+                    { data: "funcType" },
+                    { data: "funcDate" },
+                    { data: "cureEDate" },
+                    { data: "birthday" },
+                    { data: "id" },
+                    { data: "funcSeqNo" },
+                    { data: "payType" },
+                    { data: "partCode" },
+                    { data: "icd9cmCode" },
+                    { data: "icd9cmCode1" },
+                    { data: "icd9cmCode2" },
+                    { data: "drugDays" },
+                    { data: "relMode" },
+                    { data: "prsnId" },
+                    { data: "drugPrsnId" },
+                    { data: "drugDot" },
+                    { data: "cureDot" },
+                    { data: "diagCode" },
+                    { data: "diagDot" },
+                    { data: "dsvcCode" },
+                    { data: "dsvcDot" },
+                    { data: "expDot" },
+                    { data: "partAmt" },
+                    { data: "applDot" },
+                    { data: "idSex" },
+                    { data: "cureItem1" },
+                    { data: "cureItem2" },
+                    { data: "cureItem3" },
+                    { data: "cureItem4" },
+                    { data: "areaService" },
+                    { data: "suppArea" },
+                    { data: "realHospId" },
+                    { data: "hospDataType" },
+                    { data: "agencyPartAmt" },
+                    { data: "name" },
+                    { data: "applCauseMark" },
+                    { data: "icd10cmCode3" },
+                    { data: "icd10cmCode4" },
+                    { data: "metDot" },
+                    { data: "corrHospId" },
+                    { data: "tranDate" },
+                    { data: "hospSeqNo" }
+                ]
+            });
+
+            ////藥局判斷
+            //var ajax2 = function (data, callback, settings) {
+            //    debugger;
+            //    var o = $("#queryForm").serializeObject();
+            //    o.draw = data.draw;
+            //    o.start = data.start;
+            //    o.length = data.length;
+            //    $.post('@Url.Action("QueryIniDrDtl", "DeclareReport")', o, function (res) {
+            //        if (!res.isSuccess) {
+            //            myAlert.error("查詢錯誤", res.errMsg, true);
+            //            return;
+            //        }
+            //        debugger;
+            //        callback(res.data);
+            //    });
+            //};
+            //$declareTable2 = $("#DeclareTable2").DataTable({
+            //    "serverSide": true,
+            //    "scrollX": true,
+            //    "ajax": ajax2,
+            //    "paging": true,
+            //    "searching": false,
+            //    "ordering": false,
+            //    "columns": [
+            //        {
+            //            className: "sorting_1",
+            //            data: null,
+            //            width: "5%",
+            //            targets: 0,
+            //            render: function (data, type, full, meta) {
+            //                var settings = meta.settings;
+            //                var serial = meta.row + 1 + settings._iDisplayLength * settings._iDisplayStart / settings._iDisplayLength;
+            //                return serial;
+            //            }
+            //        },
+            //        { data: "dataId" },
+            //        { data: "feeYm" },
+            //        { data: "examYear" },
+            //        { data: "examTime" },
+            //        { data: "firstTreatDate" },
+            //        { data: "weekCount" },
+            //        { data: "instructExamYear" },
+            //        { data: "instructExamTime" },
+            //        { data: "firstInstructDate" },
+            //        { data: "inctructSerial" },
+            //        { data: "medApply" },
+            //        { data: "instructApply" },
+            //        { data: "traceApply" },
+            //        { data: "releaseApply" },
+            //        { data: "applType" },
+            //        { data: "hospId" },
+            //        { data: "applDate" },
+            //        { data: "caseType" },
+            //        { data: "seqNo" },
+            //        { data: "funcType" },
+            //        { data: "funcDate" },
+            //        { data: "cureEDate" },
+            //        { data: "birthday" },
+            //        { data: "id" },
+            //        { data: "funcSeqNo" },
+            //        { data: "payType" },
+            //        { data: "partCode" },
+            //        { data: "icd9cmCode" },
+            //        { data: "icd9cmCode1" },
+            //        { data: "icd9cmCode2" },
+            //        { data: "drugDays" },
+            //        { data: "relMode" },
+            //        { data: "prsnId" },
+            //        { data: "drugPrsnId" },
+            //        { data: "drugDot" },
+            //        { data: "cureDot" },
+            //        { data: "diagCode" },
+            //        { data: "diagDot" },
+            //        { data: "dsvcCode" },
+            //        { data: "dsvcDot" },
+            //        { data: "expDot" },
+            //        { data: "partAmt" },
+            //        { data: "applDot" },
+            //        { data: "idSex" },
+            //        { data: "cureItem1" },
+            //        { data: "cureItem2" },
+            //        { data: "cureItem3" },
+            //        { data: "cureItem4" },
+            //        { data: "areaService" },
+            //        { data: "suppArea" },
+            //        { data: "realHospId" },
+            //        { data: "hospDataType" },
+            //        { data: "agencyPartAmt" },
+            //        { data: "name" },
+            //        { data: "applCauseMark" },
+            //        { data: "icd10cmCode3" },
+            //        { data: "icd10cmCode4" },
+            //        { data: "metDot" },
+            //        { data: "corrHospId" },
+            //        { data: "tranDate" },
+            //        { data: "hospSeqNo" }
+            //    ]
+            //});
+        }
+    </script>
+}
+

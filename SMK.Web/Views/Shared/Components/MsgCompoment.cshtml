@@ -1,0 +1,62 @@
+﻿@using SMK.Web.AppScope
+@{
+    MsgComponentModel msg;
+    if (TempData.Keys.Contains("$MsgModel"))
+    {
+        msg = TempData.Get<MsgComponentModel>("$MsgModel");
+    }
+    else
+    {
+        msg = new MsgComponentModel();
+    }
+
+}
+<div id="sysMsgArea" style="display:none;">
+    <div id="msgErrorAlert" class="alert alert-danger alert-dismissible">
+        <button type="button" class="close" aria-hidden="true">×</button>
+        <h4><i class="icon fa fa-ban"></i><span class="alert-title"></span> </h4>
+        <span class="alert-msg"></span>
+    </div>
+
+    <div id="msgInfoAlert" class="alert alert-info alert-dismissible">
+        <button type="button" class="close" aria-hidden="true">×</button>
+        <h4><i class="icon fa fa-info"></i> <span class="alert-title"></span></h4>
+        <span class="alert-msg"></span>
+    </div>
+
+    <div id="msgWarningAlert" class="alert alert-warning alert-dismissible">
+        <button type="button" class="close" aria-hidden="true">×</button>
+        <h4><i class="icon fa fa-warning"></i> <span class="alert-title"></span></h4>
+        <span class="alert-msg"></span>
+    </div>
+
+    <div id="msgSuccessAlert" class="alert alert-success alert-dismissible">
+        <button type="button" class="close" aria-hidden="true">×</button>
+        <h4><i class="icon fa fa-check"></i> <span class="alert-title"></span></h4>
+        <span class="alert-msg"></span>
+    </div>
+</div>
+<script>
+
+    window.addEventListener("load", function () {
+        var title = "@Html.Raw(msg.Title)";
+        var msg = "@Html.Raw(msg.Detail)";
+
+        switch ("@msg.Type.ToString().ToLower()") {
+            case "success":
+                myAlert.success(title, msg, true);
+                break;
+            case "info":
+                myAlert.info(title,msg,true);
+                break;
+            case "warning":
+                myAlert.warning(title,msg,true);
+                break;
+            case "error":
+                myAlert.error(title,msg,true);
+                break;
+        }
+
+    });
+
+</script>

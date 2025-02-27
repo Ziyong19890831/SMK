@@ -1,0 +1,29 @@
+﻿<!-- Content Header (Page header) -->
+@using SMK.Web.Services
+@using SMK.Web.Heppers
+@inject AuthService authService
+@{
+    var privlegeNodeModel = authService.GetPrivilegeNodeModel(Html.GetCurrentControllerName(), Html.GetCurrentActionName());
+}
+<section class="content-header container">
+    @await Html.PartialAsync("~/Views/Shared/Components/MsgCompoment.cshtml")
+    @if (privlegeNodeModel != null)
+    {
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h4>@privlegeNodeModel.ParentNode.Name - @privlegeNodeModel.Name</h4>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item">
+                        <a asp-controller="@privlegeNodeModel.ParentNode.ControllerName" 
+                           asp-action="@privlegeNodeModel.ParentNode.ActionName">
+                            @privlegeNodeModel.ParentNode.Name
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active">@privlegeNodeModel.Name</li>
+                </ol>
+            </div>
+        </div>
+    }
+</section>

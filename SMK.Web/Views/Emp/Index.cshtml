@@ -1,0 +1,127 @@
+﻿@model IEnumerable<SMK.Data.Entity.GenEmpData>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card rounded-lg">
+            <div class="card-header">
+                <div class="col-md-12 text-left text-secondary">
+                    人員帳號管理<br />
+                    此頁為新增、編輯、刪除人員帳號之功能。
+                    <br />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="col-md-3">
+                    <a asp-action="Create" class="btn btn-primary"><i class="fa fa-plus"></i> 新增</a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="col-sm-12">
+                    <table class="jqDataTable table table-striped table-bordered table-hover " role="grid">
+                        <thead>
+                            <tr role="row">
+                                <th class="text-nowrap">序號</th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.Account)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.Name)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.Enable)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.LastLoginDate)
+                                </th>
+                                <th>
+                                    鎖定
+                                </th>
+                                <th class="text-nowrap">管理</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                int i = 1;
+                            }
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td class="sorting_1">@(i++)</td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Account)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Name)
+                                    </td>
+                                    <td>
+                                        @(item.Enable ? "啟用" : "停用")
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.LastLoginDate)
+                                    </td>
+                                    <td>
+                                        @if (item.LoginError >= 2 && item.LoginErrorAt.HasValue && item.LoginErrorAt.Value.AddMinutes(30) > DateTime.Now)
+                                        {
+                                            <span>是</span>
+                                        }
+                                        else
+                                        {
+                                            <span>否</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary">編輯</a>
+                                        @if (item.LoginError >= 2 && item.LoginErrorAt.HasValue && item.LoginErrorAt.Value.AddMinutes(30) > DateTime.Now)
+                                        {
+                                            <a asp-action="Release" asp-route-id="@item.Id" class="btn btn-warning">解鎖</a>
+                                        }
+                                        <a asp-action="Delete" asp-route-id="@item.Id"
+                                           data-ajax-failure="onFailed" data-ajax-success="onSuccess"
+                                           data-ajax="true" data-ajax-method="POST"
+                                           class="btn btn-danger fn-delete">刪除</a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    @{
+        @await Html.PartialAsync("~/Views/Shared/_DataTables.cshtml")
+        ;
+    }
+    <script type="text/javascript">
+        function onSuccess(data) {
+            console.log(data);
+            if (data.isSuccess) {
+                myAlert.success("刪除成功", "刪除資料成功", true);
+                $(this).closest("tr").detach();
+            }
+            else {
+                myAlert.error("刪除錯誤", data.errMsg, true);
+            }
+        }
+
+        function onFailed(data) {
+            console.log(data);
+            myAlert.error("刪除錯誤", data.errMsg, true);
+        }
+    </script>
+}
+

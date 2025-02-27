@@ -1,0 +1,24 @@
+﻿
+<header class="main-header navbar navbar-expand-md navbar-dark navbar-lightblue justify-content-center">
+    <div class="container-fruit d-flex">
+        <div class="d-flex">
+            <button class="navbar-toggler order-1" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <a asp-action="Index" asp-controller="Home" class="navbar-brand">
+                <span class="brand-text font-weight-light"><b>戒菸管理</b></span>
+            </a>
+
+
+            <div class="collapse navbar-collapse order-3" id="navbarCollapse">
+                <!-- Left navbar links -->
+                @await Component.InvokeAsync("Menu")
+            </div>
+
+            <!-- Right navbar links -->
+            <ul class="order-1 order-md-3 navbar-nav navbar-no-expand ml-auto">
+                @await Component.InvokeAsync("MenuUser")
+            </ul>
+        </div>
+    </div>
+</header>

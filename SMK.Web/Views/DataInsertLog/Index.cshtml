@@ -1,0 +1,73 @@
+﻿@model IEnumerable<SMK.Data.Entity.DataInsertLog>
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="row">
+    <div class="col-12">
+        <div class="card rounded-lg">
+            <div class="card-header">
+                <div class="col-md-12 text-left text-secondary">
+                    資料匯入紀錄<br />
+                    此頁具檢視資料匯入紀錄之功能，包括匯入資料名稱、匯入結束時間與筆數。<br />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="col-sm-12">
+                    <table class="jqDataTable table table-striped table-bordered table-hover " role="grid">
+                        <thead>
+                            <tr role="row">
+                                <th>
+                                    @Html.DisplayNameFor(model => model.ISNO)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.FileName)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.FinishDate)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.RecordCount)
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.ISNO)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.FileName)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.FinishDate)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.RecordCount)
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    @{
+        @await Html.PartialAsync("~/Views/Shared/_DataTables.cshtml")
+        ;
+    }
+}
+

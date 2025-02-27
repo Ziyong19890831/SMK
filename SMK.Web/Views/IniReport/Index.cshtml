@@ -1,0 +1,164 @@
+﻿@model IniReportQueryModel
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="col-sm-12">
+                    <form id="queryForm" asp-action="Export" class="form-horizontal">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="form-row mb-4">
+                            <div class="row col-12">
+                                <label asp-for="ContractYmS" class="col-2 col-form-label text-right"></label>
+                                <div class="col-4 row">
+                                    <input asp-for="ContractYmS" class="form-control" placeholder="費用年月(起) 如：108/01" />
+                                </div>
+                                <div class="col-4">
+                                    <input asp-for="ContractYmE" class="form-control" placeholder="費用年月(迄) 如：108/02" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row mb-4">
+                            <div class="row col-12">
+                                <label asp-for="NhiYmS" class="col-2 col-form-label text-right"></label>
+                                <div class="col-4 row">
+                                    <input asp-for="NhiYmS" class="form-control" placeholder="費用年月(起) 如：108/01" />
+                                </div>
+                                <div class="col-4">
+                                    <input asp-for="NhiYmE" class="form-control" placeholder="費用年月(迄) 如：108/02" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-center">
+                            @*<i class="fa fa-file-excel"></i>*@
+                            <input value="匯出Excel" type="submit" asp-action="Export" asp-route-fileType="xlsx" class="btn btn-primary mr-2" />
+                            <input value="匯出ODS" type="submit" asp-action="Export" asp-route-fileType="ods" class="btn btn-primary mr-2" />
+                            @*<i class="fa fa-file-excel"></i>*@
+                            <button id="btnQuery" type="button" class="btn btn-primary">查詢</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="col-md-12 text-right">
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="col-sm-12">
+                    <table id="DeclareTable" class="table table-striped table-bordered table-hover " role="grid">
+                        <thead>
+                            <tr role="row">
+                                <th data-orderable="false" class="text-nowrap">序號</th>
+                                <th>合約年月</th>
+                                <th>合約機構數_排除解約機構</th>
+                                <th>合約機構數_累計(含解約機構)</th>
+                                <th>執行機構數_累計(未排除解約人員)</th>
+                                <th>合約人員數_排除解約人員</th>
+                                <th>合約人員數_累計(含解約人員)</th>
+                                <th>執行人員數_累計(未排除解約人員)</th>
+                                <th>健保年月</th>
+                                <th>總計人次(用藥+衛教)</th>
+                                <th>用藥人次</th>
+                                <th>衛教人次</th>
+                                <th>總計人數(用藥+衛教)</th>
+                                <th>用藥人數</th>
+                                <th>衛教人數</th>
+                                <th>用藥 + 衛教人數</th>
+                                <th>給藥週數</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{ @await Html.PartialAsync("~/Views/Shared/_DataTables.cshtml"); }
+    <script type="text/javascript">
+        var $declareTable;
+        $(function () {
+            $("#btnQuery").on("click", query);
+        });
+         $(function() {
+            $("#ContractYmS").datepicker({ dateFormat: 'yyy/mm' });
+            $("#ContractYmE").datepicker({ dateFormat: 'yyy/mm' });
+            $("#NhiYmS").datepicker({ dateFormat: 'yyy/mm' });
+            $("#NhiYmE").datepicker({ dateFormat: 'yyy/mm' });
+        });
+        function query() {
+            if($declareTable)
+                $declareTable.destroy();
+
+            var ajax = function (data, callback, settings) {
+                debugger;
+                var o = $("#queryForm").serializeObject();
+                o.draw = data.draw;
+                o.start = data.start;
+                o.length = data.length;
+                $.post('@Url.Action("Query", "IniReport")', o, function (res) {
+                    if (!res.isSuccess) {
+                        myAlert.error("查詢錯誤", res.errMsg, true);
+                        return;
+                    }
+                    debugger;
+                    callback(res.data);
+                });
+            };
+            $declareTable = $("#DeclareTable").DataTable({
+                "scrollY": "600px",//可選，是否固定表格高度，不包括表頭；
+                "scrollCollapse": true,//與scrollY结合使用，是否固定高度，默認false;
+                "scrollX": true,
+                "serverSide": true,
+                "ajax": ajax,
+                "paging": true,
+                "searching": false,
+                "ordering": false,
+                "columns": [
+                    {
+                        className:"sorting_1",
+                        data: null,
+                        width: "5%",
+                        targets: 0,
+                        render: function (data, type, full, meta) {
+                            var settings = meta.settings;
+                            var serial = meta.row + 1 + settings._iDisplayLength * settings._iDisplayStart / settings._iDisplayLength;
+                            return serial;
+                        }
+                    },
+                    { data: "contractYM" },
+                    { data: "contractTotal" },
+                    { data: "contractAllTotal" },
+                    { data: "runTimeContractAllTotal" },
+                    { data: "contractPersonTotal" },
+                    { data: "contractPersonAllTotal" },
+                    { data: "runTimeContractPersonAllTotal" },
+                    { data: "nhiYM" },
+                    { data: "treatInstructCnt" },
+                    { data: "treatCnt" },
+                    { data: "instructCnt" },
+                    { data: "treatInstructSum" },
+                    { data: "treatSum" },
+                    { data: "instructSum" },
+                    { data: "treatAddInstruct" },
+                    { data: "treatWeek" },
+                ]
+            });
+        }
+    </script>
+}
+

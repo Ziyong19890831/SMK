@@ -1,0 +1,106 @@
+﻿@model PrsnBasicViewModel
+@using SMK.Web.Services.Foundation;
+@using SMK.Data.Entity;
+@using SMK.Web.Heppers;
+@inject PrsnBasicsService prsnBasicsService;
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var prsnTypeList = await prsnBasicsService.GetSelectLists<GenPrsnType>(Context => Context.GenPrsnType,
+                                                                    x => x.PrsnType,
+                                                                    x => x.PrsnTypeName);
+    var specialList = await prsnBasicsService.GetSelectLists<GenSpecial>(Context => Context.GenSpecial,
+                                                                    x => x.SpecialistNo,
+                                                                    x => x.SpecialistName);
+    var smkContractsList = await prsnBasicsService.GetSelectLists<GenSmkcontract>(
+                                                    context => context.GenSmkcontract,
+                                                    x => x.SmkcontractType,
+                                                    x => x.SmkcontractName);
+}
+
+<div class="row">
+    <div class="col-12">
+        <form asp-action="Create">
+            <div class="card">
+                <div class="card-header">醫事人員資料</div>
+                <div class="card-body">
+                    <div class="col-sm-12">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <label asp-for="PrsnId" class="control-label"></label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control mr-2" asp-for="PrsnId" placeholder="">
+                                </div>
+                                <span asp-validation-for="PrsnId" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label asp-for="PrsnName" class="control-label"></label>
+                                <input type="text" class="form-control" asp-for="PrsnName" placeholder="">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <label asp-for="PrsnType" class="control-label"></label>
+                                <select asp-items="prsnTypeList"
+                                        asp-for="PrsnType"
+                                        class="form-control col-sm-7"
+                                        id="EndReasonNo">
+                                    <option value="">請選擇</option>
+                                </select>
+                                <span asp-validation-for="PrsnType" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label asp-for="PrsnBirthday" class="control-label col-sm-5"></label>
+                                <div class="col-sm-7">
+                                    <input asp-for="PrsnBirthday" type="text" class="form-control smkdate" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <label asp-for="MajorSpecialistNo" class="control-label"></label>
+                                <select asp-items="specialList"
+                                        asp-for="MajorSpecialistNo"
+                                        class="form-control"
+                                        id="EndReasonNo">
+                                    <option value="">請選擇</option>
+                                </select>
+                                <span asp-validation-for="MajorSpecialistNo" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label asp-for="SubSpecialistNo" class="control-label"></label>
+                                <select asp-items="specialList"
+                                        asp-for="SubSpecialistNo"
+                                        class="form-control"
+                                        id="EndReasonNo">
+                                    <option value="">請選擇</option>
+                                </select>
+                                <span asp-validation-for="SubSpecialistNo" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-2">
+                                <label asp-for="Pemail" class="control-label"></label>
+                                <input type="text" class="form-control" asp-for="Pemail" placeholder="">
+                                <span asp-validation-for="Pemail" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12 mb-2">
+                                <label asp-for="Remark" class="control-label"></label>
+                                <input type="text" class="form-control" asp-for="Remark" placeholder="">
+                                <span asp-validation-for="Remark" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="form-group text-center">
+                            <input type="submit" value="新增" class="btn btn-primary" />
+                            <a asp-action="Create" class="btn btn-primary">重填</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+

@@ -1,0 +1,171 @@
+﻿@model CallBoardViewModel
+@{
+    ViewData["Title"] = "Edit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<section class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="col-sm-12">
+                    <form asp-action="Edit" enctype="multipart/form-data">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <input asp-for="SysNo" class="form-control" type="hidden" />
+                        <div class="form-group">
+                            <label asp-for="AnnouncementDate" class="control-label"></label>
+                            <input asp-for="AnnouncementDate" class="form-control" />
+                            <span asp-validation-for="AnnouncementDate" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <div>
+                                <label asp-for="Note" class="control-label"></label>
+                                <span>(<span id="ChangeTextArea">0</span>/500)</span>
+                            </div>
+                            <textarea asp-for="Note" class="form-control" rows="10"></textarea>
+                            <span asp-validation-for="Note" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <div>
+                                <label class="control-label">上傳檔案</label>
+                                <img src="~/image/details_open.png" alt="新增上傳檔案" title="新增上傳檔案" onclick="AddFiles()" />
+                            </div>
+                        </div>
+                        <div id="OnFile">
+                            <div id="All_Files">
+                                <div id="files_1" class="input-group">
+                                    <div class="custom-file">
+                                        <input type="file" class="custom-file-input" id="file-uploader_1" onchange="ChangeFilesName(this)" data-target="file-uploader" name="files" accept=".doc, .docx, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, .xls, .xlsx, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, .pdf, application/pdf" value="0" />
+                                        <label class="custom-file-label" for="file-uploader_1">選擇檔案，檔名需為Word, Excel, PDF等檔案格式</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex flex-row flex-wrap">
+                            @if (Model.Files != null && Model.Files.Count > 0)
+                            {
+                                int i = 1;
+                                @foreach (var item in Model.Files)
+                                {
+                                    <div class="mt-3 ">
+                                        <a class="ml-3 mr-1" href="~/CallBoard/CallBoardGetFiles?filePath=@Model.SysNo/@item.Item2" target="_blank" title="@item.Item2">附件_@i</a>
+                                        <a class="btn btn-danger" onclick="confirmDelete(@Model.SysNo,this)">刪除</a>
+                                    </div>
+                                    i++;
+                                }
+                            }
+                        </div>
+                        <div class="d-flex justify-content-end mt-3">
+                            <button type="button" class="btn btn-primary mr-2" onclick="javascript:history.back(-1);">返回上一頁</button>
+                            <button type="submit" class="btn btn-primary">修改</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    @{
+        @await Html.PartialAsync("~/Views/Shared/_DataTables.cshtml")
+        ;
+    }
+    <script type="text/javascript">
+        $(document).ready(function () {
+            keyupdata();
+            $("#Note").keyup(function () {
+                keyupdata();
+            });
+        });
+
+        const keyupdata = () => {
+            var text = $("#Note").val();
+            var textLength = text.length + (text.match(/\n/g) || []).length + (text.match(/ /g) || []).length;
+            $("#ChangeTextArea").text(textLength);
+        }
+
+        /**
+         * 上傳檔案後，更新上檔案名稱
+         */
+        const ChangeFilesName = (inputElement) => {
+            // 取得檔案元素
+            const fileElement = inputElement.files[0];
+            // 取得檔案名稱
+            const fileName = fileElement.name;
+            // 選擇相應的 label 元素
+            const labelElement = inputElement.nextElementSibling;
+            // 將檔案名稱設定為 label 元素的文字內容
+            labelElement.innerText = fileName;
+        }
+
+
+        /**
+         * 新增檔案上傳欄位
+         */
+        var fileNum = 1;
+        var All_FilesNum = 1;
+        const AddFiles = () => {
+            if (fileNum % 2 != 0) {
+                $(`#files_${All_FilesNum}`).append(
+                    `
+                    <div class="custom-file">
+                        <input type="file" class="custom-file-input" id="file-uploader_${fileNum + 1}" onchange="ChangeFilesName(this)" data-target="file-uploader" name="files" accept=".doc, .docx, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, .xls, .xlsx, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, .pdf, application/pdf" value="0" />
+                        <label class="custom-file-label" for="file-uploader_${fileNum + 1}">選擇檔案，檔名需為Word, Excel, PDF等檔案格式</label>
+                    </div>
+                    `
+                )
+                fileNum++;
+                All_FilesNum++;
+            } else {
+                All_FilesNum++;
+                $(`#All_Files`).append(
+                    `
+                    <div id="files_${All_FilesNum}" class="input-group">
+                        <div class="custom-file">
+                            <input type="file" class="custom-file-input" id="file-uploader_${fileNum + 1}" onchange="ChangeFilesName(this)" data-target="file-uploader" name="files" accept=".doc, .docx, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, .xls, .xlsx, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, .pdf, application/pdf" value="0" />
+                            <label class="custom-file-label" for="file-uploader_${fileNum + 1}">選擇檔案，檔名需為Word, Excel, PDF等檔案格式</label>
+                        </div>
+                    </div>
+                        `
+                )
+                fileNum++;
+            }
+        }
+
+        function confirmDelete(Sysno, clickedButton) {
+            // 找到父元素 div
+            var parentDiv = clickedButton.parentElement;
+            // 找到具有 title 属性的子元素 a
+            var link = parentDiv.querySelector('a[title]');
+            // 獲取 title 属性的值
+            var title = link.getAttribute('title');
+            // 獲取文本内容
+            var textContent = link.textContent.trim();
+            var result = confirm(`確定要刪除【${textContent}【${title}】】嗎？`);
+
+            if (result) {
+                $.ajax({
+                    url: '@Url.Action("DeletFiles", "CallBoard")',
+                    type: 'POST',
+                    data: { Sysno: Sysno, FileNames: title },
+                    success: function (data) {
+                        // 在這裡處理返回的JSON結果
+                        console.log(data);
+                        if (data) {
+                            myAlert.success("刪除成功", `${title}已成功刪除。`, true);
+                            setTimeout(function () {
+                                window.location.reload();
+                            }, 1500); // 這裡的 5000 是延遲的毫秒數，也就是 5 秒
+                            return;
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        // 在這裡處理錯誤
+                        console.error(xhr.responseText); // 輸出到控制台以便檢查錯誤
+                    }
+                });
+            }
+        }
+    </script>
+}

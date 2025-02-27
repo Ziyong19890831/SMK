@@ -1,0 +1,119 @@
+﻿@model HospBasicExportQueryModel
+@using SMK.Data.Entity;
+@using SMK.Data.Enums;
+@using SMK.Web.Services.Foundation;
+@inject HospContractService hospContractService;
+@inject GenHospContService genHospContService;
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var hospStatusList = hospContractService.GetEnumList<HospStatus>().Where(e => Convert.ToInt16(e.Value) <= 3).ToList();
+    var hospContList = genHospContService.GenHospContSelectListItem();
+}
+
+<div class="row mb-4">
+    <div id="app" class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="col-sm-12">
+                    <form id="queryForm" class="form-horizontal" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="form-row mb-4 row">
+                            <div class="form-inline col-sm-6">
+                                <label asp-for="HospCont" class="col-sm-5 col-form-label"></label>
+                                <div class="col-sm-3">
+                                    <select asp-items="hospContList"
+                                            asp-for="HospCont"
+                                            class="form-control">
+                                        <option value="">請選擇</option>
+                                    </select>
+                                </div>
+                                <span asp-validation-for="HospCont" class="text-danger col-sm-3"></span>
+                            </div>
+                            <div class="form-inline col-sm-6">
+                                <label asp-for="HospStatus" class="col-sm-5 col-form-label text-left text-md-right"></label>
+                                <div class="col-sm-3">
+                                    <select asp-items="hospStatusList"
+                                            asp-for="HospStatus"
+                                            class="form-control">
+                                        <option value="">請選擇</option>
+                                    </select>
+                                </div>
+                                <span asp-validation-for="HospStatus" class="text-danger col-sm-3"></span>
+                            </div>
+                        </div>
+                        <div class="form-row mb-4">
+                            <div class="form-inline col-6">
+                                <label asp-for="CouldTreat" class="col-sm-5 col-form-labell text-left text-md-right"></label>
+                                <div class="col-sm-7">
+                                    <input type="checkbox" class="form-control" id="CouldTreat" placeholder="">
+                                </div>
+                            </div>
+                            <div class="form-inline col-6">
+                                <label asp-for="CouldInstruct" class="col-sm-5 col-form-labell text-left text-md-right"></label>
+                                <div class="col-sm-7">
+                                    <input type="checkbox" class="form-control" id="CouldInstruct" placeholder="">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row mb-4">
+                            <div class="form-inline col-6">
+                                <label asp-for="ContractType2" class="col-sm-5 col-form-labell text-left text-md-right"></label>
+                                <div class="col-sm-7">
+                                    <input type="checkbox" class="form-control" id="ContractType2" placeholder="">
+                                </div>
+                            </div>
+                            <div class="form-inline col-6">
+                                <label asp-for="ContractType3" class="col-sm-5 col-form-labell text-left text-md-rightt"></label>
+                                <div class="col-sm-7">
+                                    <input type="checkbox" class="form-control" id="ContractType3" placeholder="">
+                                </div>
+                            </div>
+                        </div>
+                        @*<div class="d-flex justify-content-around">
+                        <button type="button" @@click="exportEmail('xlsx')" class="btn btn-primary mr-2">匯出e-mail清單(EXCEL)</button>
+                        <button type="button" @@click="exportEmail('ods')" class="btn btn-primary mr-2">匯出e-mail清單(ODS)</button>
+                        </div>*@
+                        <div class="d-flex justify-content-around flex-column flex-md-row flex-wrap  mt-3">
+                            <button type="button" @@click="exportPrsn('xlsx')" class="btn btn-primary mr-2 mt-3 mt-md-0">匯出醫事機構清單(EXCEL)</button>
+                            <button type="button" @@click="exportPrsn('ods')" class="btn btn-primary mr-2 mt-3 mt-md-0">匯出醫事機構清單(ODS)</button>
+                            <button type="button" @@click="exportContract('xlsx')" class="btn btn-primary mr-2 mt-3 mt-md-0">匯出醫事人員合約清單(EXCEL)</button>
+                            <button type="button" @@click="exportContract('ods')" class="btn btn-primary mr-2 mt-3 mt-md-0">匯出醫事人員合約清單(ODS)</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script type="text/javascript">
+        const app = new Vue({
+            el: '#app',
+            data: {
+                showModal: false,
+                hospContTypeSelected: false,
+                options: [],
+                hospContTypes: [],
+            },
+            methods: {
+                exportPrsn: function (fileTypes) {
+                    let url = `@Url.Action("HospBasic", "DataExport")` + '?fileType=' + fileTypes;
+                    $("#queryForm").attr("action", url);
+                    $("#queryForm").submit();
+                },
+                exportContract: function (fileTypes) {
+                    let url = `@Url.Action("PrsnContract", "DataExport")`+'?fileType=' + fileTypes;
+                    $("#queryForm").attr("action", url);
+                    $("#queryForm").submit();
+                },
+                exportEmail: function (fileTypes) {
+                    let url = `@Url.Action("Email", "DataExport")`+'?fileType=' + fileTypes;
+                    $("#queryForm").attr("action", url);
+                    $("#queryForm").submit();
+                }
+            },
+        });
+    </script>
+}

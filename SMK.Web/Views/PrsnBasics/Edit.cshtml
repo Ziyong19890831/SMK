@@ -1,0 +1,731 @@
+﻿@model PrsnBasicViewModel
+@using SMK.Web.Services.Foundation;
+@using SMK.Data.Entity;
+@using SMK.Web.Heppers;
+@inject PrsnBasicsService prsnBasicsService;
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var prsnTypeList = await prsnBasicsService.GetSelectLists<GenPrsnType>(Context => Context.GenPrsnType,
+                                                                    x => x.PrsnType,
+                                                                    x => x.PrsnTypeName);
+    var licenseTypeList = await prsnBasicsService.GetSelectLists<GenLicenceType>(Context => Context.GenLicenceType,
+                                                                    x => x.LicenceType,
+                                                                    x => x.LicenceName);
+    var specialList = await prsnBasicsService.GetSelectLists<GenSpecial>(Context => Context.GenSpecial,
+                                                            x => x.SpecialistNo,
+                                                            x => x.SpecialistName);
+    var SmkcontractsList = await prsnBasicsService.GetSelectLists<GenSmkcontract>(context => context.GenSmkcontract,
+                                                    x => x.SmkcontractType,
+                                                    x => x.SmkcontractName);
+    var prsnEndReasonList = await prsnBasicsService.GetSelectLists<GenPrsnEndReason>(context => context.GenPrsnEndReason,
+                                                     x => x.EndReasonNo,
+                                                     x => x.EndReasonName);
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card rounded-lg">
+            <div class="card-header">
+                <div class="col-md-12 text-left text-secondary">
+                    編輯醫事人員資料<br />
+                    此頁為新增、編輯、檢視醫事人員列表之功能。<br />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <form asp-action="Edit">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">醫事人員資料</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="col-sm-12" id="prsnBasic">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <label asp-for="PrsnId" class="control-label"></label>
+                                <div class="input-group">
+                                    <label id="lblPrsnId" class="form-control"></label>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label asp-for="PrsnName" class="control-label"></label>
+                                <input id="prsnName" type="text" class="form-control" placeholder="">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <label asp-for="PrsnType" class="control-label"></label>
+                                <select asp-items="prsnTypeList"
+                                        class="form-control col-sm-7"
+                                        id="prsnType">
+                                    <option value="">請選擇</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label asp-for="PrsnBirthday" class="control-label col-sm-5"></label>
+                                <div class="col-sm-7">
+                                    <input id="prsnBirthday" type="text" class="form-control smkdate" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <label asp-for="MajorSpecialistNo" class="control-label"></label>
+                                <select asp-items="specialList"
+                                        class="form-control"
+                                        id="majorSpecialistNo">
+                                    <option value="">請選擇</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label asp-for="SubSpecialistNo" class="control-label"></label>
+                                <select asp-items="specialList"
+                                        class="form-control"
+                                        id="subSpecialistNo">
+                                    <option value="">請選擇</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-2">
+                                <label asp-for="Pemail" class="control-label"></label>
+                                <input type="text" class="form-control" id="prsnEmails" placeholder="">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12 mb-2">
+                                <label asp-for="Remark" class="control-label"></label>
+                                <input type="text" class="form-control" id="remark" placeholder="">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button type="button" class="btn btn-primary" id="btnPrsnBasicSave">儲存</button>
+                    <button type="button" class="btn btn-danger" id="btnPrsnBasicRemove">刪除</button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">證照資料</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-primary" id="addLicence">新增證照資料</button>
+                        <button id="updateLicence" type="button" class="btn btn-tool"
+                                title="同步證照資料">
+                            <i class="fas fa-sync"></i>
+                        </button>
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="col-sm-12">
+                        <table id="licenceTable" class="table table-striped table-bordered table-hover " role="grid">
+                            <thead>
+                                <tr role="row">
+                                    <th class="text-nowrap">
+                                        序號
+                                    </th>
+                                    <th class="text-nowrap">證書類別</th>
+                                    <th class="text-nowrap">證書證號</th>
+                                    <th class="text-nowrap">證書有效期限</th>
+                                    <th class="text-nowrap">備註</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer"></div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">醫事人員合約</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-primary" id="addContract">新增合約資料</button>
+                        <button id="updateaddContract" type="button" class="btn btn-tool"
+                                title="更新合約資料">
+                            <i class="fas fa-sync"></i>
+                        </button>
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="col-sm-12">
+                        <table id="prsnContractTable" class="table table-striped table-bordered table-hover " role="grid">
+                            <thead>
+                                <tr role="row">
+                                    <th class="text-nowrap">
+                                        序號
+                                    </th>
+                                    <th class="text-nowrap">醫事機構名稱</th>
+                                    <th class="text-nowrap">合約類別</th>
+                                    <th class="text-nowrap">合約生效日</th>
+                                    <th class="text-nowrap">合約終止日</th>
+                                    <th class="text-nowrap">終止原因</th>
+                                    <th class="text-nowrap">功能</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal" id="modal-prsnLicence" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">證照資料</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="card">
+                    <div class="card-header">證照資料</div>
+                    <div class="card-body" id="prsnLicenceModal">
+                        <div class="col-sm-12">
+                            <div class="row">
+                                <div class="col-md-6 mb-2">
+                                    <label class="control-label">證書類別</label>
+                                    <select asp-items="licenseTypeList"
+                                            class="form-control col-sm-7"
+                                            id="selLicenceType">
+                                        <option value="">請選擇</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <label class="control-label">證書證號</label>
+                                    <div class="input-group">
+                                        <input type="text" id="txtLicenceNo" class="form-control" placeholder="" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12 mb-2">
+                                    <label class="control-label">證書有效期限</label>
+                                    <div class="form-inline">
+                                        <input id="txtCertStartDate" type="text" class="form-control" placeholder="yyyyMMdd">～
+                                        <input type="text" class="form-control" id="txtCertEndDate" placeholder="yyyyMMdd">
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12 mb-2">
+                                    <label asp-for="Remark" class="control-label"></label>
+                                    <input type="text" class="form-control" id="txtRemark" placeholder="">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="btnPrsnLicenceSave">儲存</button>
+            </div>
+        </div>
+    </div>
+</div>
+@*<div class="modal" id="modal-prsnContract" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">醫事人員合約資料</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="card">
+                    <div class="card-header">醫事人員合約</div>
+                    <div class="card-body" id="hospContractModal">
+                        <div class="col-sm-12">
+                            <div class="row">
+                                <div class="col-md-6 mb-2">
+                                    <label class="control-label">醫事機構代碼</label>
+                                    <input type="hidden" id="prsnContractId" />
+                                    <div class="input-group">
+                                        <input id="txtHospId" type="text" class="form-control disabledInView">
+                                        <input id="txtHospSeqNo" type="text" class="form-control disabledInView">
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <label class="control-label">醫事機構名稱</label>
+                                    <div class="input-group">
+                                        <input id="txtHospName" type="text" class="form-control disabledInView">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-2">
+                                    <label class="control-label">合約類別</label>
+                                    <select asp-items="SmkcontractsList"
+                                            class="form-control col-sm-7"
+                                            id="selsmkcontractType">
+                                        <option value="">請選擇</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <label class="control-label">合約生效日</label>
+                                    <input id="txtPrsnStartDate" type="text" class="form-control smkdate" placeholder="">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-2">
+                                    <label class="control-label">合約終止日</label>
+                                    <input type="text" class="form-control smkdate" id="txtPrsnEndDate" placeholder="">
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <label class="control-label">終止原因</label>
+                                    <select asp-items="prsnEndReasonList"
+                                            class="form-control"
+                                            id="selEndReason">
+                                        <option value="">請選擇</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-2">
+                                    <label class="control-label">可治療</label>
+                                    <input type="checkbox" class="form-control" id="chkCouldTreat" placeholder="">
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <label class="control-label">可衛教</label>
+                                    <input type="checkbox" class="form-control" id="chkCouldInstruct" placeholder="">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12 mb-2">
+                                    <label asp-for="Remark" class="control-label"></label>
+                                    <input type="text" class="form-control" id="txtRemark" placeholder="">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-2">
+                                    <label class="control-label">建立日期</label>
+                                    <div class="input-group">
+                                        <input type="text" id="txtCreateDate" class="form-control" disabled>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <label class="control-label">修改日期</label>
+                                    <div class="input-group">
+                                        <input type="text" id="txtModifyDate" class="form-control" disabled>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="btnPrsnContractSave">儲存</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>*@
+
+@section Scripts {
+    @{
+        @await Html.PartialAsync("~/Views/Shared/_DataTables.cshtml")
+        ;
+    }
+    <script type="text/javascript">
+        var json = @Html.Raw(Json.Serialize(@Model));
+        console.log(json);
+        var $prsnContractTable;
+        var $prsnLicencesTable;
+        var hospNameCache = {};
+        $(function () {
+            bindPrsnBasic();
+            if (json.prsnContracts)
+                bindPrsnContracts(json.prsnContracts);
+            syncLicence();
+            $("#btnPrsnContractSave").on("click", prsnContractSave);
+            $("#btnPrsnLicenceSave").on("click", prsnLicenceSave);
+            $("#btnPrsnBasicSave").on("click", prsnBasicSave);
+            $("#btnPrsnBasicRemove").on("click", prsnBasicRemove);
+            $("#updateLicence").on("click", syncLicence);
+            $('#updateaddContract').on("click", function () {
+                window.location.reload();
+            })
+            $("#addContract").on("click", function () {
+                //$("#modal-prsnContract").modal('toggle');
+                //$("#modal-prsnContract")
+                //    .find('input,select')
+                //    .each(function () {
+                //        $(this).val('');
+                //        $(this).prop('checked', false);
+                //    });
+                //toggleDisabled(false);
+                window['data'] = null;
+                var id = $('#lblPrsnId').text();
+                addwindow = window.open(`../InsertPrsnContractView?id=${id}`, '新增人員合約', 'toolbar=yes,location=no,status=no,menubar=no,scrollbars=yes,resizable=yes,width=1000,height=700');
+                addwindow.onbeforeunload = function () {
+                    window['data'] = null;
+                    window.location.reload();
+                }
+            });
+            $("#addLicence").on("click", function () {
+                $("#modal-prsnLicence").modal('toggle');
+                $("#modal-prsnLicence")
+                    .find('input,select')
+                    .each(function () {
+                        $(this).val('');
+                        $(this).prop('checked', false);
+                    });
+                toggleDisabled(false);
+            });
+            toggleDisabled();
+            $("#modal-prsnContract,#modal-prsnLicence").on("hidden.bs.modal", function () {
+                toggleDisabled(true);
+            });
+
+            $("#txtHospName").autocomplete({
+                minLength: 1,
+                source: function (request, response) {
+                    var term = request.term;
+                    if (term in hospNameCache) {
+                        response(hospNameCache[term]);
+                        return;
+                    }
+
+                    $.ajax({
+                        url: '@Url.Action("QueryHospName", "HospBasic")',
+                        type: "Get",
+                        dataType: "json",
+                        data: { keyword: request.term },
+                        success: function (res) {
+                            if (!res.isSuccess) {
+                                myAlert.error("查詢錯誤", res.errMsg, true);
+                                return;
+                            }
+                            if (res.data && res.data.length === 0) {
+                                response([]);
+                                return;
+                            }
+                            var data = res.data
+                            hospNameCache[term] = data;
+                            response(data);
+                        }
+                    });
+                },
+                select: function (event, ui) {
+                    $("#txtHospId").val(ui.item.id);
+                }
+            });
+            $("#txtHospName").autocomplete("option", "appendTo", "#hospContractModal");
+        });
+        function toggleDisabled(disabled) {
+            const elem = $(".disabledInView");
+            if (disabled)
+                elem.attr("disabled", "disabled");
+            else
+                elem.removeAttr("disabled", "disabled");
+        }
+        function bindPrsnBasic() {
+            $("#lblPrsnId").text(json.prsnId);
+            $("#prsnName").val(json.prsnName);
+            $("#prsnType").val(json.prsnType);
+            $("#prsnBirthday").val(json.prsnBirthday);
+            $("#majorSpecialistNo").val(json.majorSpecialistNo);
+            $("#subSpecialistNo").val(json.subSpecialistNo);
+            $("#prsnEmails").val(json.prsnEmails);
+            $("#remark").val(json.remark);
+        }
+        function bindPrsnLicences(data) {
+            if ($.fn.dataTable.isDataTable("#licenceTable")) {
+                $prsnLicencesTable.destroy();
+            }
+            $prsnLicencesTable = $("#licenceTable").DataTable({
+                "scrollY": "600px",//可選，是否固定表格高度，不包括表頭；
+                "scrollCollapse": true,//與scrollY结合使用，是否固定高度，默認false;
+                "scrollX": true,
+                "serverSide": false,
+                "processing": false,
+                "data": data,
+                "paging": false,
+                "searching": false,
+                "ordering": false,
+                "columns": [
+                    {
+                        className: "sorting_1",
+                        data: null,
+                        width: "5%",
+                        targets: 0,
+                        render: function (data, type, full, meta) {
+                            var settings = meta.settings;
+                            var serial = meta.row + 1 + settings._iDisplayLength * settings._iDisplayStart / settings._iDisplayLength;
+                            return serial;
+                        }
+                    },
+                    { data: "licenceName", targets: 1 },
+                    { data: "licenceNo", targets: 2 },
+                    { data: "certEndDate", targets: 3 },
+                    { data: "remark", targets: 4 }
+                ]
+            });
+        }
+
+        function bindPrsnContracts(data) {
+            if ($.fn.dataTable.isDataTable("#prsnContractTable")) {
+                $prsnContractTable.destroy();
+            }
+            $prsnContractTable = $("#prsnContractTable").DataTable({
+                "scrollY": "600px",//可選，是否固定表格高度，不包括表頭；
+                "scrollCollapse": true,//與scrollY结合使用，是否固定高度，默認false;
+                "scrollX": true,
+                "serverSide": false,
+                "processing": false,
+                "data": data,
+                "paging": false,
+                "searching": false,
+                "ordering": false,
+                "columns": [
+                    {
+                        className: "sorting_1",
+                        data: null,
+                        width: "5%",
+                        targets: 0,
+                        render: function (data, type, full, meta) {
+                            var settings = meta.settings;
+                            var serial = meta.row + 1 + settings._iDisplayLength * settings._iDisplayStart / settings._iDisplayLength;
+                            return serial;
+                        }
+                    },
+                    {
+                        data: "hospName",
+                        targets: 1,
+                        render: function (data, type, full, meta) {
+                            return '<a href="#" class="linkHosp ' + (full.isOffend ? 'star' : '') + '">' + data + '</a>';
+                        }
+                    },
+                    { data: "smkcontractTypeNam", targets: 2 },
+                    { data: "prsnStartDate", targets: 3 },
+                    { data: "prsnEndDate", targets: 4 },
+                    { data: "endReasonName", targets: 5 },
+                    {
+                        targets: 7,
+                        data: null,
+                        defaultContent:
+                            //'<button type="button" class="Edit btn btn-primary" title="編輯" data-toggle="modal" data-target="#modal-prsnContract" >編輯</button > ' +
+                            '<button type="button" class="Edit btn btn-primary" title="編輯" >編輯</button > ' +
+                            '<button type="button" class="Delete btn btn-danger fn-delete" title="刪除" >刪除</button>'
+                    }
+                ]
+            });
+            $prsnContractTable.on('click', ".Edit", function () {
+                window['data'] = null;
+                var id = $('#lblPrsnId').text();
+                var closestRow = $(this).closest('tr');
+                var data = $prsnContractTable.row(closestRow).data();
+                window['data'] = data;//透過這個把data傳到副視窗
+                Editwindow = window.open(`../InsertPrsnContractView?id=${id}`, 'UpdataprsnContract', 'toolbar=yes,location=no,status=no,menubar=no,scrollbars=yes,resizable=yes,width=1000,height=700');
+                Editwindow.onbeforeunload = function () {
+                    window['data'] = null;
+                    window.location.reload();
+                }
+                //$("#prsnContractId", "#hospContractModal").val(data.id);
+                //$("#txtHospId", "#hospContractModal").val(data.hospId);
+                //$("#txtHospSeqNo", "#hospContractModal").val(data.hospSeqNo);
+                //$("#lblHospName", "#hospContractModal").text(data.hospName);
+                //$("#txtHospName", "#hospContractModal").val(data.hospName);
+                //$("#selsmkcontractType", "#hospContractModal").val(data.smkcontractType);
+                //$("#txtPrsnStartDate", "#hospContractModal").val(data.prsnStartDate);
+                //$("#txtPrsnEndDate", "#hospContractModal").val(data.prsnEndDate);
+                //$("#selEndReason", "#hospContractModal").val(data.endReasonNo);
+                //$("#chkCouldTreat", "#hospContractModal").prop("checked", data.couldTreat == "1");
+                //$("#chkCouldInstruct", "#hospContractModal").prop("checked", data.couldInstruct == "1");
+                //$("#txtRemark", "#hospContractModal").val(data.remark);
+                //$("#txtCreateDate", "#hospContractModal").val(data.createDate);
+                //$("#txtModifyDate", "#hospContractModal").val(data.modifyDate);
+            }).on('click', ".Delete", function () {
+                if (confirm("確認要刪除?") == false) {
+                    return;
+                }
+                var closestRow = $(this).closest('tr');
+                var data = $prsnContractTable.row(closestRow).data();
+
+                $.post("@Url.Action("DeletePrsnContract")", data, function (res) {
+                    if (!res.isSuccess) {
+                        myAlert.error("刪除失敗", res.errMsg, true);
+                    }
+                    else {
+                        myAlert.success("刪除成功", res.errMsg, true);
+                    }
+                    json.prsnContracts = $.grep(json.prsnContracts, function (value) {
+                        return value != data;
+                    });
+                    $prsnContractTable.row(data).remove().draw();
+                });
+            }).on('click', ".linkHosp", function () {
+                var closestRow = $(this).closest('tr');
+                var data = $prsnContractTable.row(closestRow).data();
+                window.open('@Url.Action("Edit","HospBasic")?hospid=' + data.hospId + '&hospseqno=' + data.hospSeqNo, "_blank");
+            });
+        }
+
+        function prsnContractSave() {
+            var data = {
+                couldInstruct: $("#chkCouldInstruct", "#hospContractModal").prop("checked") ? "1" : "0",
+                couldTreat: $("#chkCouldTreat", "#hospContractModal").prop("checked") ? "1" : "0",
+                createDate: $("#txtCreateDate", "#hospContractModal").val(),
+                endReasonNo: $("#selEndReason", "#hospContractModal").val(),
+                hospId: $("#txtHospId", "#hospContractModal").val(),
+                hospName: $("#txtHospName", "#hospContractModal").val(),
+                hospSeqNo: $("#txtHospSeqNo", "#hospContractModal").val() || "00",
+                id: $("#prsnContractId", "#hospContractModal").val(),
+                prsnEndDate: $("#txtPrsnEndDate", "#hospContractModal").val(),
+                prsnStartDate: $("#txtPrsnStartDate", "#hospContractModal").val(),
+                remark: $("#txtRemark", "#hospContractModal").val(),
+                smkcontractType: $("#selsmkcontractType", "#hospContractModal").val(),
+                prsnId: $("#lblPrsnId", "#prsnBasic").text(),
+            };
+            if (data.id === "") {
+                $.post("@Url.Action("InsertPrsnContract")", data, function (res) {
+                    if (!res.isSuccess) {
+                        myAlert.error("儲存失敗", res.errMsg, true);
+                    } else {
+                        $prsnContractTable.clear().rows.add(res.data).draw();
+                        myAlert.success("儲存成功", res.errMsg, true);
+                    }
+                    $('#modal-prsnContract').modal('toggle');
+                });
+                return false;
+            } else {
+                $(json.prsnContracts).each(function (index, item) {
+                    if (item.id == data.id) {
+                        $.extend(item, data);
+                        $.post("@Url.Action("UpdatePrsnContract")", item, function (res) {
+                            if (!res.isSuccess) {
+                                myAlert.error("儲存失敗", res.errMsg, true);
+                            }
+                            else {
+                                myAlert.success("儲存成功", res.errMsg, true);
+                            }
+                            $.extend(item, res.data);
+                            $prsnContractTable.clear().rows.add(json.prsnContracts).draw();
+                        });
+                        return false;
+                    }
+                });
+                $('#modal-prsnContract').modal('toggle');
+            }
+        }
+        function prsnLicenceSave() {
+            var data = {
+                id: "",
+                certEndDate: $("#txtCertEndDate", "#prsnLicenceModal").val(),
+                certStartDate: $("#txtCertStartDate", "#prsnLicenceModal").val(),
+                remark: $("#txtRemark", "#prsnLicenceModal").val(),
+                prsnId: $("#lblPrsnId", "#prsnBasic").text(),
+                licenceNo: $("#txtLicenceNo", "#prsnLicenceModal").val(),
+                licenceName: $("#selLicenceType option:selected").text(),
+                licenceType: $("#selLicenceType", "#prsnLicenceModal").val(),
+                certPublicDate: ""
+            };
+            if (data.id === "") {
+                $.post("@Url.Action("InsertPrsnLicence")", data, function (res) {
+                    if (!res.isSuccess) {
+                        myAlert.error("儲存失敗", res.errMsg, true);
+                    } else {
+                        $prsnLicencesTable.clear().rows.add(res.data).draw();
+                        myAlert.success("儲存成功", res.errMsg, true);
+                    }
+                    $('#modal-prsnLicence').modal('toggle');
+                });
+                return false;
+            } else {
+                $(json.prsnLicences).each(function (index, item) {
+                    if (item.id == data.id) {
+                        $.extend(item, data);
+                        $.post("@Url.Action("UpdatePrsnLicence")", item, function (res) {
+                            if (!res.isSuccess) {
+                                myAlert.error("儲存失敗", res.errMsg, true);
+                            }
+                            else {
+                                myAlert.success("儲存成功", res.errMsg, true);
+                            }
+                            $.extend(item, res.data);
+                            $prsnLicencesTable.clear().rows.add(json.prsnLicences).draw();
+                        });
+                        return false;
+                    }
+                });
+                $('#modal-prsnLicence').modal('toggle');
+            }
+        }
+        function prsnBasicSave() {
+            var data = {
+                prsnId: $("#lblPrsnId", "#prsnBasic").text(),
+                prsnName: $("#prsnName", "#prsnBasic").val(),
+                prsnType: $("#prsnType", "#prsnBasic").val(),
+                prsnBirthday: $("#prsnBirthday", "#prsnBasic").val(),
+                majorSpecialistNo: $("#majorSpecialistNo", "#prsnBasic").val(),
+                subSpecialistNo: $("#subSpecialistNo", "#prsnBasic").val(),
+                prsnEmails: $("#prsnEmails", "#prsnBasic").val(),
+                remark: $("#remark", "#prsnBasic").val(),
+            };
+            $.extend(json, data);
+            $.post("@Url.Action("UpdatePrsnBasic")", json, function (res) {
+                if (!res.isSuccess) {
+                    myAlert.error("儲存失敗", res.errMsg, true);
+                }
+                else {
+                    myAlert.success("儲存成功", res.errMsg, true);
+                }
+                $.extend(json, res.data);
+                bindPrsnBasic();
+            });
+        }
+
+        function prsnBasicRemove() {
+            if (confirm("確認要刪除?") == false) {
+                return;
+            }
+            $.post("@Url.Action("RemovePrsnBasic")", { prsnId: $("#lblPrsnId", "#prsnBasic").text() }, function (res) {
+                if (!res.isSuccess) {
+                    myAlert.error("刪除失敗", res.errMsg, true);
+                }
+                else {
+                    alert("刪除成功");
+                    location.replace("@Url.Action("Index","PrsnBasics")");
+                }
+            });
+        }
+
+        function syncLicence() {
+            $.post("@Url.Action("GetPrsnLicence","PrsnLicence")", { prsnId: $("#lblPrsnId", "#prsnBasic").text(), isSync: true }, function (res) {
+                if (!res.isSuccess) {
+                    myAlert.error("同步證書失敗", res.errMsg, true);
+                    return;
+                }
+                json.prsnLicences = res.data;
+                bindPrsnLicences(json.prsnLicences);
+            });
+        }
+    </script>
+}
+
+

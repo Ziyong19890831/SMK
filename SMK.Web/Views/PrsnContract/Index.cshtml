@@ -1,0 +1,537 @@
+﻿@model PrsnContractQueryModel
+@using SMK.Data.Entity;
+@using SMK.Web.Heppers;
+@using SMK.Data.Enums;
+@using SMK.Web.Services.Foundation;
+@inject PrsnContractService hospContractService;
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var prsnTypeList = await hospContractService.GetSelectLists<GenPrsnType>(Context => Context.GenPrsnType,
+                                                                    x => x.PrsnType,
+                                                                    x => x.PrsnTypeName);
+    var SmkcontractsList = await hospContractService.GetSelectLists<GenSmkcontract>(
+                                                    context => context.GenSmkcontract,
+                                                    x => x.SmkcontractType,
+                                                    x => x.SmkcontractName);
+    var licenceTypeList = await hospContractService.GetSelectLists<GenLicenceType>(Context => Context.GenLicenceType,
+                                                    x => x.LicenceType,
+                                                    x => x.LicenceName);
+    var ApplicationTypeList = hospContractService.GetEnumList<ApplicationType>();
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card rounded-lg">
+            <div class="card-header">
+                <div class="col-md-12 text-left text-secondary">
+                    合約管理-醫事人員合約管理<br />
+                    此頁為查詢、檢視醫事人員合約概況。<br />
+                    點選綠框按鈕為醫事人員申請概況，含新增、異動、解約等；<br />
+                    查詢後下方表格點選姓名欄位(藍字)，可跳至編輯醫事人員資料畫面。<br />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form id="queryForm" asp-action="Query" class="form-horizontal">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="col-sm-12">
+
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="form-row mb-4">
+                            <div class="form-inline col-4">
+                                <label asp-for="PrsnId" class="col-sm-5 col-form-label"></label>
+                                <div class="col-sm-7">
+                                    <input asp-for="PrsnId" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="form-inline col-4">
+                                <label asp-for="PrsnName" class="col-sm-5 col-form-label"></label>
+                                <div class="col-sm-7">
+                                    <input asp-for="PrsnName" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="form-inline col-4">
+                                <label asp-for="PrsnType" class="col-sm-5 col-form-label"></label>
+                                <select asp-items="prsnTypeList"
+                                        asp-for="PrsnType"
+                                        class="form-control col-sm-7"
+                                        id="prsnType">
+                                    <option value="">請選擇</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row mb-4">
+                            <div class="form-inline col-4">
+                                <label asp-for="PrsnStartDate" class="col-sm-5 col-form-label"></label>
+                                <div class="col-sm-7">
+                                    <input asp-for="PrsnStartDate" type="text" class="form-control smkdate" />
+                                </div>
+                            </div>
+                            <div class="form-inline col-4">
+                                <label asp-for="LicenceType" class="col-sm-5 col-form-label"></label>
+                                <select asp-items="licenceTypeList"
+                                        asp-for="LicenceType"
+                                        class="form-control col-sm-7"
+                                        id="licenceType">
+                                    <option value="">請選擇</option>
+                                </select>
+                            </div>
+                            <div class="form-inline col-4">
+                                <label asp-for="SmkcontractType" class="col-sm-5 col-form-label"></label>
+                                <select asp-items="SmkcontractsList"
+                                        asp-for="SmkcontractType"
+                                        class="form-control col-sm-7"
+                                        id="selsmkcontractType">
+                                    <option value="">請選擇</option>
+                                </select>
+                            </div>
+                        </div>
+                        @*                        <div class="form-row mb-4">
+                        <div class="form-inline col-4">
+                        <label asp-for="StartCreateDate" class="col-sm-5 col-form-label text-right"></label>
+                        <div class="col-sm-7">
+                        <input asp-for="StartCreateDate" class="form-control smkdate" placeholder="建立時間(起)" />
+                        </div>
+                        </div>
+                        <div class="form-inline col-4">
+                        <div class="col-sm-7">
+                        <input asp-for="EndCreateDate" class="form-control smkdate" placeholder="建立時間(迄)" />
+                        </div>
+                        </div>
+                        <div class="form-inline col-4">
+                        <div class="custom-control custom-checkbox my-1 mr-sm-2">
+                        <input asp-for="IsApproval" type="checkbox" class="custom-control-input" id="customControlInline">
+                        <label class="custom-control-label" for="customControlInline">簽約核准</label>
+                        </div>
+                        </div>
+                        </div>*@
+                        <div class="form-row mb-4">
+                            <div class="form-inline col-8">
+                                <label class="col-sm-3 col-form-label text-right">醫事機構代碼</label>
+                                <div class="col-sm-6 input-group">
+                                    <div class="input-group-prepend">
+                                        <input asp-for="HospId" class="form-control" />
+                                    </div>
+                                    <input asp-for="HospSeqNo" class="form-control" maxlength="2" value="00" />
+                                </div>
+                            </div>
+                            <div class="form-inline col-4">
+                                <label class="col-sm-5 col-form-label text-right">醫事機構名稱</label>
+                                <div class="col-sm-7">
+                                    <input asp-for="HospName" class="form-control" readonly />
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="d-flex justify-content-center">
+                            <button id="btnQuery" type="button" class="btn btn-primary mr-2">查詢</button>
+                            <button id="btnApplyStaute" type="button" class="btn btn-success">申請概況</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="col-md-12 text-right">
+                        <button id="btnJudgeAll" class="btn btn-primary" data-toggle="modal" data-target="#modal-judge"><i class="fa fa-check"></i> 批次核准</button>
+                        <button id="btnDeleteAll" class="btn btn-primary"><i class="fa fa-trash-alt"></i> 批次刪除</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="col-sm-12">
+                        <table id="prsnContractTable" class="table table-striped table-bordered table-hover " role="grid">
+                            <thead>
+                                <tr role="row">
+                                    <th data-orderable="false" class="text-nowrap">
+                                        序號
+                                        <input id="selectAll" type="checkbox" value="全選" placeholder="全選" />
+                                    </th>
+                                    <th class="text-nowrap">姓名</th>
+                                    <th class="text-nowrap">身分證號</th>
+                                    <th class="text-nowrap">醫事人員類別</th>
+                                    <th class="text-nowrap">醫事機構代碼</th>
+                                    <th class="text-nowrap">醫事機構名稱</th>
+                                    <th class="text-nowrap">機構狀態</th>
+                                    <th class="text-nowrap">生效日期</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row" id="ApplyStaute">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="form-row mb-4 mt-3">
+                        <div class="form-inline col-4">
+                            <label class="col-sm-5 col-form-label text-right">收件年月起迄</label>
+                            <div class="col-sm-7">
+                                <input asp-for="Application_StartCreateDate" id="Application_StartCreateDate" class="form-control smkdate" placeholder="收件年月(起)" />
+                            </div>
+                        </div>
+                        <div class="form-inline col-4">
+                            <div class="col-sm-7">
+                                <input asp-for="Application_EndCreateDate" id="Application_EndCreateDate" class="form-control smkdate" placeholder="收件年月(迄)" />
+                            </div>
+                        </div>
+                        <div class="form-inline col-3">
+                            <label class="col-sm-5 col-form-label text-right">申請類型</label>
+                            @Html.MyDropDownList("ApplicationType",
+                            ApplicationTypeList,
+                            (m) => m,
+                            new { @class = "form-control col-sm-7", id = "ApplicationType"}, true)
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-center m-2">
+                        <input type="file" id="file-uploader" ref="file" accept=".xlsx">
+                        <button type="button" id="PrsnUploadFile" class="btn btn-primary mr-2">批次上傳</button>
+                    </div>
+                    <div class="d-flex justify-content-center m-4">
+                        <button id="btnQuery_Application" type="button" class="btn btn-primary mr-2">查詢</button>
+                        <input value="匯出Excel" type="submit" asp-action="ExportyPrsnApplication" asp-route-fileType="xlsx" class="btn btn-primary mr-2" />
+                        <input value="匯出ODS" type="submit" asp-action="ExportyPrsnApplication" asp-route-fileType="ods" class="btn btn-primary mr-2" />
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="col-sm-12">
+                        <div class="col-sm-12 table-responsive">
+                            <table id="prsnInsertTable" class="table table-striped table-bordered table-hover " role="grid">
+                                <thead>
+                                    <tr role="row">
+                                        <th data-orderable="false" class="text-nowrap">
+                                            序號
+                                            @*<input id="selectAll_Insert" type="checkbox" value="全選" placeholder="全選" />*@
+                                        </th>
+                                        <th class="text-nowrap">收件年月</th>
+                                        <th class="text-nowrap">收件日</th>
+                                        <th class="text-nowrap">申請類型</th>
+                                        <th class="text-nowrap">異動類型</th>
+                                        <th class="text-nowrap">院所代碼</th>
+                                        <th class="text-nowrap">院區別</th>
+                                        <th class="text-nowrap">院所名稱 &emsp; &emsp; &emsp; &emsp; &emsp; &emsp; &emsp; &emsp; &emsp;</th>
+                                        <th class="text-nowrap">醫事人員姓名</th>
+                                        <th class="text-nowrap">醫事人員ID</th>
+                                        <th class="text-nowrap">職稱 &emsp; &emsp;&emsp; &emsp;</th>
+                                        <th class="text-nowrap">服務類別</th>
+                                        <th class="text-nowrap">備註  &emsp; &emsp; &emsp;&emsp; &emsp; &emsp;&emsp; &emsp; &emsp; </th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<div class="modal fade" id="modal-judge" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">設定核准</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-inline">
+                    <label class="col-sm-5 col-form-label text-right">合約生效日</label>
+                    <div class="col-sm-7">
+                        <input type="text" class="form-control smkdate" id="judgePrsnStartDate" />
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="btnJudge">核准</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+@section Scripts {
+    @{
+        @await Html.PartialAsync("~/Views/Shared/_DataTables.cshtml")
+        ;
+    }
+    <script type="text/javascript">
+        var btnApplyStaute = false;
+        var $prsnContractTable;
+        var $prsnInsertTable;
+        $(function () {
+            $('#HospId,#HospSeqNo').on('keyup', async function () {
+                var hospID = $('#HospId').val();
+                var hospSeqNo = $('#HospSeqNo').val();
+                const { data } = await axios.get('@Url.Action("GetHospName", "HospBasic")', { params: { hospID, hospSeqNo }, hideMask: true });
+                if (data !== undefined) {
+                    $('#HospName').val(data);
+                }
+            });
+            $("#selectAll").on("click", selectAll);
+            $("#btnQuery").on("click", query);
+            $("#btnJudgeAll").on("click", judge);
+            $("#btnJudge").on("click", judgeSubmit);
+            $("#btnDeleteAll").on("click", deleteContracts);
+            $("#btnQuery_Application").on("click", btnQuery_Application);
+            $("#ApplyStaute").hide();
+            $("#Application_EndCreateDate").val(toTaiwaneseDate(new Date()));
+            $("#Application_StartCreateDate").val(toTaiwaneseDate(new Date((new Date()).setDate((new Date()).getDate() - 30))));
+        });
+
+        $("#btnApplyStaute").click(() => {
+            if (!btnApplyStaute) {
+                $("#ApplyStaute").show();
+                btnApplyStaute = true;
+            } else {
+                $("#ApplyStaute").hide();
+                btnApplyStaute = false;
+            }
+        });
+
+        $(function () {
+            $("#PrsnUploadFile").on("click", function () { var files = $("#file-uploader").get(0).files; uploadFile(files, 0) });
+        });
+
+        function toTaiwaneseDate(adDate) {
+            const adYear = adDate.getFullYear();
+            const adMonth = adDate.getMonth() + 1; // 注意：JavaScript 的月份從 0 开始，需要加上 1
+            const adDay = adDate.getDate();
+
+            const twYear = adYear - 1911;
+            const twMonth = String(adMonth).padStart(2, '0');
+            const twDay = String(adDay).padStart(2, '0');
+
+            return `${twYear}/${twMonth}/${twDay}`;
+        }
+
+
+        function uploadFile(files, type) {
+            var files;
+            var data = new FormData();
+            if (files.length == 0) {
+                myAlert.error("上傳失敗", "未選擇檔案", true);
+                return;
+            }
+            data.append("file", files[0]);
+            data.append("types", type);
+            var ajaxRequest = $.ajax({
+                type: "POST",
+                url: "@Url.Action("Application_Upload")",
+                contentType: false,
+                processData: false,
+                dataType: "json",
+                data: data
+            }).done(function (res, textStatus) {
+                if (!res.isSuccess) {
+                    myAlert.error("上傳失敗", res.errMsg, true);
+                }
+                else {
+                    myAlert.success("上傳成功", res.msg, true);
+                }
+
+            });
+        }
+
+
+        function judgeSubmit() {
+            var judgeStartDate = $.trim($("#judgePrsnStartDate").val());
+            if (judgeStartDate == "") {
+                alert('未填寫日期');
+                return;
+            }
+
+            var preJudgeData = $(".tbCheck:checked").map(function () {
+                var closestRow = $(this).closest('tr');
+                var data = $prsnContractTable.row(closestRow).data();
+                return data;
+            }).get();
+
+            $.post('@Url.Action("Judge", "PrsnContract")', { contract: preJudgeData, prsnStartDate: judgeStartDate }, function (res) {
+                if (!res.isSuccess) {
+                    myAlert.error("核准錯誤", res.errMsg, true);
+                }
+                else {
+                    myAlert.success("核准成功", res.errMsg, true);
+                }
+                $(".tbCheck:checked").each(function () {
+                    var closestRow = $(this).closest('tr');
+                    var data = $prsnContractTable.row(closestRow).data();
+                    data.prsnStartDate = judgeStartDate;
+                    $prsnContractTable.row(closestRow).data(data).draw();
+                })
+                $('#modal-judge').modal('toggle');
+            });
+        }
+        function judge() {
+            if ($(".tbCheck:checked").length == 0) {
+                myAlert.error("核准失敗", "尚未勾選資料", true);
+                return;
+            }
+        }
+
+        function deleteContracts() {
+            if ($(".tbCheck:checked").length == 0) {
+                myAlert.error("刪除失敗", "尚未勾選資料", true);
+                return;
+            }
+
+            var preRemoveData = $(".tbCheck:checked").map(function () {
+                var closestRow = $(this).closest('tr');
+                var data = $prsnContractTable.row(closestRow).data();
+                return data;
+            }).get();
+
+            $.post('@Url.Action("DeleteContracts", "PrsnContract")', { contract: preRemoveData }, function (res) {
+                if (!res.isSuccess) {
+                    myAlert.error("刪除錯誤", res.errMsg, true);
+                }
+                else {
+                    myAlert.success("刪除成功", res.errMsg, true);
+                }
+                $(".tbCheck:checked").detach();
+            });
+        }
+
+        function selectAll(e) {
+            $(".tbCheck").prop("checked", $(this).prop("checked"));
+        }
+
+        function query() {
+            if ($prsnContractTable)
+                $prsnContractTable.destroy();
+
+            var ajax = function (data, callback, settings) {
+                debugger;
+                var o = $("#queryForm").serializeObject();
+                o.draw = data.draw;
+                o.start = data.start;
+                o.length = data.length;
+                $.post('@Url.Action("Query", "PrsnContract")', o, function (res) {
+                    if (!res.isSuccess) {
+                        myAlert.error("查詢錯誤", res.errMsg, true);
+                        return;
+                    }
+                    callback(res.data);
+                });
+            };
+            $prsnContractTable = $("#prsnContractTable").DataTable({
+                "scrollY": "600px",//可選，是否固定表格高度，不包括表頭；
+                "scrollCollapse": true,//與scrollY结合使用，是否固定高度，默認false;
+                "scrollX": true,
+                "serverSide": true,
+                "ajax": ajax,
+                "paging": true,
+                "searching": false,
+                "ordering": false,
+                "columns": [
+                    {
+                        className: "tdcheckbox sorting_1",
+                        data: null,
+                        width: "5%",
+                        targets: 0,
+                        render: function (data, type, full, meta) {
+                            var settings = meta.settings;
+                            var serial = meta.row + 1 + settings._iDisplayLength * settings._iDisplayStart / settings._iDisplayLength;
+                            var html = '<label class="text-center" for="check' + serial + '">' + serial +
+                                '<input id="check' + serial + '" class="tbCheck" type="checkbox" /></label>';
+                            return html;
+                        }
+                    },
+                    {
+                        data: "prsnName",
+                        targets: 1,
+                        render: function (data, type, full, meta) {
+                            return '<a href="#' + full.prsnId + '" class="linkEdit">' + data + '</a>';
+                        }
+                    },
+                    { data: "prsnId", targets: 2 },
+                    { data: "prsnTypeNam", targets: 3 },
+                    { data: "hospId", targets: 4 },
+                    { data: "hospName", targets: 5 },
+                    { data: "hospStatusString", targets: 6 },
+                    { data: "prsnStartDate", targets: 7 }
+                ]
+            });
+            $prsnContractTable.on('click', ".linkEdit", function () {
+                var closestRow = $(this).closest('tr');
+                var data = $prsnContractTable.row(closestRow).data();
+                location.href = '@Url.Action("Edit","PrsnBasics")/' + data.prsnId;
+            });
+        }
+
+        function btnQuery_Application() {
+            if ($prsnInsertTable)
+                $prsnInsertTable.destroy();
+
+            var ajax = function (data, callback, settings) {
+                var o = $("#queryForm").serializeObject();
+                o.draw = data.draw;
+                o.start = data.start;
+                o.length = data.length;
+                $.post('@Url.Action("QueryApplication", "PrsnContract")', o, function (res) {
+                    if (!res.isSuccess) {
+                        myAlert.error("查詢錯誤", res.errMsg, true);
+                        return;
+                    }
+                    //console.log(res.data);
+                    callback(res.data);
+                });
+            };
+            $prsnInsertTable = $("#prsnInsertTable").DataTable({
+                "scrollY": "600px",//可选，是否固定表格高度，不包括表头；
+                "scrollCollapse": true,//与scrollY结合使用，是否固定高度，默认false;
+                "serverSide": true,
+                "scrollX": true,
+                "ajax": ajax,
+                "paging": true,
+                "searching": false,
+                "ordering": false,
+                "columns": [
+                    {
+                        className: "sorting_1",
+                        data: null,
+                        width: "5%",
+                        targets: 0,
+                        render: function (data, type, full, meta) {
+                            var settings = meta.settings;
+                            var serial = meta.row + 1 + settings._iDisplayLength * settings._iDisplayStart / settings._iDisplayLength;
+                            return serial;
+                        }
+                    },
+                    { data: "feeYM", targets: 1 },
+                    { data: "feeYMD", targets: 2 },
+                    { data: "application_Type", targets: 3 },
+                    { data: "change_Type", targets: 4 },
+                    { data: "hospID", targets: 5 },
+                    { data: "hospSeqNo", targets: 6 },
+                    { data: "hospName", targets: 7 },
+                    { data: "userName", targets: 8 },
+                    { data: "userID", targets: 9 },
+                    { data: "userTitle", targets: 10 },
+                    { data: "userServise", targets: 11 },
+                    { data: "note", targets: 12 },
+                ]
+            });
+        }
+    </script>
+}
+
+

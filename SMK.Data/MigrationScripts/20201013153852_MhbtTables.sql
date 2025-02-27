@@ -1,0 +1,42 @@
+﻿ALTER TABLE [MhbtQsData] DROP CONSTRAINT [PK_MhbtQsData];
+
+GO
+
+ALTER TABLE [MhbtAgentPatient] DROP CONSTRAINT [PK_MhbtAgentPatient_1];
+
+GO
+
+ALTER TABLE [MhbtQsData] ADD CONSTRAINT [PK_MhbtQsData_1] PRIMARY KEY ([Hosp_ID], [ID], [Birthday], [FuncDate], [Branch_Code], [TXT_DATE], [Cure_Type], [HospSeqNo]);
+
+GO
+
+ALTER TABLE [MhbtAgentPatient] ADD CONSTRAINT [PK_MhbtAgentPatient] PRIMARY KEY ([HospID], [HospAgentCode], [ID], [BIRTHDAY], [Branch_Code], [TXT_Date]);
+
+GO
+
+UPDATE [GenEmpData] SET [CreatedAt] = '2020-10-13T23:38:51.5056363+08:00'
+WHERE [Id] = N'00000000-0000-0000-0000-000000000000';
+SELECT @@ROWCOUNT;
+
+
+GO
+
+UPDATE [Role] SET [CreatedAt] = '2020-10-13T23:38:51.5077317+08:00'
+WHERE [Id] = N'00000000-0000-0000-0000-000000000000';
+SELECT @@ROWCOUNT;
+
+
+GO
+
+UPDATE [RoleEmpMapping] SET [CreatedAt] = '2020-10-13T23:38:51.5079021+08:00'
+WHERE [Id] = N'00000000-0000-0000-0000-000000000000';
+SELECT @@ROWCOUNT;
+
+
+GO
+
+INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+VALUES (N'20201013153852_MhbtTables', N'3.1.7');
+
+GO
+

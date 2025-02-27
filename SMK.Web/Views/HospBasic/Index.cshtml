@@ -1,0 +1,954 @@
+﻿@model HospContractQueryModel
+@using SMK.Data.Entity;
+@using SMK.Web.Heppers;
+@using SMK.Data.Enums;
+@using SMK.Web.Services.Foundation;
+@inject HospContractService hospContractService;
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var hospStatusList = hospContractService.GetEnumList<HospStatus>();
+    var contractStatusList = hospContractService.GetEnumList<ContractStatus>();
+    var SmkcontractsList = await hospContractService.GetSelectLists<GenSmkcontract>(
+                                                    context => context.GenSmkcontract,
+                                                    x => x.SmkcontractType,
+                                                    x => x.SmkcontractName);
+    var ApplicationTypeList = hospContractService.GetEnumList<ApplicationType>();
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card rounded-lg">
+            <div class="card-header">
+                <div class="col-md-12 text-left text-secondary">
+                    機構資料<br />
+                    此頁為查詢、檢視機構代碼、機構狀態、合約生效日期及合約類別等基本資料之功能。<br />
+                    另點選下方按鈕可新增機構基本資料及其他資料；<br />
+                    點選綠框按鈕為醫事機構申請概況及專案申請概況；<br />
+                    查詢後下方表格點選機構代碼(藍字)，可跳至編輯機構資料畫面。
+                    <br />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form id="queryFormFirst" method="post">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="col-sm-12">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="form-row mb-4 row">
+                            <div class="form-inline col-6">
+                                <label asp-for="HospID" class="col-sm-5 col-form-label text-right"></label>
+                                <div class="col-sm-7 input-group">
+                                    <div class="input-group-prepend">
+                                        <input asp-for="HospID" class="form-control" placeholder="機構代碼10碼" />
+                                    </div>
+                                    <input asp-for="HospSeqNo" class="form-control" maxlength="2" value="00" placeholder="院區別" />
+                                </div>
+                            </div>
+                            <div class="form-inline col-6">
+                                <label asp-for="HospName" class="col-sm-4 col-form-label text-right"></label>
+                                <div class="col-sm-7">
+                                    <input name="HospName" id="HospName" class="form-control w-100" readonly />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-row mb-4 row">
+                            <div class="form-inline col-6">
+                                <label asp-for="HospStatus" class="col-sm-5 col-form-label text-right justify-content-start" style="padding: 0 0 0 11.5%;"></label>
+                                <div class="col-sm-7">
+                                    @Html.MyDropDownList("HospStatus",
+                                             hospStatusList,
+                                             (m) => m,
+                                             new { @class = "form-control w-100", id = "HospStatus" }, true)
+                                </div>
+                            </div>
+                            <div class="form-inline col-6">
+                                <label asp-for="SMKContractType" class="col-sm-4 col-form-label text-right justify-content-start" style="padding: 0 0 0 7%;"></label>
+                                <div class="col-sm-7">
+                                    @Html.MyDropDownList("SMKContractType",
+                                             SmkcontractsList,
+                                             (m) => m,
+                                             new { @class = "form-control w-100", id = "SMKContractType" }, true)
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="form-row mb-4">
+                            <div class="form-inline col-4">
+                                <label asp-for="HospStartDate" class="col-sm-4 col-form-label text-right"></label>
+                                <div class="col-sm-7">
+                                    <input asp-for="HospStartDate" type="text" class="form-control smkdate" placeholder="民國年YYY/MM/DD" />
+                                </div>
+                            </div>
+                            <div class="form-inline col-4">
+                                <label asp-for="HospEndDate" class="col-sm-4 col-form-label text-right"></label>
+                                <div class="col-sm-7">
+                                    <input asp-for="HospEndDate" type="text" class="form-control smkdate" placeholder="民國年YYY/MM/DD" />
+                                </div>
+                            </div>
+                            <div class="form-inline col-4">
+                                <label asp-for="HospNewEndDate" class="col-sm-4 col-form-label text-right"></label>
+                                <div class="col-sm-7">
+                                    <input asp-for="HospNewEndDate" type="text" class="form-control smkdate" placeholder="民國年YYY/MM/DD" />
+                                </div>
+                            </div>
+                        </div>
+                        @*                        <div class="form-row mb-4">
+                        <div class="form-inline col-4">
+                        <label class="col-sm-5 col-form-label text-right">建立日期</label>
+                        <div class="col-sm-7">
+                        <input asp-for="StartCreateDate" class="form-control smkdate" placeholder="建立時間(起)" />
+                        </div>
+                        </div>
+                        <div class="form-inline col-4">
+                        <div class="col-sm-7">
+                        <input asp-for="EndCreateDate" class="form-control smkdate" placeholder="建立時間(迄)" />
+                        </div>
+                        </div>
+                        <div class="form-inline col-4">
+                        <div class="custom-control custom-checkbox my-1 mr-sm-2">
+                        <input asp-for="IsApproval" type="checkbox" class="custom-control-input" id="customControlInline">
+                        <label class="custom-control-label" for="customControlInline">簽約核准</label>
+                        </div>
+                        </div>
+                        </div>
+                        *@
+
+                        <div class="d-flex justify-content-center">
+                            <a asp-action="Create" class="btn btn-primary mr-2"><i class="fa fa-plus"></i> 新增</a>
+                            <button id="btnQuery" type="button" class="btn btn-primary mr-2">查詢</button>
+                            <button id="btnApplyStaute" type="button" class="btn btn-success mr-2">申請概況</button>
+                            <button id="btnQuotaHosp" type="button" class="btn btn-success">戒菸服務專案申請</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="col-md-12 text-right">
+                    <button id="btnJudgeAll" class="btn btn-primary" data-toggle="modal" data-target="#modal-judge"><i class="fa fa-check"></i> 批次核准</button>
+                    <button id="btnDeleteAll" class="btn btn-primary"><i class="fa fa-trash-alt"></i> 批次刪除</button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="col-sm-12">
+                    <table id="hospbasicTable" class="table table-striped table-bordered table-hover " role="grid">
+                        <thead>
+                            <tr role="row">
+                                <th data-orderable="false" class="text-nowrap">
+                                    序號
+                                    <input id="selectAll" type="checkbox" value="全選" placeholder="全選" />
+                                </th>
+                                <th class="text-nowrap">醫事機構代碼</th>
+                                <th class="text-nowrap">院區別</th>
+                                <th class="text-nowrap">醫事機構名稱</th>
+                                <th class="text-nowrap">機構狀態</th>
+                                <th class="text-nowrap">合約類別</th>
+                                <th class="text-nowrap">機構合約起日</th>
+                                <th class="text-nowrap">機構合約迄日</th>
+                                <th class="text-nowrap">最新契約迄日</th>
+                                <th class="text-nowrap">契約書</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="DownloadModal" tabindex="-1" aria-labelledby="DownloadModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+            <div class="modal-header align-items-center">
+                <h5 class="modal-title" id="DownloadModalLabel">合約類別</h5>
+                <button class="ml-2 btn btn-info" onclick="DownloadPdf('All',999)">全部開啟</button>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body d-flex justify-content-center mb-2">
+                <table id="downloadhospbasicTable" class="table table-striped table-bordered table-hover" role="grid">
+                    <thead>
+                        <tr role="row">
+                            <th data-orderable="false" class="text-nowrap">
+                                序號
+                            </th>
+                            <th class="text-nowrap">&emsp; &emsp; &emsp; &emsp; &emsp; 檔案名稱 &emsp; &emsp; &emsp; &emsp; &emsp;</th>
+                            <th class="text-nowrap">&emsp; &emsp; 上傳時間 &emsp; &emsp;</th>
+                            <th class="text-nowrap">&emsp; 下載 &emsp;</th>
+                            <th class="text-nowrap">&emsp; 刪除 &emsp;</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">關閉</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form id="queryForm" asp-action="Query" class="form-horizontal" method="post">
+    <div class="row mb-4" id="ApplyStaute">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="m-3">申請概況</h4>
+                    <hr />
+                    <div class="form-row mb-4 mt-3">
+                        <div class="form-inline col-4">
+                            <label class="col-sm-5 col-form-label text-right">收件年月起迄</label>
+                            <div class="col-sm-7">
+                                <input asp-for="Application_StartCreateDate" id="Application_StartCreateDate" class="form-control smkdate" placeholder="收件年月(起)" />
+                            </div>
+                        </div>
+                        <div class="form-inline col-4">
+                            <div class="col-sm-7">
+                                <input asp-for="Application_EndCreateDate" id="Application_EndCreateDate" class="form-control smkdate" placeholder="收件年月(迄)" />
+                            </div>
+                        </div>
+                        <div class="form-inline col-3">
+                            <label class="col-sm-5 col-form-label text-right">申請類型</label>
+                            @Html.MyDropDownList("ApplicationType",
+                                     ApplicationTypeList,
+                                     (m) => m,
+                                     new { @class = "form-control col-sm-7", id = "ApplicationType" }, true)
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-center m-2">
+                        <input type="file" id="file-uploader" ref="file" accept=".xlsx">
+                        <button type="button" id="HospUploadFile" class="btn btn-primary mr-2">批次上傳</button>
+                    </div>
+                    <div class="d-flex justify-content-center m-4">
+                        <button id="btnQuery_Application" type="button" class="btn btn-primary mr-2">查詢</button>
+                        <input value="匯出Excel" type="submit" asp-action="ExportyApplication" asp-route-fileType="xlsx" class="btn btn-primary mr-2" />
+                        <input value="匯出ODS" type="submit" asp-action="ExportyApplication" asp-route-fileType="ods" class="btn btn-primary mr-2" />
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="col-sm-12">
+                        <div class="col-sm-12 table-responsive">
+                            <table id="hospbasicInsertTable" class="table table-striped table-bordered table-hover " role="grid">
+                                <thead>
+                                    <tr role="row">
+                                        <th data-orderable="false" class="text-nowrap">
+                                            序號
+                                            @*<input id="selectAll_Insert" type="checkbox" value="全選" placeholder="全選" />*@
+                                        </th>
+                                        <th class="text-nowrap">收件年月</th>
+                                        <th class="text-nowrap">收件日</th>
+                                        <th class="text-nowrap">申請類型</th>
+                                        <th class="text-nowrap">異動類型</th>
+                                        <th class="text-nowrap">院所代碼</th>
+                                        <th class="text-nowrap">院區別</th>
+                                        <th class="text-nowrap">&emsp; &emsp; &emsp; &emsp; &emsp;院所名稱 &emsp; &emsp; &emsp; &emsp; &emsp;</th>
+                                        <th class="text-nowrap">&emsp; &emsp; &emsp; &emsp; &emsp; 備註 &emsp; &emsp; &emsp; &emsp; &emsp;</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4" id="QuotaHosp">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="m-3">戒菸服務專案申請</h4>
+                    <hr />
+                    <div class="form-row mb-4 mt-3">
+                        <div class="form-inline col">
+                            <label class="col-sm-5 col-form-label text-right">收件年月起迄</label>
+                            <div class="col-sm-7">
+                                <input asp-for="QuotaHosp_StartCreateDate" id="QuotaHosp_StartCreateDate" class="form-control smkdate" placeholder="收件年月(起)" />
+                            </div>
+                        </div>
+                        <div class="form-inline col">
+                            <div class="col-sm-7">
+                                <input asp-for="QuotaHosp_EndCreateDate" id="QuotaHosp_EndCreateDate" class="form-control smkdate" placeholder="收件年月(迄)" />
+                            </div>
+                        </div>
+                        @*                        <div class="form-inline col-3">
+                        <label class="col-sm-5 col-form-label text-right">申請類型</label>
+                        @Html.MyDropDownList("ApplicationType",
+                        ApplicationTypeList,
+                        (m) => m,
+                        new { @class = "form-control col-sm-7", id = "ApplicationType"}, true)
+                        </div>*@
+                    </div>
+                    <div class="d-flex justify-content-center m-2">
+                        <input type="file" id="file-QuotaHosp-uploader" ref="file" accept=".xlsx">
+                        <button type="button" id="QuotaHospUploadFile" class="btn btn-primary mr-2">批次上傳</button>
+                    </div>
+                    <div class="d-flex justify-content-center m-4">
+                        <button id="btnQuery_QuotaHosp" type="button" class="btn btn-primary mr-2">查詢</button>
+                        <input value="匯出Excel" type="submit" asp-action="ExportyQuotaHosp" asp-route-fileType="xlsx" class="btn btn-primary mr-2" />
+                        <input value="匯出ODS" type="submit" asp-action="ExportyQuotaHosp" asp-route-fileType="ods" class="btn btn-primary mr-2" />
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="col-sm-12">
+                        <div class="col-sm-12 table-responsive">
+                            <table id="quotaHospInsertTable" class="table table-striped table-bordered table-hover" role="grid">
+                                <thead align='center' valign="middle">
+                                    <tr role="row">
+                                        <th data-orderable="false" class="text-nowrap" rowspan=2>
+                                            序號
+                                        </th>
+                                        <th class="text-nowrap center " rowspan=2>收件年月</th>
+                                        <th class="text-nowrap" rowspan=2>收件日</th>
+                                        <th class="text-nowrap" rowspan=2>&emsp; &emsp;院所代碼&emsp; &emsp;</th>
+                                        <th class="text-nowrap" rowspan=2>院區別</th>
+                                        <th class="text-nowrap" rowspan=2>&emsp; &emsp; &emsp; &emsp; &emsp;院所名稱 &emsp; &emsp; &emsp; &emsp; &emsp;</th>
+                                        <th class="text-nowrap" rowspan=2>&emsp; 層級別 &emsp;</th>
+                                        <th class="text-nowrap" colspan=4>申請戒菸服務項目及人次</th>
+                                        <th class="text-nowrap" colspan=2>&emsp; &emsp; 專設戒菸服務門診 (每月幾個診次_半日為1個診次) &emsp; &emsp; </th>
+                                        <th class="text-nowrap" colspan=2>&emsp; &emsp; &emsp; &emsp; &emsp; &emsp; 署審查結果 &emsp; &emsp; &emsp; &emsp; &emsp; &emsp; </th>
+                                        <th class="text-nowrap" rowspan=2>&emsp; &emsp; &emsp; &emsp; &emsp; &emsp; &emsp; &emsp; &emsp; VPN異動說明 &emsp; &emsp; &emsp; &emsp; &emsp; &emsp; &emsp; &emsp; &emsp;</th>
+                                    </tr>
+                                    <tr role="row">
+                                        <th class="text-nowrap">戒菸治療</th>
+                                        <th class="text-nowrap">治療申請人次</th>
+                                        <th class="text-nowrap">戒菸衛教</th>
+                                        <th class="text-nowrap">衛教申請人次</th>
+                                        <th class="text-nowrap">戒菸治療</th>
+                                        <th class="text-nowrap">戒菸衛教</th>
+                                        <th class="text-nowrap">戒菸治療</th>
+                                        <th class="text-nowrap">&emsp;  戒菸衛教 &emsp;</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</form>
+<style>
+    th {
+        vertical-align: middle !important;
+    }
+
+    td {
+        vertical-align: middle !important;
+    }
+
+        td.highlight {
+            color: red;
+        }
+
+    table {
+        text-align: center;
+    }
+</style>
+<div class="modal fade" id="modal-judge" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">設定核准</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-inline">
+                    <label class="col-sm-5 col-form-label text-right">合約生效日</label>
+                    <div class="col-sm-7">
+                        <input type="text" class="form-control smkdate" id="judgeHospStartDate" />
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="btnJudge">核准</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+@section Scripts {
+    @{
+        @await Html.PartialAsync("~/Views/Shared/_DataTables.cshtml")
+        ;
+    }
+    <script type="text/javascript">
+        var btnApplyStaute = false;
+        var btnQuotaHosp = false;
+        var DownloadAllResponse;
+        var SelectRowData;
+
+        Date.prototype.yyyymmdd = function () {
+            var mm = this.getMonth() + 1; // getMonth() is zero-based
+            var dd = this.getDate();
+
+            return [this.getFullYear() - 1911,
+            (mm > 9 ? '' : '0') + mm,
+            (dd > 9 ? '' : '0') + dd
+            ].join('/');
+        };
+
+        $(function () {
+            $("#HospUploadFile").on("click", function () { var files = $("#file-uploader").get(0).files; uploadFile(files, 0, "ApplyStaute") });
+            $("#QuotaHospUploadFile").on("click", function () { var files = $("#file-QuotaHosp-uploader").get(0).files; uploadFile(files, 0, "QuotaHosp") });
+        });
+
+        $("#btnApplyStaute").click(() => {
+            if (!btnApplyStaute) {
+                $("#ApplyStaute").show();
+                btnApplyStaute = true;
+            } else {
+                $("#ApplyStaute").hide();
+                btnApplyStaute = false;
+            }
+        });
+
+        $("#btnQuotaHosp").click(() => {
+            if (!btnQuotaHosp) {
+                $("#QuotaHosp").show();
+                btnQuotaHosp = true;
+            } else {
+                $("#QuotaHosp").hide();
+                btnQuotaHosp = false;
+            }
+        });
+
+        function uploadFile(files, type, UploadType) {
+            var files;
+            var data = new FormData();
+            if (files.length == 0) {
+                myAlert.error("上傳失敗", "未選擇檔案", true);
+                return;
+            }
+            data.append("file", files[0]);
+            data.append("types", type);
+            data.append("UploadType", UploadType);
+            var ajaxRequest = $.ajax({
+                type: "POST",
+                url: "@Url.Action("Application_Upload")",
+                contentType: false,
+                processData: false,
+                dataType: "json",
+                data: data
+            }).done(function (res, textStatus) {
+                if (!res.isSuccess) {
+                    myAlert.error("上傳失敗", res.errMsg, true);
+                }
+                else {
+                    myAlert.success("上傳成功", res.msg, true);
+                }
+
+            });
+        }
+
+
+        var $hospbasicTable;
+        var $hospbasicInsertTable;
+        var $downloadhospbasicTable;
+        var $quotaHospInsertTable;
+        var hospNameCache = {};
+        $(function () {
+            $("#ApplyStaute").hide();
+            $("#QuotaHosp").hide();
+            //console.log(new Date().getFullYear())
+            $("#Application_EndCreateDate").val(toTaiwaneseDate(new Date()));
+            $("#Application_StartCreateDate").val(toTaiwaneseDate(new Date((new Date()).setDate((new Date()).getDate() - 30))));
+            $("#QuotaHosp_EndCreateDate").val(toTaiwaneseDate(new Date()));
+            $("#QuotaHosp_StartCreateDate").val(toTaiwaneseDate(new Date((new Date()).setDate((new Date()).getDate() - 30))));
+
+            $('#HospID,#HospSeqNo').on('keyup', async function () {
+                var hospID = $('#HospID').val();
+                var hospSeqNo = $('#HospSeqNo').val();
+                const { data } = await axios.get('@Url.Action("GetHospName", "HospBasic")', { params: { hospID, hospSeqNo }, hideMask: true });
+                if (data !== undefined) {
+                    $('#HospName').val(data);
+                }
+            });
+            $("#selectAll").on("click", selectAll);
+            $("#btnQuery").on("click", query);
+            $("#btnQuery_Application").on("click", btnQuery_Application);
+            $("#btnQuery_QuotaHosp").on("click", btnQuery_QuotaHosp);
+            $("#btnJudgeAll").on("click", judge);
+            $("#btnJudge").on("click", judgeSubmit);
+            $("#btnDeleteAll").on("click", deleteAll);
+            $("#HospName").autocomplete({
+                minLength: 1,
+                source: function (request, response) {
+                    var term = request.term;
+                    if (term in hospNameCache) {
+                        response(hospNameCache[term]);
+                        return;
+                    }
+
+                    $.ajax({
+                        url: '@Url.Action("QueryHospName", "HospBasic")',
+                        type: "Get",
+                        dataType: "json",
+                        data: { keyword: request.term },
+                        success: function (res) {
+                            if (!res.isSuccess) {
+                                myAlert.error("查詢錯誤", res.errMsg, true);
+                                return;
+                            }
+                            if (res.data && res.data.length == 0) {
+                                response([]);
+                                return;
+                            }
+                            var data = res.data
+                            hospNameCache[term] = data;
+                            response(data);
+                        }
+                    });
+
+                },
+                select: function (event, ui) {
+                    $("#HospID").val(ui.item.id);
+                }
+            });
+        });
+
+        function toTaiwaneseDate(adDate) {
+            const adYear = adDate.getFullYear();
+            const adMonth = adDate.getMonth() + 1; // 注意：JavaScript 的月份從 0 开始，需要加上 1
+            const adDay = adDate.getDate();
+
+            const twYear = adYear - 1911;
+            const twMonth = String(adMonth).padStart(2, '0');
+            const twDay = String(adDay).padStart(2, '0');
+
+            return `${twYear}/${twMonth}/${twDay}`;
+        }
+
+        function judgeSubmit() {
+            var hospStartDate = $.trim($("#judgeHospStartDate").val());
+            if (hospStartDate == "") {
+                alert('未填寫日期');
+                return;
+            }
+
+            var preJudgeData = $(".tbCheck:checked").map(function () {
+                var closestRow = $(this).closest('tr');
+                var data = $hospbasicTable.row(closestRow).data();
+                return data;
+            }).get();
+
+            $.post('@Url.Action("Judge", "HospBasic")', { contract: preJudgeData, hospStartDate: hospStartDate }, function (res) {
+                if (!res.isSuccess) {
+                    myAlert.error("核准錯誤", res.errMsg, true);
+                }
+                else {
+                    myAlert.success("核准成功", res.errMsg, true);
+                }
+                $(".tbCheck:checked").each(function () {
+                    var closestRow = $(this).closest('tr');
+                    var data = $hospbasicTable.row(closestRow).data();
+                    data.hospStartDate = hospStartDate;
+                    $hospbasicTable.row(closestRow).data(data).draw();
+                })
+                $('#modal-judge').modal('toggle');
+            });
+        }
+        function judge() {
+            if ($(".tbCheck:checked").length == 0) {
+                myAlert.error("核准失敗", "尚未勾選資料", true);
+                return;
+            }
+        }
+        function selectAll(e) {
+            $(".tbCheck").prop("checked", $(this).prop("checked"));
+        }
+        function query() {
+            if ($hospbasicTable)
+                $hospbasicTable.destroy();
+
+            var ajax = function (data, callback, settings) {
+                var o = $("#queryFormFirst").serializeObject();
+                o.draw = data.draw;
+                o.start = data.start;
+                o.length = data.length;
+                $.post('@Url.Action("Query", "HospBasic")', o, function (res) {
+                    if (!res.isSuccess) {
+                        myAlert.error("查詢錯誤", res.errMsg, true);
+                        return;
+                    }
+                    callback(res.data);
+                });
+            };
+            $hospbasicTable = $("#hospbasicTable").DataTable({
+                "scrollY": "600px",//可選，是否固定表格高度，不包括表頭；
+                "scrollCollapse": true,//與scrollY结合使用，是否固定高度，默認false;
+                "serverSide": true,
+                "ajax": ajax,
+                "paging": true,
+                "searching": false,
+                "ordering": false,
+                "columns": [
+                    {
+                        className: "tdcheckbox sorting_1",
+                        data: null,
+                        width: "5%",
+                        targets: 0,
+                        render: function (data, type, full, meta) {
+                            var settings = meta.settings;
+                            var serial = meta.row + 1 + settings._iDisplayLength * settings._iDisplayStart / settings._iDisplayLength;
+                            var html = '<label class="text-center" for="check' + serial + '">' + serial +
+                                '<input id="check' + serial + '" class="tbCheck" type="checkbox" /></label>';
+                            return html;
+                        }
+                    },
+                    {
+                        data: "hospID",
+                        targets: 1,
+                        render: function (data, type, full, meta) {
+                            return '<a href="#' + data + '" class="linkEdit">' + data + '</a>';
+                        }
+                    },
+                    { data: "hospSeqNo", targets: 2 },
+                    { data: "hospName", targets: 3 },
+                    // {
+                    //     data: "hospEndDate", targets: 4,
+                    //     render: function (data, type, full, meta) {
+                    //         var date = new Date();
+                    //         var today = date.yyyymmdd();
+                    //         //console.log(data);
+                    //         if (today <= data || data == null || data.trim() == "") {
+                    //             return '合約有效';
+                    //         } else {
+                    //             return '合約終止';
+                    //         }
+                    //     }
+                    // },
+                    //{ data: "contractStatusStr", targets: 4 },
+                    { data: "hospStatusName", targets: 4 },
+                    { data: "smkContractTypeNam", targets: 5 },
+                    { data: "hospStartDate", targets: 6 },
+                    { data: "hospEndDate", targets: 7 },
+                    { data: "hospNewEndDate", targets: 8 },
+                    {
+                        targets: 9,
+                        data: "id",
+                        render: function (data, type, full, meta) {
+                            return `<button type="button" class="Download" title="下載" value = "${data}"><i class= "fas fa-download" aria-hidden="true" ></i></button >`;
+                        }
+                    },
+                ]
+            });
+            $hospbasicTable.on('click', ".Download", function () {
+                var Id_data = $(this).val();
+                var closestRow = $(this).closest('tr');
+                SelectRowData = $hospbasicTable.row(closestRow).data();
+                //console.log(Id_data)
+                $.ajax({
+                    url: '@Url.Action("DownloadAll", "HospBasic")', // 请求的 URL
+                    method: 'GET', // 请求的方法（GET、POST 等）
+                    data: { Id: Id_data },
+                    success: function (response) {
+                        DownloadAllResponse = response;
+                        if (DownloadAllResponse == null) {
+                            alert('錯誤!!!沒有抓到檔案!!!');
+                        } else {
+                            DownloadAllDataTable();
+                            $('#DownloadModal').modal();
+                        }
+                        //for (var i = 0; i < response.length; i++) {
+                        //    window.open('@Url.Action("DownloadGetAll")?hospid=' + response[i].hospId + '&hospseqno=' + response[i].hospSeqNo + '&SMKContractType=' + response[i].smkcontractType + '&createDate=' + response[i].createDate + '&remark=' + response[i].remark, "_blank");
+                        //}
+                    },
+                    error: function (xhr, status, error) {
+                        console.log('出現錯誤，陣列問題比較多', error);
+                    }
+                });
+
+            }).on('click', ".linkEdit", function () {
+                var closestRow = $(this).closest('tr');
+                var data = $hospbasicTable.row(closestRow).data();
+                location.href = '@Url.Action("Edit")?hospid=' + data.hospID + '&hospseqno=' + data.hospSeqNo;
+            });
+        }
+
+        function DownloadPdf(All, SysNo) {
+            if (All == "All") {
+                for (var i = 0; i < DownloadAllResponse.length; i++) {
+                    window.open('@Url.Action("DownloadGetAll")?hospid=' + DownloadAllResponse[i].hospId + '&hospseqno=' + DownloadAllResponse[i].hospSeqNo + '&SMKContractType=' + DownloadAllResponse[i].smkcontractType + '&UpdateFileTime=' + DownloadAllResponse[i].updateFileTime + '&remark=' + DownloadAllResponse[i].remark, "_blank");
+                }
+            } else {
+                window.open('@Url.Action("DownloadGetAll")?hospid=' + DownloadAllResponse[SysNo].hospId + '&hospseqno=' + DownloadAllResponse[SysNo].hospSeqNo + '&SMKContractType=' + DownloadAllResponse[SysNo].smkcontractType + '&UpdateFileTime=' + DownloadAllResponse[SysNo].updateFileTime + '&remark=' + DownloadAllResponse[SysNo].remark, "_blank");
+            }
+        }
+
+
+        //彈出一個詢問框，有確定和取消按鈕
+        function confirmDeletePDF(data, SysNo) {
+            //利用對話方塊返回的值 （true 或者 false）
+            data = `請問是否要刪除【${DownloadAllResponse[SysNo].remark}】呢?`
+            if (confirm(data)) {
+                if (DownloadAllResponse.length != SysNo + 1) {
+                    DeletePdf(SysNo)
+                } else {
+                    alert("最新檔案禁止刪除。");
+                }
+            }
+        }
+
+        function DeletePdf(SysNo) {
+            var NewUrl = '@Url.Action("DeletePdf")?hospid=' + DownloadAllResponse[SysNo].hospId + '&hospseqno=' + DownloadAllResponse[SysNo].hospSeqNo + '&SMKContractType=' + DownloadAllResponse[SysNo].smkcontractType + '&UpdateFileTime=' + DownloadAllResponse[SysNo].updateFileTime + '&remark=' + DownloadAllResponse[SysNo].remark;
+            $.ajax({
+                url: NewUrl, // 请求的 URL
+                method: 'GET', // 请求的方法（GET、POST 等）
+                success: function (response) {
+                    console.log(response)
+                    if (response.errMsg == '刪除成功') {
+                        myAlert.success("刪除成功", "", true);
+                        firm("刪除成功，是否要重新整理 ? (建議確定)");
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.log('出現錯誤，陣列問題比較多', error);
+                }
+            });
+        }
+
+        //彈出一個詢問框，有確定和取消按鈕
+        function firm(data) {
+            //利用對話方塊返回的值 （true 或者 false）
+            if (confirm(data)) {
+                window.location.reload();
+            }
+        }
+
+        function DownloadAllDataTable() {
+            if ($downloadhospbasicTable)
+                $downloadhospbasicTable.destroy();
+
+            $("#DownloadModalLabel").text(`${SelectRowData.hospName}(${SelectRowData.smkContractTypeNam})`);
+
+            $downloadhospbasicTable = $("#downloadhospbasicTable").DataTable({
+                "scrollY": "500px",//可选，是否固定表格高度，不包括表头；
+                "scrollCollapse": true,//与scrollY结合使用，是否固定高度，默认false;
+                "serverSide": false,
+                "scrollX": true,
+                "data": DownloadAllResponse,
+                "paging": true,
+                "searching": false,
+                "ordering": true,
+                "order": [[2, 'desc']],
+                "columns": [
+                    {
+                        className: "sorting_1",
+                        data: null,
+                        width: "5%",
+                        targets: 0,
+                        render: function (data, type, full, meta) {
+                            var settings = meta.settings;
+                            var serial = meta.row + 1 + settings._iDisplayLength * settings._iDisplayStart / settings._iDisplayLength;
+                            return serial;
+                        }
+                    },
+                    { data: "remark", targets: 1 },
+                    { data: "updateFileTime", targets: 2 },
+                    {
+                        targets: 3,
+                        data: null,
+                        render: function (data, type, full, meta) {
+                            var settings = meta.settings;
+                            var serial = meta.row + settings._iDisplayLength * settings._iDisplayStart / settings._iDisplayLength;
+                            return `<button type="button" title="下載" value = "${serial}" onclick="DownloadPdf('Only',${serial})"><i class= "fas fa-download" aria-hidden="true" ></i></button >`;
+                        }
+                    },
+                    {
+                        targets: 4,
+                        data: null,
+                        render: function (data, type, full, meta) {
+                            var settings = meta.settings;
+                            var serial = meta.row + settings._iDisplayLength * settings._iDisplayStart / settings._iDisplayLength;
+                            return `<button type="button" title="下載" value = "${serial}" onclick="confirmDeletePDF('', ${serial})" class = "btn btn-danger">刪除</button >`;
+                        }
+                    },
+                ]
+            });
+
+        }
+
+        function deleteAll() {
+
+            var preDelData = $(".tbCheck:checked").map(function () {
+                var closestRow = $(this).closest('tr');
+                var data = $hospbasicTable.row(closestRow).data();
+                return data;
+            }).get();
+
+            $.post('@Url.Action("DeleteContracts", "HospBasic")', { contract: preDelData }, function (res) {
+                if (!res.isSuccess) {
+                    myAlert.error("刪除錯誤", res.errMsg, true);
+                }
+                else {
+                    myAlert.success("刪除成功", res.errMsg, true);
+                    query();
+                }
+            });
+        }
+
+        function btnQuery_Application() {
+            if ($hospbasicInsertTable)
+                $hospbasicInsertTable.destroy();
+
+            var ajax = function (data, callback, settings) {
+                var o = $("#queryForm").serializeObject();
+                o.draw = data.draw;
+                o.start = data.start;
+                o.length = data.length;
+                $.post('@Url.Action("QueryApplication", "HospBasic")', o, function (res) {
+                    if (!res.isSuccess) {
+                        myAlert.error("查詢錯誤", res.errMsg, true);
+                        return;
+                    }
+                    callback(res.data);
+                    //console.log(res.data);
+                });
+            };
+            $hospbasicInsertTable = $("#hospbasicInsertTable").DataTable({
+                "scrollY": "600px",//可选，是否固定表格高度，不包括表头；
+                "scrollCollapse": true,//与scrollY结合使用，是否固定高度，默认false;
+                "serverSide": true,
+                "scrollX": true,
+                "ajax": ajax,
+                "paging": true,
+                "searching": false,
+                "ordering": false,
+                "columns": [
+                    {
+                        className: "sorting_1",
+                        data: null,
+                        width: "5%",
+                        targets: 0,
+                        render: function (data, type, full, meta) {
+                            var settings = meta.settings;
+                            var serial = meta.row + 1 + settings._iDisplayLength * settings._iDisplayStart / settings._iDisplayLength;
+                            return serial;
+                        }
+                    },
+                    { data: "feeYM", targets: 1 },
+                    { data: "feeYMD", targets: 2 },
+                    { data: "application_Type", targets: 3 },
+                    { data: "changeType", targets: 4 },
+                    { data: "hospID", targets: 5 },
+                    { data: "hospSeqNo", targets: 6 },
+                    { data: "hospName", targets: 7 },
+                    { data: "new_Note", targets: 8 },
+                ]
+            });
+        }
+
+        function btnQuery_QuotaHosp() {
+            if ($quotaHospInsertTable)
+                $quotaHospInsertTable.destroy();
+
+            var resultHealthEdu = ["會議審查不予通過", "行政審查不予通過"];
+            var resultHealthEdu_Meeting_Sussue = ["會議審查通過"];
+            var resultHealthEdu_Istrative_Sussue = ["行政審查通過"];
+
+            var ajax = function (data, callback, settings) {
+                var o = $("#queryForm").serializeObject();
+                o.draw = data.draw;
+                o.start = data.start;
+                o.length = data.length;
+                $.post('@Url.Action("QueryQuotaHosp", "HospBasic")', o, function (res) {
+                    if (!res.isSuccess) {
+                        myAlert.error("查詢錯誤", res.errMsg, true);
+                        return;
+                    }
+                    callback(res.data);
+                    //console.log(res.data);
+                });
+            };
+            $quotaHospInsertTable = $("#quotaHospInsertTable").DataTable({
+                "scrollY": "600px",//可选，是否固定表格高度，不包括表头；
+                "scrollCollapse": true,//与scrollY结合使用，是否固定高度，默认false;
+                "serverSide": true,
+                "scrollX": true,
+                "ajax": ajax,
+                "paging": true,
+                "searching": false,
+                "ordering": false,
+                "columns": [
+                    {
+                        className: "sorting_2",
+                        data: null,
+                        width: "5%",
+                        targets: 0,
+                        render: function (data, type, full, meta) {
+                            var settings = meta.settings;
+                            var serial = meta.row + 1 + settings._iDisplayLength * settings._iDisplayStart / settings._iDisplayLength;
+                            return serial;
+                        }
+                    },
+                    { data: "feeYM", targets: 1 },
+                    { data: "feeYMD", targets: 2 },
+                    { data: "hospID", targets: 3 },
+                    { data: "hospSeqNo", targets: 4 },
+                    { data: "hospName", targets: 5 },
+                    { data: "lastContType", targets: 6 },
+                    { data: "applyTreatChange", targets: 7 },
+                    { data: "applyTreatPeople", targets: 8 },
+                    { data: "applyHealthEduChange", targets: 9 },
+                    { data: "applyHealthEduPeople", targets: 10 },
+                    { data: "designedTreat", targets: 11 },
+                    { data: "designedTreatHealthEdu", targets: 12 },
+                    {
+                        data: "resultTreat", targets: 13,
+                        render: function (data, type, full, meta) {
+                            if (resultHealthEdu.indexOf(data) != -1) {
+                                return '<span style="color:red;">' + data + '</span>';
+                            } else if (resultHealthEdu_Meeting_Sussue.indexOf(data) != -1) {
+                                return '<span class="p-1" style="background-color:#efef0f;">' + data + '</span>';
+                            } else if (resultHealthEdu_Istrative_Sussue.indexOf(data) != -1) {
+                                return '<span class="p-1" style="background-color:#45db45;">' + data + '</span>';
+                            } else {
+                                return data;
+                            }
+                        }
+                    },
+                    {
+                        data: "resultHealthEdu", targets: 14,
+                        render: function (data, type, full, meta) {
+                            if (resultHealthEdu.indexOf(data) != -1) {
+                                return '<span style="color:red;">' + data + '</span>';
+                            } else if (resultHealthEdu_Meeting_Sussue.indexOf(data) != -1) {
+                                return '<span class="p-1" style="background-color:#efef0f;">' + data + '</span>';
+                            } else if (resultHealthEdu_Istrative_Sussue.indexOf(data) != -1) {
+                                return '<span class="p-1" style="background-color:#45db45;">' + data + '</span>';
+                            } else {
+                                return data;
+                            }
+                        }
+                    },
+                    { data: "vpnChangeNote", targets: 15 },
+                ]
+            });
+        }
+
+
+    </script>
+}
+
+

@@ -1,0 +1,247 @@
+﻿@model EmpLoginLogViewModel
+@using SMK.Web.Services;
+@inject EmpLogService empLogService;
+@using SMK.Data.Enums;
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card rounded-lg">
+            <div class="card-header">
+                <div class="col-md-12 text-left text-secondary">
+                    帳號登入紀錄<br />
+                    此頁為查詢、檢視，及匯出帳號登入紀錄之功能。
+                    <br />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="col-sm-12">
+                    <form id="queryForm" asp-action="Export" class="form-horizontal">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="form-row d-flex flex-column align-items-center">
+                            <div class="d-flex justify-content-around mb-3">
+                                <div class="form-inline d-flex mr-2">
+                                    <label class="control-label">登入時間</label>
+                                    <div class="col-sm-7 d-flex align-items-center">
+                                        <input asp-for="LoginTime_Start" class="form-control smkdate" placeholder="YYY/MM/DD" />
+                                        <span class="mr-2 ml-2" style="font-size:2rem;">~</span>
+                                        <input asp-for="LoginTime_End" class="form-control smkdate" placeholder="YYY/MM/DD" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-around mb-3">
+                                <div class="form-inline d-flex mr-3">
+                                    <label asp-for="User_Account" class="control-label"></label>
+                                    <div class="col-sm-7">
+                                        <input asp-for="User_Account" class="form-control" placeholder="帳號" />
+                                    </div>
+                                </div>
+                                <div class="form-inline d-flex mr-3">
+                                    <label asp-for="User_Name" class="control-label"></label>
+                                    <div class="col-sm-7">
+                                        <input asp-for="User_Name" class="form-control" placeholder="姓名" />
+                                    </div>
+                                </div>
+                                <div class="form-inline d-flex mr-3">
+                                    <label asp-for="Enable" class="control-label"></label>
+                                    <div class="col-sm-7">
+                                        <select name="Enable" class="form-control">
+                                            <option value="">全部狀態</option>
+                                            <option value="true">啟用</option>
+                                            <option value="false">停用</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-inline d-flex mr-3">
+                                    <label asp-for="LoginMsg" class="control-label"></label>
+                                    <div class="col-sm-7">
+                                        <select name="LoginMsg" class="form-control">
+                                            <option value="">全部狀態</option>
+                                            @foreach (var item in @ViewBag.LoginLog_enum)
+                                            {
+                                                <option value="@item">@item</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-center">
+                            <button id="btnQuery" type="button" class="btn btn-primary mr-2">查詢</button>
+                            <input value="匯出Excel" type="submit" asp-action="ExportEmpLog" asp-route-fileType="xlsx" class="btn btn-primary mr-2" />
+                            <input value="匯出ODS" type="submit" asp-action="ExportEmpLog" asp-route-fileType="ods" class="btn btn-primary mr-2" />
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table id="LoginLogTable" class="table table-striped table-bordered table-hover " role="grid">
+                        <thead>
+                            <tr role="row">
+                                <th class="text-nowrap">使用者帳號</th>
+                                <th class="text-nowrap">使用者姓名</th>
+                                <th class="text-nowrap">登入時間</th>
+                                <th class="text-nowrap">登入狀態</th>
+                                <th class="text-nowrap">帳號狀態</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        @await Html.PartialAsync("~/Views/Shared/_DataTables.cshtml")
+        ;
+    }
+    <script type="text/javascript">
+        var $LoginLogTable;
+        $(function () {
+            $("#btnQuery").on("click", query);
+        });
+
+        function query() {
+            if ($LoginLogTable)
+                $LoginLogTable.destroy();
+
+            var ajax = function (data, callback, settings) {
+                var o = $("#queryForm").serializeObject();
+                o.draw = data.draw;
+                o.start = data.start;
+                o.length = data.length;
+                $.post('@Url.Action("Query", "EmpLog")', o, function (res) {
+                    if (!res.isSuccess) {
+                        myAlert.error("查詢錯誤", res.errMsg, true);
+                        return;
+                    }
+                    console.table(res.data.data)
+                    callback(res.data);
+                });
+            };
+            $LoginLogTable = $("#LoginLogTable").DataTable({
+                "scrollY": "600px",//可選，是否固定表格高度，不包括表頭；
+                "scrollCollapse": true,//與scrollY结合使用，是否固定高度，默認false;
+                "serverSide": true,
+                "ajax": ajax,
+                "paging": true,
+                "searching": false,
+                "ordering": false,
+                "columns": [
+                    { data: "user_Account", targets: 0 },
+                    { data: "user_Name", targets: 1 },
+                    { data: "loginTime", targets: 2 },
+                    { data: "loginMsg", targets: 3 },
+                    { data: "enable", targets: 4 },
+                ]
+            });
+        }
+
+    </script>
+    @*    <script type="text/javascript">
+        var $hospbasicTable;
+        $(function () {
+            $("#btnQuery").on("click", query);
+        });
+
+        function importData(values, response) {
+            $.ajax({
+                url: '@Url.Action("Import", "IniFileInCtrl")',
+                type: "post",
+                dataType: "json",
+                data: {
+                    id: values.id,
+                    createdAt: $('#CreatedAt').val(),
+                    fileDate: $('#FileDate').val(),
+                    fileName: $('#FileName').val(),
+                    draw: 1,
+                    start: 0,
+                    length: 100,
+                },
+                success: function (res) {
+                    if (!res.isSuccess) {
+                        myAlert.error("查詢錯誤", res.errMsg, true);
+                        return;
+                    }
+                    if (res.data && res.data.length == 0) {
+                        response([]);
+                        return;
+                    }
+                    var data = res.data;
+                    response(data);
+                }
+            });
+        }
+        function query() {
+            if ($hospbasicTable)
+                $hospbasicTable.destroy();
+
+            var ajax = function (data, callback, settings) {
+                var o = $("#queryForm").serializeObject();
+                o.draw = data.draw;
+                o.start = data.start;
+                o.length = data.length;
+                $.post('@Url.Action("Query", "IniFileInCtrl")', o, function (res) {
+                    if (!res.isSuccess) {
+                        myAlert.error("查詢錯誤", res.errMsg, true);
+                        return;
+                    }
+                    callback(res.data);
+                });
+            };
+            $hospbasicTable = $("#hospbasicTable").DataTable({
+                "serverSide": true,
+                "ajax": ajax,
+                "paging": true,
+                "searching": false,
+                "ordering": false,
+                "rowCallback": function (row, data) {
+                    let importButton = $(row).find('.import');
+                    if (importButton) {
+                        importButton.on('click', () => {
+                            importData(data, (results) => {
+                            });
+                        });
+                    }
+                },
+                "columns": [
+                    { data: "filename", targets: 1 },
+                    { data: "startedAt", targets: 2 },
+                    { data: "statusUpdatedAt", targets: 3 },
+                    { data: "statusStr", targets: 4 },
+                    {
+                        targets: 5,
+                        data: null,
+                        render: function (data, type, full, meta) {
+                            return data.fileIsExisted ?
+                                '<button type="button" class="import" title="重新匯入"><i class= "fas fa-play" aria-hidden="true" ></i></button > '
+                                : '';
+                        },
+                    }
+                ]
+            });
+        }
+    </script>
+*@
+}

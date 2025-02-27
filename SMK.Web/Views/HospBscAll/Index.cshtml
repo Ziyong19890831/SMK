@@ -1,0 +1,198 @@
+﻿@model SMK.Web.Models.HospBscAllQueryModel
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+<div class="row mb-4">
+    <div id="app" class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="col-sm-12">
+                    <form id="queryForm" class="form-horizontal" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="form-row mb-4 row">
+                            <div class="form-inline col-sm-6">
+                                <label asp-for="HospID" class="col-sm-5 col-form-label"></label>
+                                <div class="col-sm-3">
+                                    <input asp-for="HospID" class="form-control" />
+                                </div>
+                                <span asp-validation-for="HospID" class="text-danger col-sm-3"></span>
+                            </div>
+                            <div class="form-inline col-sm-6">
+                                <label asp-for="HospName" class="col-sm-5 col-form-label text-right"></label>
+                                <div class="col-sm-3">
+                                    <input asp-for="HospName" class="form-control" />
+                                </div>
+                                <span asp-validation-for="HospName" class="text-danger col-sm-3"></span>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-center">
+                            <input type="file" @@change="uploadFile" ref="file">
+                            <button type="button" @@click="submitFile" class="btn btn-primary mr-2">批次上傳</button>
+                            <button type="button" @@click="query()" class="btn btn-primary mr-2">查詢</button>
+                            @*<button type="button" onclick="location.href='@Url.Action("Create","HospBscAll")'" class="btn btn-primary mr-2">新增</button>*@
+
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="col-sm-12">
+                    <div class="table-responsive">
+                        <table id="dataTable1" class="table table-striped table-bordered table-hover" role="grid">
+                            <thead>
+                                <tr role="row">
+                                    <th class="text-nowrap">醫事機構代碼</th>
+                                    <th class="text-nowrap"> &emsp; &emsp; &emsp; &emsp; &emsp; &emsp; &emsp;醫事機構名稱 &emsp; &emsp; &emsp; &emsp; &emsp; &emsp; &emsp;</th>
+                                    <th class="text-nowrap">電話區域號碼</th>
+                                    <th class="text-nowrap">電話號碼</th>
+                                    <th class="text-nowrap">分區別</th>
+                                    <th class="text-nowrap">&emsp; &emsp; &emsp; &emsp; &emsp; &emsp; &emsp;機構地址 &emsp; &emsp; &emsp; &emsp; &emsp; &emsp; &emsp;</th>
+                                    <th class="text-nowrap">特約類別</th>
+                                    <th class="text-nowrap">型態別</th>
+                                    <th class="text-nowrap">醫事機構種類</th>
+                                    <th class="text-nowrap">開業狀態</th>
+                                    <th class="text-nowrap">原始合約起日</th>
+                                    <th class="text-nowrap">終止合約或歇業日期</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    th {
+        vertical-align: middle !important;
+    }
+
+    td {
+        vertical-align: middle !important;
+    }
+
+    table {
+        text-align: center;
+    }
+</style>
+@section Scripts {
+    @{
+        @await Html.PartialAsync("~/Views/Shared/_DataTables.cshtml")
+        ;
+    }
+    <script type="text/javascript">
+        var $hospbasicTable;
+        const app = new Vue({
+            el: '#app',
+            data: {
+                showModal: false,
+                hospContTypeSelected: false,
+                options: [],
+                hospContTypes: [],
+                input: null
+            },
+            methods: {
+                uploadFile() {
+                    this.input = this.$refs.file.files[0];
+                },
+                submitFile() {
+                    const formData = new FormData();
+                    formData.append('file', this.input);
+                    console.log(this.input);
+                    const headers = { 'Content-Type': 'multipart/form-data' };
+                    $.ajax({
+                        url: '@Url.Action("Upload", "HospBscAll")',
+                        data: formData,
+                        //headers: headers,
+                        processData: false,
+                        contentType: false,
+                        method: 'post',
+                        success: function (res) {
+                            if (!res.isSuccess) {
+                                myAlert.error("匯入錯誤", res.errMsg, true);
+                                return;
+                            } else {
+                                myAlert.success("匯入成功", res.msg, true);
+                            }
+                        }
+                    })
+        @*axios.post('@Url.Action("Upload", "CorrectionSlip")', formData, { headers }).then((res) => {
+                    if (!res.isSuccess) {
+                    myAlert.error("匯入錯誤", res.errMsg, true);
+                    return;
+                    } else {
+                    myAlert.success("匯入成功");
+                    }
+                    });*@
+                                            },
+                query() {
+
+                    if ($hospbasicTable)
+                        $hospbasicTable.destroy();
+
+                    const ajax = function (data, callback, settings) {
+                        var o = $("#queryForm").serializeObject();
+                        o.draw = data.draw;
+                        o.start = data.start;
+                        o.length = data.length;
+                        $.post('@Url.Action("query", "HospBscAll")', o, function (res) {
+                            if (!res.isSuccess) {
+                                myAlert.error("查詢錯誤", res.errMsg, true);
+                                return;
+                            }
+                            callback(res.data);
+                        });
+                    };
+
+                    $hospbasicTable = $("#dataTable1").DataTable({
+                        "scrollY": "600px",//可選，是否固定表格高度，不包括表頭；
+                        "scrollCollapse": true,//與scrollY结合使用，是否固定高度，默認false;
+                        "serverSide": true,
+                        "ajax": ajax,
+                        "paging": true,
+                        "searching": false,
+                        "ordering": false,
+                        "scrollX": true,
+                        "stripeClasses": [],
+                        "createdRow": function (row, data, dataIndex) {
+                            $(row).removeClass('even');
+                            $(row).removeClass('odd');
+                            if (data['dataType'] === '1') {
+                                $(row).addClass('light-cyan');
+                            } else {
+                                $(row).addClass('light-yellow');
+                            }
+                        },
+                        "columns": [
+                            { data: "hospId", targets: 0 },
+                            { data: "hospName", targets: 1 },
+                            { data: "hospTelArea", targets: 2 },
+                            { data: "hospTel", targets: 3 },
+                            { data: "branchNo", targets: 4 },
+                            { data: "hospAddress", targets: 5 },
+                            { data: "contType", targets: 6 },
+                            { data: "hospType", targets: 7 },
+                            { data: "hospKind", targets: 8 },
+                            { data: "openState", targets: 9 },
+                            { data: "hospStartDate", targets: 10 },
+                            { data: "hospEndDate", targets: 11 }
+                        ]
+                    });
+                },
+                insert: function () {
+                    alert('尚未獲得資料實作');
+                }
+            },
+        });
+
+    </script>
+}

@@ -1,0 +1,52 @@
+﻿@using SMK.Data.Dto;
+@using SMK.Data.Enums;
+@using SMK.Data.Entity;
+@model PrivilegeNodeModel
+@{
+    var role = ViewBag.ExtendData as Role;
+}
+@section Styles{
+    <style>
+    </style>
+}
+<row class="text-left">
+    <div class="col-sm-4">
+        <table class="table table-bordered">
+            @*
+                <tr><td>Id</td><td>@role.Id</td></tr>*@
+            <tr>
+                <td>角色</td>
+                <td>@role.Name</td>
+            </tr>
+        </table>
+    </div>
+</row>
+<hr />
+<row>
+    <div class="col-sm-12">
+        @await Html.PartialAsync("Partail_Treeview.cshtml", Model)
+    </div>
+</row>
+
+@section Scripts{
+    <script>
+    $(function () {
+        $(".role-edit").on("change", function () {
+            var self = this;
+            $(self).prop("disabled", true);
+            var data={
+                roleId: $(self).data("rid"),
+                privilegeId: $(self).data("pid"),
+                enable: $(self).prop("checked")
+            };
+            $.post("@Url.Action("SwitchRolePrivilege")", data, function (res) {
+                if (!res.isSuccess) {
+                    myAlert.error("更新權限程式關聯失敗", res.errMsg, true);
+                    return;
+                }
+                $(self).prop("disabled", false);
+            });
+        });
+    })
+    </script>
+}

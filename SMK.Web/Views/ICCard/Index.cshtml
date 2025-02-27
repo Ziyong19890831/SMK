@@ -1,0 +1,66 @@
+﻿@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="row">
+    <div class="col-12">
+        <div class="card rounded-lg">
+            <div class="card-header">
+                <div class="col-md-12 text-left text-secondary">
+                    健保卡過卡功能，包括產製以下4種報表：刷卡次數、未過卡詳細資料、層級別醫院別每月過卡率及層級別醫院別單月過卡率。
+                    </br>另可根據查詢選項篩選所需內容後匯出。
+                    </br></br>
+                    資料更新頻率：每月1次。
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="col-md-12 text-right">
+                    <ul class="nav nav-pills" id="pills-tab" role="tablist">           
+                        <li class="nav-item mr-2" role="presentation">
+                            <button class="nav-link active" id="pills-ICcardByMonth-tab" data-toggle="pill" data-target="#pills-ICcardByMonth" type="button" role="tab" aria-controls="pills-ICcardByMonth" aria-selected="true">醫院別刷卡次數</button>
+                        </li>
+                        <li class="nav-item mr-2" role="presentation">
+                            <button class="nav-link" id="pills-ICNotFound-tab" data-toggle="pill" data-target="#pills-ICNotFound" type="button" role="tab" aria-controls="pills-ICNotFound" aria-selected="false">未過卡詳細資料</button>
+                        </li>
+                        <li class="nav-item mr-2" role="presentation">
+                            <button class="nav-link" id="pills-ICRateLately-tab" data-toggle="pill" data-target="#pills-ICRateLately" type="button" role="tab" aria-controls="pills-ICRateLately" aria-selected="false">層級別醫院別單月過卡率</button>
+                        </li>
+                        <li class="nav-item mr-2" role="presentation">
+                            <button class="nav-link" id="pills-ICRateByMonth-tab" data-toggle="pill" data-target="#pills-ICRateByMonth" type="button" role="tab" aria-controls="pills-ICRateByMonth" aria-selected="true">層級別醫院別每月過卡率</button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="tab-content" id="pills-tabContent">
+                    <div class="tab-pane fade active show" id="pills-ICcardByMonth" role="tabpanel" aria-labelledby="pills-ICcardByMonth-tab">
+                        @await Html.PartialAsync("Partial/ICcardByMonth")
+                    </div>
+                    <div class="tab-pane fade" id="pills-ICNotFound" role="tabpanel" aria-labelledby="pills-ICNotFound-tab">
+                        @await Html.PartialAsync("Partial/ICNotFound")
+                    </div>
+                    <div class="tab-pane fade" id="pills-ICRateLately" role="tabpanel" aria-labelledby="pills-ICRateLately-tab">
+                        @await Html.PartialAsync("Partial/ICRateLately")
+                    </div>
+                    <div class="tab-pane fade" id="pills-ICRateByMonth" role="tabpanel" aria-labelledby="pills-ICRateByMonth-tab">
+                        @await Html.PartialAsync("Partial/ICRateByMonth")
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        @await Html.PartialAsync("~/Views/Shared/_DataTables.cshtml")
+        ;
+    }
+}

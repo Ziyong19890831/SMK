@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UserSecretsId>dotnet-SMK.Worker-4D286C97-CB4C-461D-A378-5AB833425C09</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="EFCore.BulkExtensions" Version="5.2.5" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.1.16" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="3.1.16" />
+    <PackageReference Include="Yozian.DependencyInjectionPlus" Version="5.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SMK.Data\SMK.Data.csproj" />
+    <ProjectReference Include="..\SMK.Shared\SMK.Shared.csproj" />
+  </ItemGroup>
+
+	<ItemGroup>
+		<None Update="Templates\*">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+
+</Project>

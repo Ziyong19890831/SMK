@@ -1,0 +1,38 @@
+﻿ALTER TABLE [PrsnContract] ADD [EndReasonNo] nvarchar(2) NULL DEFAULT ((''));
+
+GO
+
+CREATE TABLE [GenPrsnEndReason] (
+    [EndReasonNo] char(2) NOT NULL,
+    [EndReasonName] nvarchar(20) NULL DEFAULT (('')),
+    CONSTRAINT [PK_GenPrsnEndReason_1] PRIMARY KEY ([EndReasonNo])
+);
+
+GO
+
+UPDATE [GenEmpData] SET [CreatedAt] = '2020-05-30T15:47:58.3028277+08:00'
+WHERE [Id] = N'00000000-0000-0000-0000-000000000000';
+SELECT @@ROWCOUNT;
+
+
+GO
+
+UPDATE [Role] SET [CreatedAt] = '2020-05-30T15:47:58.3047995+08:00'
+WHERE [Id] = N'00000000-0000-0000-0000-000000000000';
+SELECT @@ROWCOUNT;
+
+
+GO
+
+UPDATE [RoleEmpMapping] SET [CreatedAt] = '2020-05-30T15:47:58.3050005+08:00'
+WHERE [Id] = N'00000000-0000-0000-0000-000000000000';
+SELECT @@ROWCOUNT;
+
+
+GO
+
+INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+VALUES (N'20200530074758_AddPrsnEndReasonNo', N'3.1.3');
+
+GO
+

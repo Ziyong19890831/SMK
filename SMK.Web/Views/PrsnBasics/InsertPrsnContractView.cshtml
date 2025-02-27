@@ -1,0 +1,208 @@
+﻿@model SMK.Web.Models.PrsnBasicViewModel
+@using SMK.Web.Services.Foundation;
+@using SMK.Data.Entity;
+@using SMK.Web.Heppers;
+@inject PrsnBasicsService prsnBasicsService;
+
+@{
+    ViewData["Title"] = "新增人員合約";
+    Layout = "~/Views/Shared/_LayoutNoHeadFooter.cshtml";
+    var SmkcontractsList = await prsnBasicsService.GetSelectLists<GenSmkcontract>(context => context.GenSmkcontract,
+                                                x => x.SmkcontractType,
+                                                x => x.SmkcontractName);
+    var prsnEndReasonList = await prsnBasicsService.GetSelectLists<GenPrsnEndReason>(context => context.GenPrsnEndReason,
+                                                 x => x.EndReasonNo,
+                                                 x => x.EndReasonName);
+}
+
+<div class="modal-dialog modal-lg">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h4 class="modal-title">醫事人員合約資料</h4>
+        </div>
+        <div class="modal-body">
+            <div id="prsnBasic">
+                <input type="hidden" value="@Model.PrsnId" id="lblPrsnId"> <!--這邊沒加會抓不到資料-->
+            </div>
+            <div class="card">
+                <div class="card-header">醫事人員合約</div>
+                <div class="card-body" id="hospContractModal">
+                    <div class="col-sm-12">
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <label class="control-label">醫事機構代碼</label>
+                                <input type="hidden" id="prsnContractId" />
+                                <div class="input-group">
+                                    <input id="txtHospId" type="text" class="form-control disabledInView">
+                                    <input id="txtHospSeqNo" type="text" class="form-control disabledInView">
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label class="control-label">醫事機構名稱</label>
+                                <div class="input-group">
+                                    <input id="txtHospName" type="text" class="form-control disabledInView">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <label class="control-label">合約類別</label>
+                                <select asp-items="SmkcontractsList"
+                                        class="form-control col-sm-7"
+                                        id="selsmkcontractType">
+                                    <option value="">請選擇</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label class="control-label">合約生效日</label>
+                                <input id="txtPrsnStartDate" type="text" class="form-control smkdate" placeholder="">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <label class="control-label">合約終止日</label>
+                                <input type="text" class="form-control smkdate" id="txtPrsnEndDate" placeholder="">
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label class="control-label">終止原因</label>
+                                <select asp-items="prsnEndReasonList"
+                                        class="form-control"
+                                        id="selEndReason">
+                                    <option value="">請選擇</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <label class="control-label">可治療</label>
+                                <input type="checkbox" class="form-control" id="chkCouldTreat" placeholder="">
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label class="control-label">可衛教</label>
+                                <input type="checkbox" class="form-control" id="chkCouldInstruct" placeholder="">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12 mb-2">
+                                <label asp-for="Remark" class="control-label"></label>
+                                <input type="text" class="form-control" id="txtRemark" placeholder="">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <label class="control-label">建立日期</label>
+                                <div class="input-group">
+                                    <input type="text" id="txtCreateDate" class="form-control" disabled>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label class="control-label">修改日期</label>
+                                <div class="input-group">
+                                    <input type="text" id="txtModifyDate" class="form-control" disabled>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer justify-content-between">
+            <button type="button" class="btn btn-default" onclick="btnClose()">取消</button>
+            <button type="button" class="btn btn-primary" id="btnPrsnContractSave" onclick="prsnContractSave()">儲存</button>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        let data = window.opener["data"];
+        if (data != undefined || data != null) {
+            $("#prsnContractId", "#hospContractModal").val(data.id);
+            $("#txtHospId", "#hospContractModal").val(data.hospId);
+            $("#txtHospSeqNo", "#hospContractModal").val(data.hospSeqNo);
+            $("#lblHospName", "#hospContractModal").text(data.hospName);
+            $("#txtHospName", "#hospContractModal").val(data.hospName);
+            $("#selsmkcontractType", "#hospContractModal").val(data.smkcontractType);
+            $("#txtPrsnStartDate", "#hospContractModal").val(data.prsnStartDate);
+            $("#txtPrsnEndDate", "#hospContractModal").val(data.prsnEndDate);
+            $("#selEndReason", "#hospContractModal").val(data.endReasonNo);
+            $("#chkCouldTreat", "#hospContractModal").prop("checked", data.couldTreat == "1");
+            $("#chkCouldInstruct", "#hospContractModal").prop("checked", data.couldInstruct == "1");
+            $("#txtRemark", "#hospContractModal").val(data.remark);
+            $("#txtCreateDate", "#hospContractModal").val(data.createDate);
+            $("#txtModifyDate", "#hospContractModal").val(data.modifyDate);
+        }
+
+
+        function prsnContractSave() {
+            var data = {
+                couldInstruct: $("#chkCouldInstruct", "#hospContractModal").prop("checked") ? "1" : "0",
+                couldTreat: $("#chkCouldTreat", "#hospContractModal").prop("checked") ? "1" : "0",
+                createDate: $("#txtCreateDate", "#hospContractModal").val(),
+                endReasonNo: $("#selEndReason", "#hospContractModal").val(),
+                hospId: $("#txtHospId", "#hospContractModal").val(),
+                hospName: $("#txtHospName", "#hospContractModal").val(),
+                hospSeqNo: $("#txtHospSeqNo", "#hospContractModal").val() || "00",
+                id: $("#prsnContractId", "#hospContractModal").val(),
+                prsnEndDate: $("#txtPrsnEndDate", "#hospContractModal").val(),
+                prsnStartDate: $("#txtPrsnStartDate", "#hospContractModal").val(),
+                remark: $("#txtRemark", "#hospContractModal").val(),
+                smkcontractType: $("#selsmkcontractType", "#hospContractModal").val(),
+                prsnId: $("#lblPrsnId", "#prsnBasic").val(),
+            };
+            if (data.id === "") {
+                $.post("@Url.Action("InsertPrsnContract")", data, function (res) {
+                    if (!res.isSuccess) {
+                        myAlert.error("儲存失敗", res.errMsg, true);
+                    } else {
+                        alert("儲存成功 \n" + res.errMsg);
+                        window.close();
+                    }
+                    //$('#modal-prsnContract').modal('toggle');
+                });
+                return false;
+            } else {
+                $.post("@Url.Action("UpdatePrsnContract")", data, function (res) {
+                    if (!res.isSuccess) {
+                        myAlert.error("儲存失敗", res.errMsg, true);
+                    } else {
+                        alert("儲存成功 \n" + res.errMsg);
+                        window.close();
+                    }
+                    //$('#modal-prsnContract').modal('toggle');
+                
+                //$(json.prsnContracts).each(function (index, item) {
+                //    if (item.id == data.id) {
+                //        $.extend(item, data);
+                //        $.post("@Url.Action("UpdatePrsnContract")", item, function (res) {
+                //            if (!res.isSuccess) {
+                //                myAlert.error("儲存失敗", res.errMsg, true);
+                //            }
+                //            else {
+                //                //myAlert.success("儲存成功", res.errMsg, true);
+                //                alert("儲存成功 \n" + res.errMsg);
+                //                window.close();
+                //            }
+                //            $.extend(item, res.data);
+                //            //$prsnContractTable.clear().rows.add(json.prsnContracts).draw();
+                //        });
+                //        return false;
+                //    }
+
+                //$('#modal-prsnContract').modal('toggle');
+                });
+            }
+        }
+
+        function btnClose() {
+            if (confirm('確定要取消嗎?') == true) {
+                window.close();
+            }
+        }
+    </script>
+}

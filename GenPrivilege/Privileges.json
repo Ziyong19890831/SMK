@@ -1,0 +1,814 @@
+﻿{
+  "linkTypeStr": "Root",
+  "nodes": [
+    {
+      "parentId": null,
+      "name": "系統管理",
+      "sort": 1,
+      "linkTypeStr": "Node",
+      "nodes": [
+        {
+          "name": "人員帳號管理",
+          "sort": 1,
+          "linkTypeStr": "Link",
+          "controllerName": "Emp",
+          "actionName": "Index",
+          "queryParams": null,
+          "nodes": [
+            {
+              "name": "新增帳號",
+              "sort": 1,
+              "linkTypeStr": "Functionality",
+              "controllerName": "Emp",
+              "actionName": "Create",
+              "queryParams": null
+            },
+            {
+              "name": "修改帳號",
+              "sort": 2,
+              "linkTypeStr": "Functionality",
+              "controllerName": "Emp",
+              "actionName": "Edit",
+              "queryParams": null
+            },
+            {
+              "name": "刪除帳號",
+              "sort": 3,
+              "linkTypeStr": "Functionality",
+              "controllerName": "Emp",
+              "actionName": "Delete",
+              "queryParams": null
+            }
+          ]
+        },
+        {
+          "name": "人員權限設定",
+          "sort": 2,
+          "linkTypeStr": "Link",
+          "controllerName": "Role",
+          "actionName": "List",
+          "nodes": [
+            {
+              "name": "新增角色",
+              "sort": 1,
+              "linkTypeStr": "Functionality",
+              "controllerName": "Role",
+              "actionName": "Create",
+              "queryParams": null
+            },
+            {
+              "name": "編輯角色",
+              "sort": 2,
+              "linkTypeStr": "Functionality",
+              "controllerName": "Role",
+              "actionName": "Edit",
+              "queryParams": null
+            },
+            {
+              "name": "權限",
+              "sort": 3,
+              "linkTypeStr": "Functionality",
+              "controllerName": "Role",
+              "actionName": "Privilege",
+              "queryParams": null
+            },
+            {
+              "name": "權限異動",
+              "sort": 4,
+              "linkTypeStr": "Functionality",
+              "controllerName": "Role",
+              "actionName": "SwitchRolePrivilege",
+              "queryParams": null
+            },
+            {
+              "name": "刪除角色",
+              "sort": 5,
+              "linkTypeStr": "Functionality",
+              "controllerName": "Role",
+              "actionName": "Remove",
+              "queryParams": null
+            },
+            {
+              "name": "角色成員列表",
+              "sort": 4,
+              "linkTypeStr": "Functionality",
+              "controllerName": "Role",
+              "actionName": "MemberList",
+              "queryParams": null,
+              "nodes": [
+                {
+                  "name": "新增成員",
+                  "sort": 1,
+                  "linkTypeStr": "Functionality",
+                  "controllerName": "Role",
+                  "actionName": "JoinRole",
+                  "queryParams": null
+                },
+                {
+                  "name": "刪除成員",
+                  "sort": 2,
+                  "linkTypeStr": "Functionality",
+                  "controllerName": "Role",
+                  "actionName": "LeaveRole",
+                  "queryParams": null
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "異動紀錄",
+          "sort": 3,
+          "linkTypeStr": "Link",
+          "controllerName": "SystemLog",
+          "actionName": "Index",
+          "queryParams": null
+        }
+      ]
+    },
+    {
+      "parentId": null,
+      "name": "項目清單維護",
+      "sort": 2,
+      "linkTypeStr": "Node",
+      "nodes": [
+        {
+          "name": "分局別",
+          "sort": 1,
+          "linkTypeStr": "Link",
+          "controllerName": "Branch",
+          "actionName": "Index",
+          "nodes": [
+            {
+              "name": "新增分局別",
+              "sort": 1,
+              "linkTypeStr": "Functionality",
+              "controllerName": "Branch",
+              "actionName": "Create",
+              "queryParams": null
+            },
+            {
+              "name": "編輯分局別",
+              "sort": 2,
+              "linkTypeStr": "Functionality",
+              "controllerName": "Branch",
+              "actionName": "Edit",
+              "queryParams": null
+            },
+            {
+              "name": "刪除分局別",
+              "sort": 3,
+              "linkTypeStr": "Functionality",
+              "controllerName": "Branch",
+              "actionName": "Delete",
+              "queryParams": null
+            }
+          ]
+        },
+        {
+          "name": "特約",
+          "sort": 2,
+          "linkTypeStr": "Link",
+          "controllerName": "HospConts",
+          "actionName": "Index",
+          "nodes": [
+            {
+              "name": "新增特約",
+              "sort": 1,
+              "linkTypeStr": "Functionality",
+              "controllerName": "HospConts",
+              "actionName": "Create",
+              "queryParams": null
+            },
+            {
+              "name": "編輯特約",
+              "sort": 2,
+              "linkTypeStr": "Functionality",
+              "controllerName": "HospConts",
+              "actionName": "Edit",
+              "queryParams": null
+            },
+            {
+              "name": "刪除特約",
+              "sort": 3,
+              "linkTypeStr": "Functionality",
+              "controllerName": "HospConts",
+              "actionName": "Delete",
+              "queryParams": null
+            }
+          ]
+        },
+        {
+          "name": "終止原因",
+          "sort": 3,
+          "linkTypeStr": "Link",
+          "controllerName": "EndReasons",
+          "actionName": "Index",
+          "nodes": [
+            {
+              "name": "新增終止原因",
+              "sort": 1,
+              "linkTypeStr": "Functionality",
+              "controllerName": "EndReasons",
+              "actionName": "Create",
+              "queryParams": null
+            },
+            {
+              "name": "編輯終止原因",
+              "sort": 2,
+              "linkTypeStr": "Functionality",
+              "controllerName": "EndReasons",
+              "actionName": "Edit",
+              "queryParams": null
+            },
+            {
+              "name": "刪除終止原因",
+              "sort": 3,
+              "linkTypeStr": "Functionality",
+              "controllerName": "EndReasons",
+              "actionName": "Delete",
+              "queryParams": null
+            }
+          ]
+        },
+        {
+          "name": "戒菸合約",
+          "sort": 4,
+          "linkTypeStr": "Link",
+          "controllerName": "Smkcontracts",
+          "actionName": "Index",
+          "nodes": [
+            {
+              "name": "新增戒菸合約",
+              "sort": 1,
+              "linkTypeStr": "Functionality",
+              "controllerName": "Smkcontracts",
+              "actionName": "Create",
+              "queryParams": null
+            },
+            {
+              "name": "編輯戒菸合約",
+              "sort": 2,
+              "linkTypeStr": "Functionality",
+              "controllerName": "Smkcontracts",
+              "actionName": "Edit",
+              "queryParams": null
+            },
+            {
+              "name": "刪除戒菸合約",
+              "sort": 3,
+              "linkTypeStr": "Functionality",
+              "controllerName": "Smkcontracts",
+              "actionName": "Delete",
+              "queryParams": null
+            }
+          ]
+        },
+        {
+          "name": "醫事人員類別",
+          "sort": 5,
+          "linkTypeStr": "Link",
+          "controllerName": "PrsnTypes",
+          "actionName": "Index",
+          "nodes": [
+            {
+              "name": "新增醫事人員類別",
+              "sort": 1,
+              "linkTypeStr": "Functionality",
+              "controllerName": "PrsnTypes",
+              "actionName": "Create",
+              "queryParams": null
+            },
+            {
+              "name": "編輯醫事人員類別",
+              "sort": 2,
+              "linkTypeStr": "Functionality",
+              "controllerName": "PrsnTypes",
+              "actionName": "Edit",
+              "queryParams": null
+            },
+            {
+              "name": "刪除醫事人員類別",
+              "sort": 3,
+              "linkTypeStr": "Functionality",
+              "controllerName": "PrsnTypes",
+              "actionName": "Delete",
+              "queryParams": null
+            }
+          ]
+        },
+        {
+          "name": "證書類別",
+          "sort": 6,
+          "linkTypeStr": "Link",
+          "controllerName": "LicenceTypes",
+          "actionName": "Index",
+          "nodes": [
+            {
+              "name": "新增證書類別",
+              "sort": 1,
+              "linkTypeStr": "Functionality",
+              "controllerName": "LicenceTypes",
+              "actionName": "Create",
+              "queryParams": null
+            },
+            {
+              "name": "編輯證書類別",
+              "sort": 2,
+              "linkTypeStr": "Functionality",
+              "controllerName": "LicenceTypes",
+              "actionName": "Edit",
+              "queryParams": null
+            },
+            {
+              "name": "刪除證書類別",
+              "sort": 3,
+              "linkTypeStr": "Functionality",
+              "controllerName": "LicenceTypes",
+              "actionName": "Delete",
+              "queryParams": null
+            }
+          ]
+        },
+        {
+          "name": "專科別",
+          "sort": 7,
+          "linkTypeStr": "Link",
+          "controllerName": "Specials",
+          "actionName": "Index",
+          "nodes": [
+            {
+              "name": "新增專科別",
+              "sort": 1,
+              "linkTypeStr": "Functionality",
+              "controllerName": "Specials",
+              "actionName": "Create",
+              "queryParams": null
+            },
+            {
+              "name": "編輯專科別",
+              "sort": 2,
+              "linkTypeStr": "Functionality",
+              "controllerName": "Specials",
+              "actionName": "Edit",
+              "queryParams": null
+            },
+            {
+              "name": "刪除專科別",
+              "sort": 3,
+              "linkTypeStr": "Functionality",
+              "controllerName": "Specials",
+              "actionName": "Delete",
+              "queryParams": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "parentId": null,
+      "name": "合約管理",
+      "sort": 3,
+      "linkTypeStr": "Node",
+      "nodes": [
+        {
+          "name": "機構資料",
+          "sort": 1,
+          "linkTypeStr": "Link",
+          "controllerName": "HospBasic",
+          "actionName": "Index",
+          "queryParams": null,
+          "nodes": [
+            {
+              "name": "新增機構資料",
+              "sort": 1,
+              "linkTypeStr": "Functionality",
+              "controllerName": "HospBasic",
+              "actionName": "Create",
+              "queryParams": null
+            },
+            {
+              "name": "編輯機構資料",
+              "sort": 2,
+              "linkTypeStr": "Functionality",
+              "controllerName": "HospBasic",
+              "actionName": "Edit",
+              "queryParams": null
+            },
+            {
+              "name": "刪除機構資料",
+              "sort": 3,
+              "linkTypeStr": "Functionality",
+              "controllerName": "HospBasic",
+              "actionName": "Delete",
+              "queryParams": null
+            },
+            {
+              "name": "醫事機構人員合約資料",
+              "sort": 4,
+              "linkTypeStr": "Functionality",
+              "controllerName": "HospBasic",
+              "actionName": "HospPrsnList",
+              "queryParams": null
+            }
+          ]
+        },
+
+        {
+          "name": "醫事人員列表",
+          "sort": 2,
+          "linkTypeStr": "Link",
+          "controllerName": "PrsnBasics",
+          "actionName": "Index",
+          "nodes": [
+            {
+              "name": "醫事人員列表",
+              "sort": 1,
+              "linkTypeStr": "Functionality",
+              "controllerName": "PrsnBasics",
+              "actionName": "Index",
+              "queryParams": null
+            },
+            {
+              "name": "新增醫事人員資料",
+              "sort": 1,
+              "linkTypeStr": "Functionality",
+              "controllerName": "PrsnBasics",
+              "actionName": "Create",
+              "queryParams": null
+            },
+            {
+              "name": "編輯醫事人員資料",
+              "sort": 2,
+              "linkTypeStr": "Functionality",
+              "controllerName": "PrsnBasics",
+              "actionName": "Edit",
+              "queryParams": null
+            },
+            {
+              "name": "刪除醫事人員資料",
+              "sort": 3,
+              "linkTypeStr": "Functionality",
+              "controllerName": "PrsnBasics",
+              "actionName": "Delete",
+              "queryParams": null
+            }
+          ]
+        },
+        {
+          "name": "醫事人員合約管理",
+          "sort": 4,
+          "linkTypeStr": "Link",
+          "controllerName": "PrsnContract",
+          "actionName": "Index",
+          "nodes": [
+            {
+              "name": "新增醫事人員合約",
+              "sort": 1,
+              "linkTypeStr": "Functionality",
+              "controllerName": "PrsnContract",
+              "actionName": "Create",
+              "queryParams": null
+            },
+            {
+              "name": "編輯醫事人員合約",
+              "sort": 2,
+              "linkTypeStr": "Functionality",
+              "controllerName": "PrsnContract",
+              "actionName": "Edit",
+              "queryParams": null
+            },
+            {
+              "name": "刪除醫事人員合約",
+              "sort": 3,
+              "linkTypeStr": "Functionality",
+              "controllerName": "PrsnContract",
+              "actionName": "Delete",
+              "queryParams": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "parentId": null,
+      "name": "檔案上傳",
+      "sort": 1,
+      "linkTypeStr": "Node",
+      "nodes": [
+        {
+          "name": "戒菸VPN",
+          "sort": 1,
+          "linkTypeStr": "Link",
+          "controllerName": "SmkVPNFile",
+          "actionName": "Index",
+          "queryParams": null,
+          "nodes": [
+            {
+              "name": "上傳",
+              "sort": 1,
+              "linkTypeStr": "Functionality",
+              "controllerName": "SmkVPNFile",
+              "actionName": "Upload",
+              "queryParams": null
+            }
+          ]
+        },
+        {
+          "name": "健保檔",
+          "sort": 2,
+          "linkTypeStr": "Link",
+          "controllerName": "NhiFile",
+          "actionName": "Index",
+          "queryParams": null,
+          "nodes": [
+            {
+              "name": "上傳",
+              "sort": 1,
+              "linkTypeStr": "Functionality",
+              "controllerName": "NhiFile",
+              "actionName": "Upload",
+              "queryParams": null
+            }
+          ]
+        },
+        {
+          "name": "其他資料",
+          "sort": 3,
+          "linkTypeStr": "Link",
+          "controllerName": "OtherFile",
+          "actionName": "Index",
+          "queryParams": null,
+          "nodes": [
+            {
+              "name": "上傳",
+              "sort": 1,
+              "linkTypeStr": "Functionality",
+              "controllerName": "OtherFile",
+              "actionName": "Upload",
+              "queryParams": null
+            }
+          ]
+        },
+        {
+          "name": "資料匯入紀錄",
+          "sort": 3,
+          "linkTypeStr": "Link",
+          "controllerName": "DataInsertLog",
+          "actionName": "Index",
+          "queryParams": null,
+          "nodes": [
+            {
+              "name": "紀錄",
+              "sort": 1,
+              "linkTypeStr": "Functionality",
+              "controllerName": "DataInsertLog",
+              "actionName": "Index",
+              "queryParams": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "parentId": null,
+      "name": "醫令審核",
+      "sort": 1,
+      "linkTypeStr": "Node",
+      "nodes": [
+        {
+          "name": "自選參數",
+          "sort": 1,
+          "linkTypeStr": "Link",
+          "controllerName": "MedicalOrder",
+          "actionName": "Index",
+          "queryParams": null,
+          "nodes": [
+            {
+              "name": "下載",
+              "sort": 1,
+              "linkTypeStr": "Functionality",
+              "controllerName": "MedicalOrder",
+              "actionName": "Download",
+              "queryParams": null
+            }
+          ]
+        },
+        {
+          "name": "檢核結果下載",
+          "sort": 1,
+          "linkTypeStr": "Link",
+          "controllerName": "MedicalOrderCheck",
+          "actionName": "Index",
+          "queryParams": null,
+          "nodes": [
+            {
+              "name": "下載",
+              "sort": 1,
+              "linkTypeStr": "Functionality",
+              "controllerName": "MedicalOrderCheck",
+              "actionName": "Download",
+              "queryParams": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "parentId": null,
+      "name": "產製報表",
+      "sort": 1,
+      "linkTypeStr": "Node",
+      "nodes": [
+        {
+          "name": "申報資料",
+          "sort": 1,
+          "linkTypeStr": "Link",
+          "controllerName": "DeclareReport",
+          "actionName": "Index",
+          "queryParams": null,
+          "nodes": [
+            {
+              "name": "查詢",
+              "sort": 1,
+              "linkTypeStr": "Functionality",
+              "controllerName": "DeclareReport",
+              "actionName": "Query",
+              "queryParams": null
+            }
+          ]
+        },
+        {
+          "name": "機構名冊",
+          "sort": 2,
+          "linkTypeStr": "Link",
+          "controllerName": "HospContractReport",
+          "actionName": "Index",
+          "queryParams": null,
+          "nodes": [
+            {
+              "name": "查詢",
+              "sort": 1,
+              "linkTypeStr": "Functionality",
+              "controllerName": "HospBasic",
+              "actionName": "Query",
+              "queryParams": null
+            }
+          ]
+        },
+        {
+          "name": "醫事人員名冊",
+          "sort": 3,
+          "linkTypeStr": "Link",
+          "controllerName": "PrsnBasicsReport",
+          "actionName": "Index",
+          "queryParams": null,
+          "nodes": [
+            {
+              "name": "查詢",
+              "sort": 1,
+              "linkTypeStr": "Functionality",
+              "controllerName": "PrsnBasicsReport",
+              "actionName": "Query",
+              "queryParams": null
+            }
+          ]
+        },
+        {
+          "name": "專審名冊",
+          "sort": 4,
+          "linkTypeStr": "Link",
+          "controllerName": "ProReview",
+          "actionName": "Index",
+          "queryParams": null,
+          "nodes": [
+            {
+              "name": "查詢",
+              "sort": 1,
+              "linkTypeStr": "Functionality",
+              "controllerName": "ProReview",
+              "actionName": "Query",
+              "queryParams": null
+            }
+          ]
+        },
+        {
+          "name": "核扣名冊",
+          "sort": 5,
+          "linkTypeStr": "Link",
+          "controllerName": "AuditDeduction",
+          "actionName": "Index",
+          "queryParams": null,
+          "nodes": [
+            {
+              "name": "查詢",
+              "sort": 1,
+              "linkTypeStr": "Functionality",
+              "controllerName": "AuditDeduction",
+              "actionName": "Query",
+              "queryParams": null
+            }
+          ]
+        },
+        {
+          "name": "違規機構資料",
+          "sort": 6,
+          "linkTypeStr": "Link",
+          "controllerName": "ViolationHospReport",
+          "actionName": "Index",
+          "queryParams": null,
+          "nodes": [
+            {
+              "name": "查詢",
+              "sort": 1,
+              "linkTypeStr": "Functionality",
+              "controllerName": "ViolationHospReport",
+              "actionName": "Query",
+              "queryParams": null
+            }
+          ]
+        },
+        {
+          "name": "譯碼簿",
+          "sort": 7,
+          "linkTypeStr": "Link",
+          "controllerName": "SchemaReport",
+          "actionName": "Index",
+          "queryParams": null,
+          "nodes": [
+            {
+              "name": "下載",
+              "sort": 1,
+              "linkTypeStr": "Functionality",
+              "controllerName": "SchemaReport",
+              "actionName": "Index",
+              "queryParams": null
+            }
+          ]
+        },
+        {
+          "name": "服務人次",
+          "sort": 7,
+          "linkTypeStr": "Link",
+          "controllerName": "ServiceReport",
+          "actionName": "Index",
+          "queryParams": null,
+          "nodes": [
+            {
+              "name": "查詢",
+              "sort": 1,
+              "linkTypeStr": "Functionality",
+              "controllerName": "ServiceReport",
+              "actionName": "Index",
+              "queryParams": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "parentId": null,
+      "name": "審查管理",
+      "sort": 1,
+      "linkTypeStr": "Node",
+      "nodes": [
+        {
+          "name": "抽樣作業",
+          "sort": 1,
+          "linkTypeStr": "Link",
+          "controllerName": "Sampling",
+          "actionName": "Index",
+          "queryParams": null,
+          "nodes": [
+            {
+              "name": "查詢",
+              "sort": 1,
+              "linkTypeStr": "Functionality",
+              "controllerName": "Sampling",
+              "actionName": "Query",
+              "queryParams": null
+            }
+          ]
+        },
+        {
+          "name": "專業審查",
+          "sort": 2,
+          "linkTypeStr": "Link",
+          "controllerName": "SamplingExamine",
+          "actionName": "Index",
+          "queryParams": null,
+          "nodes": [
+            {
+              "name": "查詢",
+              "sort": 1,
+              "linkTypeStr": "Functionality",
+              "controllerName": "SamplingExamine",
+              "actionName": "Query",
+              "queryParams": null
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

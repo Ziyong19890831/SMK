@@ -1,0 +1,156 @@
+﻿@model IniExportInCtrlQueryModel
+@using SMK.Web.Services.Foundation;
+@inject HospContractService hospContractService;
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="col-sm-12">
+                    <form id="queryForm" class="form-horizontal">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="form-row mb-12">
+                            <div class="form-inline col-6">
+                                <label asp-for="fee_ym" class="control-label"></label>
+                                <div class="col-sm-7">
+                                    <input asp-for="fee_ym" class="form-control" placeholder="202112" />
+                                </div>
+                                <button id="btnImport" type="button" class="btn btn-primary">新增匯出</button>
+                            </div>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="col-sm-12">
+                    <table id="hospbasicTable" class="table table-striped table-bordered table-hover " role="grid">
+                        <thead>
+                            <tr role="row">
+                                <th class="text-nowrap">序號</th>
+                                <th class="text-nowrap">查詢年月</th>
+                                <th class="text-nowrap">排程設定時間</th>
+                                <th class="text-nowrap">排程完成時間</th>
+                                <th class="text-nowrap">狀態</th>
+                                <th class="text-nowrap">下載</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        @await Html.PartialAsync("~/Views/Shared/_DataTables.cshtml")
+        ;
+    }
+    <script type="text/javascript">
+        var $hospbasicTable;
+        $(function () {
+            query();
+            $("#btnImport").on("click", importData);
+            
+        });
+
+        function importData(values, response) {
+            $.ajax({
+                url: '@Url.Action("Import", "IniExportInCtrl")',
+                type: "post",
+                dataType: "json",
+                data: {
+                    id: values.id,
+                    fee_ym : $('#fee_ym').val(),
+                    createdAt: $('#CreatedAt').val(),
+                    fileDate: $('#FileDate').val(),
+                    fileName: $('#FileName').val(),
+                    draw: 1,
+                    start: 0,
+                    length: 100,
+                },
+                success: function (res) {
+                    if (!res.isSuccess) {
+                        myAlert.error("新增錯誤", res.errMsg, true);
+                        return;
+                    }
+                    else {
+                        query();
+                    }
+                }
+            });
+        }
+        function query() {
+            if($hospbasicTable)
+                $hospbasicTable.destroy();
+
+            var ajax = function (data, callback, settings) {
+                var o = $("#queryForm").serializeObject();
+                o.fee_ym = null;
+                o.draw = data.draw;
+                o.start = data.start;
+                o.length = data.length;
+                $.post('@Url.Action("Query", "IniExportInCtrl")', o, function (res) {
+                    if (!res.isSuccess) {
+                        myAlert.error("查詢錯誤", res.errMsg, true);
+                        return;
+                    }
+                    callback(res.data);
+                });
+            };
+            $hospbasicTable = $("#hospbasicTable").DataTable({
+                "scrollY": "600px",//可選，是否固定表格高度，不包括表頭；
+                "scrollCollapse": true,//與scrollY结合使用，是否固定高度，默認false;
+                "serverSide": true,
+                "ajax": ajax,
+                "paging": true,
+                "searching": false,
+                "ordering": false,
+                "rowCallback": function(row, data) {
+                    let importButton = $(row).find('.import');
+                    if (importButton) {
+                        importButton.on('click', () => {
+                            importData(data, (results) => {
+                            });
+                        });
+                    }
+                },
+                "columns": [
+                    { data: "id", targets: 1 },
+                    { data: "fee_ym", targets: 2 },
+                    { data: "createdAt", targets: 3 },
+                    {
+                        targets: 4,
+                        data: null,
+                        render: function (data, type, full, meta) {
+                            return data.statusStr == 'Completed' ? data.statusUpdatedAt : '';
+                        },
+                        
+                    },
+                    { data: "statusStr", targets: 5 },
+                    {
+                        targets: 6,
+                        data: null,
+                        render: function (data, type, full, meta) {
+                            return data.statusStr == 'Completed' ?
+                                '<a href="/DataExport/' + data.id + '/inidrdtl.txt">inidrdtl<a><br/> <a href="/DataExport/' + data.id + '/inidrord.txt">inidrord<a><br/> <a href="/DataExport/' + data.id + '//iniopdtl.txt">iniopdtl<a><br/> <a href="/DataExport/' + data.id +'/iniopord.txt">iniopord<a>'
+                                : '';
+                        },
+                    }
+                ]
+            });
+        }
+    </script>
+}

@@ -1,0 +1,114 @@
+﻿@using SMK.Data.Dto;
+@using SMK.Data.Entity;
+@using SMK.Web.Services;
+@model IEnumerable<RoleEmpModel>
+@inject AuthService authService
+@{
+    var role = ViewBag.ExtendData as Role;
+}
+<row class="text-left">
+    <div class="card">
+        <div class="card-header">
+            <div class="col-md-3">
+                角色
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-2">
+                    <label class="control-label">Id</label>
+                    <div class="input-group">
+                        <label class="form-control">@role.Id</label>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-2">
+                    <label class="control-label">角色</label>
+                    <div class="input-group">
+                        <label class="form-control">@role.Name</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</row>
+@*<row class="text-left">
+        <div class="col-sm-12">
+            <form method="get">
+                <input type="text" name="Name" class="form-control input-sm input-inline" placeholder="名稱">
+                <input type="text" name="Account" class="form-control input-sm input-inline" placeholder="帳號">
+                <button type="submit" class="btn btn-default">查詢</button>
+            </form>
+        </div>
+    </row>*@
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="col-md-3">
+                    <a asp-action="JoinRole" asp-route-roleId="@role.Id" class="btn btn-primary"><i class="fa fa-plus"></i> 新增成員</a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="col-sm-12">
+                    <table class="jqDataTable table table-striped table-bordered table-hover " role="grid">
+                        <thead>
+                            <tr role="row">
+                                <th class="text-nowrap">序號</th>
+                                <th class="text-nowrap">
+                                    @Html.DisplayNameFor(model => model.Account))
+                                </th>
+                                <th class="text-nowrap">
+                                    @Html.DisplayNameFor(model => model.EmpName))
+                                </th>
+                                <th class="text-nowrap">管理</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                int i = 1;
+                            }
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td class="sorting_1">@(i++)</td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Account)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.EmpName)
+                                    </td>
+                                    <td>
+                                        <a asp-action="LeaveRole" asp-route-empId="@item.EmpId" asp-route-roleId="@item.RoleId"
+                                           data-ajax-failure="onFailed" data-ajax-success="onSuccess"
+                                           data-ajax="true" data-ajax-method="POST"
+                                           class="btn btn-danger fn-delete">刪除</a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts{
+    @{ @await Html.PartialAsync("~/Views/Shared/_DataTables.cshtml"); }
+    <script type="text/javascript">
+        function onSuccess(data) {
+            console.log(data);
+            if (data.isSuccess) {
+                myAlert.success("刪除成功", "刪除資料成功", true);
+                $(this).closest("tr").detach();
+            }
+            else {
+                myAlert.error("刪除錯誤", data.errMsg, true);
+            }
+        }
+
+        function onFailed(data) {
+            console.log(data);
+            myAlert.error("刪除錯誤", data.errMsg, true);
+        }
+    </script>
+}

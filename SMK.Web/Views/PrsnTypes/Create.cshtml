@@ -1,0 +1,33 @@
+﻿@model SMK.Data.Entity.GenPrsnType
+
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="col-sm-12">
+                    <form asp-action="Create">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="form-group">
+                            <label asp-for="PrsnType" class="control-label"></label>
+                            <input asp-for="PrsnType" class="form-control" />
+                            <span asp-validation-for="PrsnType" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="PrsnTypeName" class="control-label"></label>
+                            <input asp-for="PrsnTypeName" class="form-control" />
+                            <span asp-validation-for="PrsnTypeName" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <input type="submit" value="新增" class="btn btn-primary" />
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
